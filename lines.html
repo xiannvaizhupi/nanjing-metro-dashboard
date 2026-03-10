@@ -66,12 +66,6 @@
             <div id="lineTrendChart" style="height: 400px;"></div>
         </div>
 
-        <!-- 线路对比 - 改为历史排名 -->
-        <div class="bg-white rounded-xl shadow-md p-6">
-            <h2 class="text-lg font-bold text-gray-800 mb-4">🏆 线路历史排名</h2>
-            <p class="text-gray-500 mb-4">各线路历史累计客流排行（基于当前数据）</p>
-            <div id="rankingChart" style="height: 400px;"></div>
-        </div>
     </main>
 
     <script>
@@ -91,7 +85,6 @@
                 initLineSelector();
                 updateLineStats();
                 initLineTrendChart();
-                initRankingChart();
             } catch (error) {
                 console.error('加载数据失败:', error);
             }
@@ -256,60 +249,6 @@
             if (menu) {
                 menu.classList.toggle('hidden');
             }
-        }
-
-        // 历史排名图 - 各线路累计客流
-        function initRankingChart() {
-            const chart = echarts.init(document.getElementById('rankingChart'));
-            
-            // 计算各线路累计客流
-            const lineTotals = linesInfo.map(line => {
-                const total = metroData.reduce((sum, day) => sum + (day.lines[line.id] || 0), 0);
-                return {
-                    name: line.name,
-                    value: parseFloat(total.toFixed(1)),
-                    color: line.color
-                };
-            }).sort((a, b) => b.value - a.value);
-            
-            const option = {
-                tooltip: {
-                    trigger: 'axis',
-                    axisPointer: { type: 'shadow' },
-                    formatter: '{b}: {c}万 (累计)'
-                },
-                grid: {
-                    left: '3%',
-                    right: '4%',
-                    bottom: '3%',
-                    containLabel: true
-                },
-                xAxis: {
-                    type: 'value',
-                    name: '累计万人次'
-                },
-                yAxis: {
-                    type: 'category',
-                    data: lineTotals.map(l => l.name).reverse(),
-                    axisLabel: { interval: 0 }
-                },
-                series: [{
-                    data: lineTotals.map(l => ({
-                        value: l.value,
-                        itemStyle: { color: l.color }
-                    })).reverse(),
-                    type: 'bar',
-                    barWidth: '60%',
-                    label: {
-                        show: true,
-                        position: 'right',
-                        formatter: '{c}万'
-                    }
-                }]
-            };
-            
-            chart.setOption(option);
-            window.addEventListener('resize', () => chart.resize());
         }
     </script>
 </body>
