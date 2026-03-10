@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>南京地铁客流数据 | Nanjing Metro Flow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center space-x-3">
+                    <img src="Nanjing_Metro_Logo.svg.png" alt="南京地铁" class="w-10 h-10">
+                    <span class="font-bold text-xl">南京地铁客流数据</span>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="index.html" class="text-blue-200 font-medium">首页</a>
+                    <a href="lines.html" class="hover:text-blue-200 transition">线路详情</a>
+                    <a href="history.html" class="hover:text-blue-200 transition">历史数据</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- 今日概览卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
+                <p class="text-gray-500 text-sm">昨日总客流</p>
+                <p class="text-3xl font-bold text-gray-800 mt-2" id="todayTotal">--</p>
+                <p class="text-sm mt-1" id="todayChange">--</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
+                <p class="text-gray-500 text-sm">本月最高</p>
+                <p class="text-3xl font-bold text-gray-800 mt-2" id="monthMax">--</p>
+                <p class="text-sm text-gray-400 mt-1" id="monthMaxDate">--</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-yellow-500">
+                <p class="text-gray-500 text-sm">本月平均</p>
+                <p class="text-3xl font-bold text-gray-800 mt-2" id="monthAvg">--</p>
+                <p class="text-sm text-gray-400 mt-1">万人次/日</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500">
+                <p class="text-gray-500 text-sm">数据更新</p>
+                <p class="text-lg font-bold text-gray-800 mt-2" id="lastUpdate">--</p>
+                <p class="text-sm text-gray-400 mt-1">每日上午更新</p>
+            </div>
+        </div>
+
+        <!-- 图表区域 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- 总客流趋势 -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">📈 总客流趋势</h2>
+                    <div class="flex space-x-2">
+                        <button onclick="setTrendRange('all')" id="btn-all" class="px-3 py-1 text-sm rounded bg-blue-500 text-white">所有数据</button>
+                        <button onclick="setTrendRange('month')" id="btn-month" class="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700">近一个月</button>
+                        <button onclick="setTrendRange('week')" id="btn-week" class="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700">近一周</button>
+                    </div>
+                </div>
+                <div id="trendChart" style="height: 300px;"></div>
+            </div>
+            
+            <!-- 线路客流占比 -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h2 class="text-lg font-bold text-gray-800 mb-4">🥧 线路客流占比</h2>
+                <div id="pieChart" style="height: 300px;"></div>
+            </div>
+        </div>
+
+        <!-- 各线路详情 -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+            <h2 class="text-lg font-bold text-gray-800 mb-4">🚇 各线路昨日客流</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">线路</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">昨日客流(万)</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">占比</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">可视化</th>
+                        </tr>
+                    </thead>
+                    <tbody id="linesTable" class="bg-white divide-y divide-gray-200">
+                        <!-- 动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 数据说明 -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="bg-blue-50 rounded-xl p-6">
+            <h3 class="font-medium text-blue-900 mb-2">📢 数据说明</h3>
+            <ul class="text-sm text-blue-800 space-y-1 list-disc list-inside">
+                <li>数据自动从南京地铁官方微博抓取，每日更新</li>
+                <li>当前数据范围：2025-01-01 至 昨天</li>
+                <li>最后更新时间：<span id="lastUpdate">--</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 text-gray-300 py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p>数据来源：南京地铁官方微博</p>
+            <p class="text-sm text-gray-500 mt-2">© 2026 Nanjing Metro Flow Dashboard</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

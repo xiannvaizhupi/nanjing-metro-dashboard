@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>历史数据 | 南京地铁客流数据</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center space-x-3">
+                    <img src="Nanjing_Metro_Logo.svg.png" alt="南京地铁" class="w-10 h-10">
+                    <span class="font-bold text-xl">南京地铁客流数据</span>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="index.html" class="hover:text-blue-200 transition">首页</a>
+                    <a href="lines.html" class="hover:text-blue-200 transition">线路详情</a>
+                    <a href="history.html" class="text-blue-200 font-medium">历史数据</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- 筛选器 -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+            <div class="flex flex-wrap gap-4 items-end">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">开始日期</label>
+                    <input type="date" id="startDate" 
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">结束日期</label>
+                    <input type="date" id="endDate" 
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">排序</label>
+                    <select id="sortOrder" 
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="desc">日期倒序</option>
+                        <option value="asc">日期正序</option>
+                        <option value="flow_desc">客流从高到低</option>
+                        <option value="flow_asc">客流从低到高</option>
+                    </select>
+                </div>
+                <button onclick="applyFilter()" 
+                    class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    筛选
+                </button>
+                <button onclick="exportTable()" 
+                    class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                    导出CSV
+                </button>
+            </div>
+        </div>
+
+        <!-- 数据表格 -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200" id="dataTable">
+                    <thead class="bg-gray-50" id="tableHead">
+                        <!-- 动态生成表头 -->
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="tableBody">
+                        <!-- 动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let metroData = null;
+        let filteredData = null;
+        let linesInfo = null;
+        let allLineIds = [];
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const response = await fetch('data/metro_data.json');
+                const data = await response.json();
+                metroData = data.daily_data;
+                linesInfo = data.metadata.lines;
+                filteredData = [...metroData];
+                
+                // 收集所有出现过的线路ID
+                collectAllLineIds();
+                
+                // 设置默认日期范围
+                if (metroData.length > 0) {
+                    document.getElementById('startDate').value = metroData[metroData.length - 1].date;
+                    document.getElementById('endDate').value = metroData[0].date;
+                }
+                
+                renderTableHead();
+                renderTable();
+            } catch (error) {
+                console.error('加载数据失败:', error);
+            }
+        });
+
+        // 收集所有出现过的线路ID
+        function collectAllLineIds() {
+            const lineIdSet = new Set();
+            metroData.forEach(day => {
+                Object.keys(day.lines).forEach(lineId => lineIdSet.add(lineId));
+            });
+            // 按线路ID排序
+            allLineIds = Array.from(lineIdSet).sort((a, b) => {
+                // L线在前，S线在后
+                if (a.startsWith('L') && b.startsWith('S')) return -1;
+                if (a.startsWith('S') && b.startsWith('L')) return 1;
+                return a.localeCompare(b);
+            });
+        }
+
+        // 渲染表头
+        function renderTableHead() {
+            const thead = document.getElementById('tableHead');
+            let html = `
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase sticky left-0 bg-gray-50">日期</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">星期</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">总客流(万)</th>
+            `;
+            
+            allLineIds.forEach(lineId => {
+                const lineInfo = linesInfo.find(l => l.id === lineId);
+                const displayName = lineInfo ? lineInfo.name : lineId;
+                html += `<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">${displayName}</th>`;
+            });
+            
+            html += '</tr>';
+            thead.innerHTML = html;
+        }
+
+        // 渲染表格
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            
+            tbody.innerHTML = filteredData.map(item => {
+                const date = new Date(item.date);
+                const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+                const weekday = weekdays[date.getDay()];
+                const isWeekend = item.is_weekend || date.getDay() === 0 || date.getDay() === 6;
+                
+                let html = `
+                    <tr class="hover:bg-gray-50 ${isWeekend ? 'bg-blue-50' : ''}">
+                        <td class="px-4 py-3 text-sm font-medium text-gray-900 sticky left-0 ${isWeekend ? 'bg-blue-50' : 'bg-white'}">${item.date}</td>
+                        <td class="px-4 py-3 text-sm text-gray-500">${isWeekend ? '<span class="text-blue-600">周' + weekday + '</span>' : '周' + weekday}</td>
+                        <td class="px-4 py-3 text-sm font-bold text-blue-600">${item.total.toFixed(1)}</td>
+                `;
+                
+                // 动态生成各线路数据列
+                allLineIds.forEach(lineId => {
+                    const value = item.lines[lineId] || 0;
+                    html += `<td class="px-4 py-3 text-sm text-gray-600">${value.toFixed(1)}</td>`;
+                });
+                
+                html += '</tr>';
+                return html;
+            }).join('');
+        }
+
+        // 应用筛选
+        function applyFilter() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const sortOrder = document.getElementById('sortOrder').value;
+            
+            filteredData = metroData.filter(item => {
+                if (startDate && item.date < startDate) return false;
+                if (endDate && item.date > endDate) return false;
+                return true;
+            });
+            
+            // 排序
+            switch(sortOrder) {
+                case 'asc':
+                    filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
+                    break;
+                case 'desc':
+                    filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    break;
+                case 'flow_asc':
+                    filteredData.sort((a, b) => a.total - b.total);
+                    break;
+                case 'flow_desc':
+                    filteredData.sort((a, b) => b.total - a.total);
+                    break;
+            }
+            
+            renderTable();
+        }
+
+        // 导出CSV
+        function exportTable() {
+            if (filteredData.length === 0) {
+                alert('没有数据可导出');
+                return;
+            }
+            
+            // 动态生成表头
+            const headers = ['日期', '总客流(万)'];
+            allLineIds.forEach(lineId => {
+                const lineInfo = linesInfo.find(l => l.id === lineId);
+                headers.push(lineInfo ? lineInfo.name : lineId);
+            });
+            
+            // 动态生成数据行
+            const rows = filteredData.map(item => {
+                const row = [item.date, item.total];
+                allLineIds.forEach(lineId => {
+                    row.push(item.lines[lineId] || 0);
+                });
+                return row;
+            });
+            
+            const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+            
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `nanjing_metro_history_${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

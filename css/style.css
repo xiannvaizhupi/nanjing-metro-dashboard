@@ -1,0 +1,53 @@
+/* 自定义样式 */
+.line-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 24px;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    background: #e5e7eb;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+/* 动画 */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* 表格样式优化 */
+table th {
+    font-weight: 600;
+}
+
+table td {
+    vertical-align: middle;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .line-badge {
+        width: 40px;
+        height: 20px;
+        font-size: 10px;
+    }
+}

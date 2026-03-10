@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>线路详情 | 南京地铁客流数据</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center space-x-3">
+                    <img src="Nanjing_Metro_Logo.svg.png" alt="南京地铁" class="w-10 h-10">
+                    <span class="font-bold text-xl">南京地铁客流数据</span>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="index.html" class="hover:text-blue-200 transition">首页</a>
+                    <a href="lines.html" class="text-blue-200 font-medium">线路详情</a>
+                    <a href="history.html" class="hover:text-blue-200 transition">历史数据</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- 线路选择器 -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+            <h2 class="text-lg font-bold text-gray-800 mb-4">选择线路</h2>
+            <div class="flex flex-wrap gap-3" id="lineSelector">
+                <!-- 动态生成 -->
+            </div>
+        </div>
+
+        <!-- 当前线路概览 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6" id="lineStats">
+            <!-- 动态生成 -->
+        </div>
+
+        <!-- 图表区域 -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold text-gray-800">📈 线路客流趋势</h2>
+                <div class="flex space-x-2">
+                    <button onclick="setLineTrendRange('all')" id="line-btn-all" class="px-3 py-1 text-sm rounded bg-blue-500 text-white">所有数据</button>
+                    <button onclick="setLineTrendRange('month')" id="line-btn-month" class="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700">近一个月</button>
+                    <button onclick="setLineTrendRange('week')" id="line-btn-week" class="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700">近一周</button>
+                </div>
+            </div>
+            <div id="lineTrendChart" style="height: 400px;"></div>
+        </div>
+
+        <!-- 线路对比 - 改为历史排名 -->
+        <div class="bg-white rounded-xl shadow-md p-6">
+            <h2 class="text-lg font-bold text-gray-800 mb-4">🏆 线路历史排名</h2>
+            <p class="text-gray-500 mb-4">各线路历史累计客流排行（基于当前数据）</p>
+            <div id="rankingChart" style="height: 400px;"></div>
+        </div>
+    </main>
+
+    <script>
+        let metroData = null;
+        let linesInfo = null;
+        let currentLineId = 'L1';
+        let lineTrendChart = null;
+        let currentLineTrendRange = 'all';
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const response = await fetch('data/metro_data.json');
+                const data = await response.json();
+                metroData = data.daily_data;
+                linesInfo = data.metadata.lines;
+                
+                initLineSelector();
+                updateLineStats();
+                initLineTrendChart();
+                initRankingChart();
+            } catch (error) {
+                console.error('加载数据失败:', error);
+            }
+        });
+
+        // 初始化线路选择器
+        function initLineSelector() {
+            const container = document.getElementById('lineSelector');
+            container.innerHTML = linesInfo.map(line => `
+                <button onclick="selectLine('${line.id}')" 
+                    class="line-btn px-4 py-2 rounded-lg font-medium transition"
+                    data-line="${line.id}"
+                    style="background-color: ${line.id === currentLineId ? line.color : '#f3f4f6'}; 
+                           color: ${line.id === currentLineId ? 'white' : '#374151'}">
+                    ${line.name}
+                </button>
+            `).join('');
+        }
+
+        // 选择线路
+        function selectLine(lineId) {
+            currentLineId = lineId;
+            
+            // 更新按钮样式
+            document.querySelectorAll('.line-btn').forEach(btn => {
+                const line = linesInfo.find(l => l.id === btn.dataset.line);
+                if (btn.dataset.line === lineId) {
+                    btn.style.backgroundColor = line.color;
+                    btn.style.color = 'white';
+                } else {
+                    btn.style.backgroundColor = '#f3f4f6';
+                    btn.style.color = '#374151';
+                }
+            });
+            
+            updateLineStats();
+            initLineTrendChart();
+        }
+
+        // 更新线路统计
+        function updateLineStats() {
+            const lineInfo = linesInfo.find(l => l.id === currentLineId);
+            const values = metroData.map(d => d.lines[currentLineId] || 0).filter(v => v > 0);
+            
+            if (values.length === 0) {
+                document.getElementById('lineStats').innerHTML = '<div class="col-span-3 text-center text-gray-500">暂无数据</div>';
+                return;
+            }
+            
+            const max = Math.max(...values);
+            const min = Math.min(...values);
+            const avg = values.reduce((a, b) => a + b, 0) / values.length;
+            
+            const container = document.getElementById('lineStats');
+            container.innerHTML = `
+                <div class="bg-white rounded-xl shadow-md p-6 border-l-4" style="border-color: ${lineInfo.color}">
+                    <p class="text-gray-500 text-sm">最高客流</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-2">${max.toFixed(1)}万</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-6 border-l-4" style="border-color: ${lineInfo.color}">
+                    <p class="text-gray-500 text-sm">最低客流</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-2">${min.toFixed(1)}万</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-6 border-l-4" style="border-color: ${lineInfo.color}">
+                    <p class="text-gray-500 text-sm">平均客流</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-2">${avg.toFixed(1)}万</p>
+                </div>
+            `;
+        }
+
+        // 线路趋势图
+        function initLineTrendChart() {
+            lineTrendChart = echarts.init(document.getElementById('lineTrendChart'));
+            updateLineTrendChart();
+            window.addEventListener('resize', () => lineTrendChart.resize());
+        }
+
+        // 更新线路趋势图
+        function updateLineTrendChart() {
+            const lineInfo = linesInfo.find(l => l.id === currentLineId);
+            
+            let filteredData = metroData;
+            if (currentLineTrendRange === 'week') {
+                filteredData = metroData.slice(0, 7);
+            } else if (currentLineTrendRange === 'month') {
+                filteredData = metroData.slice(0, 30);
+            }
+            
+            const dates = filteredData.map(d => d.date.slice(5)).reverse();
+            const values = filteredData.map(d => d.lines[currentLineId] || 0).reverse();
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    formatter: '{b}<br/>' + lineInfo.name + ': {c}万'
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: dates,
+                    axisLabel: { rotate: 45 }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '万人次'
+                },
+                series: [{
+                    data: values,
+                    type: 'line',
+                    smooth: true,
+                    symbol: 'circle',
+                    symbolSize: 8,
+                    lineStyle: {
+                        color: lineInfo.color,
+                        width: 3
+                    },
+                    itemStyle: {
+                        color: lineInfo.color
+                    },
+                    areaStyle: {
+                        color: {
+                            type: 'linear',
+                            x: 0, y: 0, x2: 0, y2: 1,
+                            colorStops: [
+                                { offset: 0, color: lineInfo.color + '4D' },
+                                { offset: 1, color: lineInfo.color + '0D' }
+                            ]
+                        }
+                    }
+                }]
+            };
+            
+            lineTrendChart.setOption(option, true);
+        }
+
+        // 设置线路趋势图时间范围
+        function setLineTrendRange(range) {
+            currentLineTrendRange = range;
+            
+            // 更新按钮样式
+            document.getElementById('line-btn-all').className = range === 'all' 
+                ? 'px-3 py-1 text-sm rounded bg-blue-500 text-white' 
+                : 'px-3 py-1 text-sm rounded bg-gray-200 text-gray-700';
+            document.getElementById('line-btn-month').className = range === 'month' 
+                ? 'px-3 py-1 text-sm rounded bg-blue-500 text-white' 
+                : 'px-3 py-1 text-sm rounded bg-gray-200 text-gray-700';
+            document.getElementById('line-btn-week').className = range === 'week' 
+                ? 'px-3 py-1 text-sm rounded bg-blue-500 text-white' 
+                : 'px-3 py-1 text-sm rounded bg-gray-200 text-gray-700';
+            
+            updateLineTrendChart();
+        }
+
+        // 历史排名图 - 各线路累计客流
+        function initRankingChart() {
+            const chart = echarts.init(document.getElementById('rankingChart'));
+            
+            // 计算各线路累计客流
+            const lineTotals = linesInfo.map(line => {
+                const total = metroData.reduce((sum, day) => sum + (day.lines[line.id] || 0), 0);
+                return {
+                    name: line.name,
+                    value: parseFloat(total.toFixed(1)),
+                    color: line.color
+                };
+            }).sort((a, b) => b.value - a.value);
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' },
+                    formatter: '{b}: {c}万 (累计)'
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'value',
+                    name: '累计万人次'
+                },
+                yAxis: {
+                    type: 'category',
+                    data: lineTotals.map(l => l.name).reverse(),
+                    axisLabel: { interval: 0 }
+                },
+                series: [{
+                    data: lineTotals.map(l => ({
+                        value: l.value,
+                        itemStyle: { color: l.color }
+                    })).reverse(),
+                    type: 'bar',
+                    barWidth: '60%',
+                    label: {
+                        show: true,
+                        position: 'right',
+                        formatter: '{c}万'
+                    }
+                }]
+            };
+            
+            chart.setOption(option);
+            window.addEventListener('resize', () => chart.resize());
+        }
+    </script>
+</body>
+</html>
