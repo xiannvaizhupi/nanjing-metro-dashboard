@@ -4,7 +4,7 @@
 
 一个用于展示南京地铁各线路每日客流数据的可视化网站，支持数据录入、趋势分析和历史查询。
 
-**在线访问：** http://localhost:8080 （本地运行）
+**在线访问：** https://nanjing-metro-dashboard.vercel.app
 
 ---
 
