@@ -3,7 +3,7 @@
   "name": "nanjing-metro-dashboard",
   "builds": [
     {
-      "src": "**/*.html",
+      "src": "**/*",
       "use": "@vercel/static"
     }
   ],
@@ -11,6 +11,14 @@
     {
       "src": "/",
       "dest": "/index.html"
+    },
+    {
+      "src": "/data/(.*)",
+      "dest": "/data/$1",
+      "headers": {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+      }
     }
   ]
 }
