@@ -4,6 +4,14 @@ let linesInfo = null;
 let trendChart = null;
 let currentTrendRange = 'all';
 
+// 移动端菜单切换
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    if (menu) {
+        menu.classList.toggle('hidden');
+    }
+}
+
 // 加载数据
 document.addEventListener('DOMContentLoaded', async function() {
     try {

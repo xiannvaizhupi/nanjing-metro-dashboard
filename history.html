@@ -16,11 +16,24 @@
                     <img src="Nanjing_Metro_Logo.svg.png" alt="南京地铁" class="w-10 h-10">
                     <span class="font-bold text-xl">南京地铁客流数据</span>
                 </div>
+                <!-- 桌面端导航 -->
                 <div class="hidden md:flex space-x-6">
                     <a href="index.html" class="hover:text-blue-200 transition">首页</a>
                     <a href="lines.html" class="hover:text-blue-200 transition">线路详情</a>
                     <a href="history.html" class="text-blue-200 font-medium">历史数据</a>
                 </div>
+                <!-- 移动端汉堡菜单按钮 -->
+                <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg hover:bg-blue-700 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+            </div>
+            <!-- 移动端导航菜单 -->
+            <div id="mobileMenu" class="hidden md:hidden pb-4">
+                <a href="index.html" class="block py-2 px-4 hover:text-blue-200 hover:bg-blue-700 rounded-lg mb-2 transition">首页</a>
+                <a href="lines.html" class="block py-2 px-4 hover:text-blue-200 hover:bg-blue-700 rounded-lg mb-2 transition">线路详情</a>
+                <a href="history.html" class="block py-2 px-4 text-blue-200 font-medium bg-blue-700 rounded-lg transition">历史数据</a>
             </div>
         </div>
     </nav>
@@ -195,7 +208,13 @@
             renderTable();
         }
 
-
+        // 移动端菜单切换
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            if (menu) {
+                menu.classList.toggle('hidden');
+            }
+        }
     </script>
 </body>
 </html>
