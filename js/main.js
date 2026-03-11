@@ -5,6 +5,7 @@ let trendChart = null;
 let currentTrendRange = 'all';
 let selectedDateData = null;
 let selectedDate = null;
+let lastUpdated = null;
 
 // 移动端菜单切换
 function toggleMobileMenu() {
@@ -22,11 +23,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         metroData = data.daily_data;
         linesInfo = data.metadata.lines;
 
-        // 显示最后更新时间
-        const lastUpdateEl = document.getElementById('lastUpdate');
-        if (lastUpdateEl) {
-            lastUpdateEl.textContent = data.metadata.last_updated;
-        }
+        lastUpdated = data.metadata.last_updated || '';
+        updateLastUpdated(lastUpdated || (metroData[0] ? metroData[0].date : '--'));
 
         updateDashboard();
         initCharts();
@@ -41,27 +39,40 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 });
 
+function updateLastUpdated(text) {
+    const targets = document.querySelectorAll('[data-last-update]');
+    targets.forEach(el => {
+        el.textContent = text || '--';
+    });
+}
+
+function updateChangeRate(current, previous, labelText) {
+    const changeEl = document.getElementById('todayChange');
+    if (!changeEl) return;
+    if (!previous || previous.total === 0) {
+        changeEl.textContent = '--';
+        return;
+    }
+    const changeValue = (current.total - previous.total) / previous.total * 100;
+    const change = changeValue.toFixed(1);
+    if (changeValue > 0) {
+        changeEl.innerHTML = `<span class="text-red-500">↗ +${change}%</span> ${labelText}`;
+    } else if (changeValue < 0) {
+        changeEl.innerHTML = `<span class="text-green-500">↘ ${change}%</span> ${labelText}`;
+    } else {
+        changeEl.innerHTML = `<span class="text-gray-500">→ ${change}%</span> ${labelText}`;
+    }
+}
+
 // 更新仪表板数据
 function updateDashboard() {
     if (!metroData || metroData.length === 0) return;
     
     // 最新数据
     const latest = metroData[0];
-    const previous = metroData[1];
     
     // 设置默认日期
-    selectDate(latest);
-    
-    // 环比变化
-    if (previous) {
-        const change = ((latest.total - previous.total) / previous.total * 100).toFixed(1);
-        const changeEl = document.getElementById('todayChange');
-        if (change > 0) {
-            changeEl.innerHTML = `<span class="text-red-500">↗ +${change}%</span> 较昨日`;
-        } else {
-            changeEl.innerHTML = `<span class="text-green-500">↘ ${change}%</span> 较昨日`;
-        }
-    }
+    selectDate(latest, { labelText: '较昨日' });
     
     // 获取当前月份数据
     const currentMonth = latest.date.slice(0, 7); // "2026-03"
@@ -81,7 +92,7 @@ function updateDashboard() {
     }
     
     // 最后更新
-    document.getElementById('lastUpdate').textContent = latest.date;
+    updateLastUpdated(lastUpdated || latest.date);
 }
 
 // 初始化图表
@@ -213,25 +224,42 @@ function initPieChart() {
         })
         .sort((a, b) => b.value - a.value);
 
+    const legendNames = pieData.map(item => item.name);
+    const splitIndex = Math.ceil(legendNames.length / 2);
+    const legendLeft = legendNames.slice(0, splitIndex);
+    const legendRight = legendNames.slice(splitIndex);
+
     const option = {
         tooltip: {
             trigger: 'item',
             formatter: '{b}: {c}万 ({d}%)'
         },
-        legend: {
-            type: 'scroll',
-            orient: 'vertical',
-            right: 10,
-            top: 20,
-            bottom: 20,
-            textStyle: {
-                fontSize: 11
+        legend: [
+            {
+                type: 'plain',
+                selectedMode: false,
+                orient: 'vertical',
+                left: '60%',
+                top: 20,
+                itemGap: 8,
+                textStyle: { fontSize: 11 },
+                data: legendLeft
+            },
+            {
+                type: 'plain',
+                selectedMode: false,
+                orient: 'vertical',
+                left: '78%',
+                top: 20,
+                itemGap: 8,
+                textStyle: { fontSize: 11 },
+                data: legendRight
             }
-        },
+        ],
         series: [{
             type: 'pie',
-            radius: ['40%', '70%'],
-            center: ['35%', '50%'],
+            radius: ['38%', '68%'],
+            center: ['32%', '50%'],
             avoidLabelOverlap: false,
             itemStyle: {
                 borderRadius: 6,
@@ -257,9 +285,10 @@ function initPieChart() {
 }
 
 // 选择日期
-function selectDate(data) {
+function selectDate(data, options = {}) {
     selectedDateData = data;
     selectedDate = data.date;
+    const labelText = options.labelText || '较前日';
 
     // 更新日期标签
     const dateLabel = document.getElementById('selectedDateLabel');
@@ -276,19 +305,9 @@ function selectDate(data) {
 
     // 更新变化率（如果可能）
     if (metroData.length > 1) {
-        const previousIndex = metroData.findIndex(item => item.date === data.date) - 1;
-        if (previousIndex >= 0 && previousIndex < metroData.length) {
-            const previous = metroData[previousIndex];
-            const change = ((data.total - previous.total) / previous.total * 100).toFixed(1);
-            const changeEl = document.getElementById('todayChange');
-            if (changeEl) {
-                if (change > 0) {
-                    changeEl.innerHTML = `<span class="text-red-500">↗ +${change}%</span> 较前日`;
-                } else {
-                    changeEl.innerHTML = `<span class="text-green-500">↘ ${change}%</span> 较前日`;
-                }
-            }
-        }
+        const currentIndex = metroData.findIndex(item => item.date === data.date);
+        const previous = currentIndex >= 0 ? metroData[currentIndex + 1] : null;
+        updateChangeRate(data, previous, labelText);
     }
 
     // 重新渲染表格
@@ -314,8 +333,6 @@ function renderLinesTable() {
         })
         .sort((a, b) => b.value - a.value);
 
-    const maxValue = sortedLines[0].value;
-
     tbody.innerHTML = sortedLines.map(line => `
         <tr class="hover:bg-gray-50">
             <td class="px-6 py-4 whitespace-nowrap">
@@ -328,11 +345,6 @@ function renderLinesTable() {
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-gray-500">
                 ${line.percent}%
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <div class="progress-bar" style="width: 150px;">
-                    <div class="progress-fill" style="width: ${(line.value / maxValue * 100).toFixed(1)}%; background-color: ${line.color}"></div>
-                </div>
             </td>
         </tr>
     `).join('');

@@ -60,13 +60,13 @@
             </div>
             <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500">
                 <p class="text-gray-500 text-sm">数据更新</p>
-                <p class="text-lg font-bold text-gray-800 mt-2" id="lastUpdate">--</p>
+                <p class="text-lg font-bold text-gray-800 mt-2" data-last-update>--</p>
                 <p class="text-sm text-gray-400 mt-1">每日上午更新</p>
             </div>
         </div>
 
         <!-- 图表区域 -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="grid grid-cols-1 gap-6 mb-8">
             <!-- 总客流趋势 -->
             <div class="bg-white rounded-xl shadow-md p-6">
                 <div class="flex justify-between items-center mb-4">
@@ -77,33 +77,32 @@
                         <button onclick="setTrendRange('week')" id="btn-week" class="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700">近一周</button>
                     </div>
                 </div>
-                <div id="trendChart" style="height: 300px;"></div>
-            </div>
-            
-            <!-- 线路客流占比 -->
-            <div class="bg-white rounded-xl shadow-md p-6">
-                <h2 class="text-lg font-bold text-gray-800 mb-4">🥧 线路客流占比</h2>
-                <div id="pieChart" style="height: 300px;"></div>
+                <div id="trendChart" style="height: 380px;"></div>
             </div>
         </div>
 
-        <!-- 各线路详情 -->
-        <div class="bg-white rounded-xl shadow-md p-6 mb-8">
-            <h2 class="text-lg font-bold text-gray-800 mb-4" id="selectedDateLabel2">🚇 各线路昨日客流</h2>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">线路</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">客流(万)</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">占比</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">可视化</th>
-                        </tr>
-                    </thead>
-                    <tbody id="linesTable" class="bg-white divide-y divide-gray-200">
-                        <!-- 动态生成 -->
-                    </tbody>
-                </table>
+        <!-- 各线路详情 + 占比 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-md p-6 lg:col-span-2">
+                <h2 class="text-lg font-bold text-gray-800 mb-4" id="selectedDateLabel2">🚇 各线路昨日客流</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">线路</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">客流(万)</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">占比</th>
+                            </tr>
+                        </thead>
+                        <tbody id="linesTable" class="bg-white divide-y divide-gray-200">
+                            <!-- 动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6 lg:col-span-1">
+                <h2 class="text-lg font-bold text-gray-800 mb-4">🥧 线路客流占比</h2>
+                <div id="pieChart" style="height: 340px;"></div>
             </div>
         </div>
 
@@ -116,7 +115,7 @@
             <ul class="text-sm text-blue-800 space-y-1 list-disc list-inside">
                 <li>数据自动从南京地铁官方微博抓取，每日更新</li>
                 <li>当前数据范围：2025-01-01 至 昨天</li>
-                <li>最后更新时间：<span id="lastUpdate">--</span></li>
+                <li>最后更新时间：<span data-last-update>--</span></li>
             </ul>
         </div>
     </div>
