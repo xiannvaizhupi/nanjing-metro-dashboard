@@ -44,7 +44,7 @@
         <!-- 今日概览卡片 -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
-                <p class="text-gray-500 text-sm">昨日总客流</p>
+                <p class="text-gray-500 text-sm" id="selectedDateLabel">昨日总客流</p>
                 <p class="text-3xl font-bold text-gray-800 mt-2" id="todayTotal">--</p>
                 <p class="text-sm mt-1" id="todayChange">--</p>
             </div>
@@ -89,13 +89,13 @@
 
         <!-- 各线路详情 -->
         <div class="bg-white rounded-xl shadow-md p-6 mb-8">
-            <h2 class="text-lg font-bold text-gray-800 mb-4">🚇 各线路昨日客流</h2>
+            <h2 class="text-lg font-bold text-gray-800 mb-4" id="selectedDateLabel2">🚇 各线路昨日客流</h2>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">线路</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">昨日客流(万)</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">客流(万)</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">占比</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">可视化</th>
                         </tr>

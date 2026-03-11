@@ -3,6 +3,8 @@ let metroData = null;
 let linesInfo = null;
 let trendChart = null;
 let currentTrendRange = 'all';
+let selectedDateData = null;
+let selectedDate = null;
 
 // 移动端菜单切换
 function toggleMobileMenu() {
@@ -19,13 +21,13 @@ document.addEventListener('DOMContentLoaded', async function() {
         const data = await response.json();
         metroData = data.daily_data;
         linesInfo = data.metadata.lines;
-        
+
         // 显示最后更新时间
         const lastUpdateEl = document.getElementById('lastUpdate');
         if (lastUpdateEl) {
             lastUpdateEl.textContent = data.metadata.last_updated;
         }
-        
+
         updateDashboard();
         initCharts();
         renderLinesTable();
@@ -47,8 +49,8 @@ function updateDashboard() {
     const latest = metroData[0];
     const previous = metroData[1];
     
-    // 昨日总客流
-    document.getElementById('todayTotal').textContent = latest.total.toFixed(1) + '万';
+    // 设置默认日期
+    selectDate(latest);
     
     // 环比变化
     if (previous) {
@@ -93,25 +95,40 @@ function initTrendChart() {
     trendChart = echarts.init(document.getElementById('trendChart'));
     updateTrendChart();
     window.addEventListener('resize', () => trendChart.resize());
+
+    // 添加点击事件
+    trendChart.on('click', function(params) {
+        if (params.componentType === 'series') {
+            const clickedDate = params.name;
+            const clickedData = metroData.find(item => item.date.slice(5) === clickedDate);
+            if (clickedData) {
+                selectDate(clickedData);
+            }
+        }
+    });
 }
 
 // 更新趋势图数据
 function updateTrendChart() {
     let filteredData = metroData;
-    
+
     if (currentTrendRange === 'week') {
         filteredData = metroData.slice(0, 7);
     } else if (currentTrendRange === 'month') {
         filteredData = metroData.slice(0, 30);
     }
-    
+
     const dates = filteredData.map(d => d.date.slice(5)).reverse();
     const values = filteredData.map(d => d.total).reverse();
-    
+
     const option = {
         tooltip: {
             trigger: 'axis',
-            formatter: '{b}<br/>总客流: {c}万'
+            formatter: function(params) {
+                const date = params[0].name;
+                const value = params[0].value;
+                return `${date}<br/>总客流: ${value}万`;
+            }
         },
         grid: {
             left: '3%',
@@ -158,32 +175,32 @@ function updateTrendChart() {
             }
         }]
     };
-    
+
     trendChart.setOption(option, true);
 }
 
 // 设置趋势图时间范围
 function setTrendRange(range) {
     currentTrendRange = range;
-    
+
     // 更新按钮样式
-    document.getElementById('btn-all').className = range === 'all' 
-        ? 'px-3 py-1 text-sm rounded bg-blue-500 text-white' 
+    document.getElementById('btn-all').className = range === 'all'
+        ? 'px-3 py-1 text-sm rounded bg-blue-500 text-white'
         : 'px-3 py-1 text-sm rounded bg-gray-200 text-gray-700';
-    document.getElementById('btn-month').className = range === 'month' 
-        ? 'px-3 py-1 text-sm rounded bg-blue-500 text-white' 
+    document.getElementById('btn-month').className = range === 'month'
+        ? 'px-3 py-1 text-sm rounded bg-blue-500 text-white'
         : 'px-3 py-1 text-sm rounded bg-gray-200 text-gray-700';
-    document.getElementById('btn-week').className = range === 'week' 
-        ? 'px-3 py-1 text-sm rounded bg-blue-500 text-white' 
+    document.getElementById('btn-week').className = range === 'week'
+        ? 'px-3 py-1 text-sm rounded bg-blue-500 text-white'
         : 'px-3 py-1 text-sm rounded bg-gray-200 text-gray-700';
-    
+
     updateTrendChart();
 }
 
 // 饼图
 function initPieChart() {
     const chart = echarts.init(document.getElementById('pieChart'));
-    
+
     const latest = metroData[0];
     const pieData = Object.entries(latest.lines)
         .map(([lineId, value]) => {
@@ -195,7 +212,7 @@ function initPieChart() {
             };
         })
         .sort((a, b) => b.value - a.value);
-    
+
     const option = {
         tooltip: {
             trigger: 'item',
@@ -234,18 +251,57 @@ function initPieChart() {
             data: pieData
         }]
     };
-    
+
     chart.setOption(option);
     window.addEventListener('resize', () => chart.resize());
+}
+
+// 选择日期
+function selectDate(data) {
+    selectedDateData = data;
+    selectedDate = data.date;
+
+    // 更新日期标签
+    const dateLabel = document.getElementById('selectedDateLabel');
+    const dateLabel2 = document.getElementById('selectedDateLabel2');
+    if (dateLabel) {
+        dateLabel.textContent = `${data.date.slice(5)}总客流`;
+    }
+    if (dateLabel2) {
+        dateLabel2.textContent = `🚇 ${data.date.slice(5)}各线路客流`;
+    }
+
+    // 更新总客流显示
+    document.getElementById('todayTotal').textContent = data.total.toFixed(1) + '万';
+
+    // 更新变化率（如果可能）
+    if (metroData.length > 1) {
+        const previousIndex = metroData.findIndex(item => item.date === data.date) - 1;
+        if (previousIndex >= 0 && previousIndex < metroData.length) {
+            const previous = metroData[previousIndex];
+            const change = ((data.total - previous.total) / previous.total * 100).toFixed(1);
+            const changeEl = document.getElementById('todayChange');
+            if (changeEl) {
+                if (change > 0) {
+                    changeEl.innerHTML = `<span class="text-red-500">↗ +${change}%</span> 较前日`;
+                } else {
+                    changeEl.innerHTML = `<span class="text-green-500">↘ ${change}%</span> 较前日`;
+                }
+            }
+        }
+    }
+
+    // 重新渲染表格
+    renderLinesTable();
 }
 
 // 渲染线路表格
 function renderLinesTable() {
     const tbody = document.getElementById('linesTable');
-    const latest = metroData[0];
-    const total = latest.total;
-    
-    const sortedLines = Object.entries(latest.lines)
+    const data = selectedDateData || metroData[0];
+    const total = data.total;
+
+    const sortedLines = Object.entries(data.lines)
         .map(([lineId, value]) => {
             const lineInfo = linesInfo.find(l => l.id === lineId);
             return {
@@ -257,9 +313,9 @@ function renderLinesTable() {
             };
         })
         .sort((a, b) => b.value - a.value);
-    
+
     const maxValue = sortedLines[0].value;
-    
+
     tbody.innerHTML = sortedLines.map(line => `
         <tr class="hover:bg-gray-50">
             <td class="px-6 py-4 whitespace-nowrap">
