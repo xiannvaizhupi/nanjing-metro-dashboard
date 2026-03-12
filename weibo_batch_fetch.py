@@ -19,14 +19,14 @@ from typing import Dict, List, Optional
 import requests
 
 UID_NANJING_METRO = "2638276292"
-MOBILE_TIMELINE_URL = "https://m.weibo.cn/api/container/getIndex"
-MOBILE_EXTEND_URL = "https://m.weibo.cn/statuses/extend"
+WEB_TIMELINE_URL = "https://weibo.com/ajax/statuses/mymblog"
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept": "application/json, text/plain, */*",
     "X-Requested-With": "XMLHttpRequest",
-    "Referer": f"https://m.weibo.cn/u/{UID_NANJING_METRO}",
+    "Referer": f"https://weibo.com/u/{UID_NANJING_METRO}",
+    "Origin": "https://weibo.com",
 }
 
 
@@ -69,7 +69,7 @@ def apply_cookie_headers(session: requests.Session, cookie_str: str, cookie_keys
     session.headers.update({"Cookie": cookie_str})
     xsrf = cookie_map.get("XSRF-TOKEN") or cookie_map.get("XSRF-TOKEN".lower())
     if xsrf:
-        session.headers.update({"X-XSRF-TOKEN": xsrf})
+        session.headers.update({"X-XSRF-TOKEN": xsrf, "x-xsrf-token": xsrf})
 
 
 def strip_html(text: str) -> str:
@@ -88,7 +88,11 @@ def parse_created_at(created_at: str) -> Optional[date]:
 
 
 def parse_metro_text(text: str, year_hint: Optional[int]) -> Optional[Dict]:
-    pattern = r"(?:#昨日客流#)?南京地铁(\d{1,2})月(\d{1,2})日客运量(\d+(?:\.\d+)?)[^，]*，(.+?)（以上单位: 万）"
+    pattern = (
+        r"(?:#昨日客流#)?南京地铁(\d{1,2})月(\d{1,2})日客运量"
+        r"(\d+(?:\.\d+)?)[^，]*，(.+?)"
+        r"(?:（以上单位[:：]\s*万）|\\(以上单位[:：]\s*万\\))"
+    )
     match = re.search(pattern, text)
     if not match:
         return None
@@ -123,29 +127,16 @@ def parse_metro_text(text: str, year_hint: Optional[int]) -> Optional[Dict]:
     }
 
 
-def fetch_page(session: requests.Session, since_id: Optional[str]) -> Dict:
-    params = {
-        "type": "uid",
-        "value": UID_NANJING_METRO,
-        "containerid": f"107603{UID_NANJING_METRO}",
-    }
-    if since_id:
-        params["since_id"] = since_id
-    resp = session.get(MOBILE_TIMELINE_URL, params=params, headers=HEADERS, timeout=20)
+def fetch_page(session: requests.Session, page: int) -> List[Dict]:
+    params = {"uid": UID_NANJING_METRO, "page": page, "feature": 0, "count": 20}
+    resp = session.post(WEB_TIMELINE_URL, data=params, headers=HEADERS, timeout=20)
+    if resp.status_code == 404:
+        resp = session.get(WEB_TIMELINE_URL, params=params, headers=HEADERS, timeout=20)
     if resp.status_code != 200:
-        raise FetchError(f"mobile timeline request failed: {resp.status_code}")
+        raise FetchError(f"web timeline request failed: {resp.status_code}")
     payload = resp.json()
-    if payload.get("ok") != 1:
-        raise FetchError(f"mobile timeline response not ok: {payload.get('ok')}")
-    return payload.get("data", {}) or {}
-
-
-def fetch_long_text(session: requests.Session, mid: str) -> Optional[str]:
-    resp = session.get(MOBILE_EXTEND_URL, params={"id": mid}, headers=HEADERS, timeout=20)
-    if resp.status_code != 200:
-        return None
-    payload = resp.json()
-    return payload.get("data", {}).get("longTextContent")
+    data = payload.get("data", {})
+    return data.get("list", []) or []
 
 
 def main() -> int:
@@ -154,9 +145,12 @@ def main() -> int:
     parser.add_argument("--end", required=True, help="end date YYYY-MM-DD")
     parser.add_argument("--cookie-file", type=str, default=None, help="path to cookie file")
     parser.add_argument("--out", type=str, default="data/weibo_batch.json", help="output json path")
-    parser.add_argument("--sleep", type=float, default=0.3, help="sleep seconds between pages")
-    parser.add_argument("--max-pages", type=int, default=500, help="safety limit for pages")
-    parser.add_argument("--cookie-keys", type=str, default="SUB,SUBP,SCF,SSOLoginState,ALF,XSRF-TOKEN,WBPSESS,_T_WM,MLOGIN,WEIBOCN_FROM", help="comma-separated cookie keys to keep")
+    parser.add_argument("--sleep", type=float, default=1.2, help="sleep seconds between pages")
+    parser.add_argument("--max-pages", type=int, default=800, help="safety limit for pages")
+    parser.add_argument("--retries", type=int, default=6, help="retries per page on transient errors")
+    parser.add_argument("--start-page", type=int, default=1, help="start page for resume")
+    parser.add_argument("--skip-fail", action="store_true", help="skip failed pages and continue")
+    parser.add_argument("--cookie-keys", type=str, default="SUB,SUBP,SCF,SSOLoginState,ALF,XSRF-TOKEN,WBPSESS,_s_tentry,SINAGLOBAL,ULV,Apache", help="comma-separated cookie keys to keep")
     args = parser.parse_args()
 
     start_date = datetime.strptime(args.start, "%Y-%m-%d").date()
@@ -175,31 +169,53 @@ def main() -> int:
     apply_cookie_headers(session, cookie, cookie_keys)
 
     results = {}
-    fetched_pages = 0
-    since_id = None
-    while fetched_pages <= args.max_pages:
-        data = fetch_page(session, since_id)
-        cards = data.get("cards", []) or []
-        if not cards:
+    if os.path.exists(args.out):
+        try:
+            with open(args.out, "r", encoding="utf-8") as f:
+                existing = json.load(f)
+            if isinstance(existing, list):
+                for item in existing:
+                    if isinstance(item, dict) and item.get("date"):
+                        results[item["date"]] = item
+        except Exception:
+            pass
+
+    failed_pages = []
+    page = args.start_page
+    while page <= args.max_pages:
+        posts = None
+        for attempt in range(args.retries):
+            try:
+                posts = fetch_page(session, page)
+                break
+            except FetchError as e:
+                msg = str(e)
+                # Backoff on 414/429/5xx
+                if "414" in msg or "429" in msg or "500" in msg or "502" in msg or "503" in msg:
+                    time.sleep(args.sleep * (attempt + 2))
+                    continue
+                raise
+
+        if posts is None:
+            if args.skip_fail:
+                failed_pages.append(page)
+                page += 1
+                time.sleep(args.sleep)
+                continue
+            print(f"page {page} failed after retries, stopping to allow resume", file=sys.stderr)
+            break
+        if not posts:
             break
 
         oldest_date_in_page = None
-        for card in cards:
-            mblog = card.get("mblog") or card.get("card_group", [{}])[0].get("mblog")
-            if not mblog:
-                continue
-            created_at = mblog.get("created_at", "")
+        for post in posts:
+            created_at = post.get("created_at", "")
             created_date = parse_created_at(created_at)
             if created_date is not None:
                 oldest_date_in_page = created_date
-            text = mblog.get("text") or ""
+            text = post.get("text_raw") or post.get("text") or ""
             if "昨日客流" not in text:
                 continue
-            mid = str(mblog.get("id") or "")
-            if mblog.get("isLongText"):
-                long_text = fetch_long_text(session, mid)
-                if long_text:
-                    text = long_text
             clean = strip_html(text)
             year_hint = created_date.year if created_date else None
             parsed = parse_metro_text(clean, year_hint)
@@ -212,8 +228,7 @@ def main() -> int:
         if oldest_date_in_page and oldest_date_in_page < start_date:
             break
 
-        since_id = (data.get("cardlistInfo") or {}).get("since_id") or since_id
-        fetched_pages += 1
+        page += 1
         time.sleep(args.sleep)
 
     output_list = [results[k] for k in sorted(results.keys())]
@@ -222,6 +237,10 @@ def main() -> int:
         json.dump(output_list, f, ensure_ascii=False, indent=2)
 
     print(f"Fetched {len(output_list)} records to {args.out}")
+    if page <= args.max_pages:
+        print(f"Stopped at page {page}. You can resume with --start-page {page}.")
+    if failed_pages:
+        print(f"Skipped pages: {failed_pages}")
     return 0
 
 
