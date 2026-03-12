@@ -23,8 +23,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         metroData = data.daily_data;
         linesInfo = data.metadata.lines;
 
-        lastUpdated = data.metadata.last_updated || '';
-        updateLastUpdated(lastUpdated || (metroData[0] ? metroData[0].date : '--'));
+        const fetchedAt = data.metadata.fetched_at || '';
+        lastUpdated = fetchedAt || data.metadata.last_updated || '';
+        const displayDate = lastUpdated.includes(' ') ? lastUpdated.split(' ')[0] : lastUpdated;
+        updateLastUpdated(displayDate || (metroData[0] ? metroData[0].date : '--'));
 
         updateDashboard();
         initCharts();
@@ -92,7 +94,8 @@ function updateDashboard() {
     }
     
     // 最后更新
-    updateLastUpdated(lastUpdated || latest.date);
+    const displayDate = lastUpdated && lastUpdated.includes(' ') ? lastUpdated.split(' ')[0] : lastUpdated;
+    updateLastUpdated(displayDate || latest.date);
 }
 
 // 初始化图表
