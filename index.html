@@ -82,10 +82,13 @@
         </div>
 
         <!-- 各线路详情 + 占比 -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white rounded-xl shadow-md p-6 lg:col-span-2">
-                <h2 class="text-lg font-bold text-gray-800 mb-4" id="selectedDateLabel2">🚇 各线路昨日客流</h2>
-                <div class="overflow-x-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-md p-6 lg:col-span-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-gray-800" id="selectedDateLabel2">🚇 各线路昨日客流</h2>
+                    <span class="text-xs text-gray-500">按客流从高到低</span>
+                </div>
+                <div class="overflow-x-auto max-h-[420px]">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
@@ -100,9 +103,12 @@
                     </table>
                 </div>
             </div>
-            <div class="bg-white rounded-xl shadow-md p-6 lg:col-span-1">
-                <h2 class="text-lg font-bold text-gray-800 mb-4">🥧 线路客流占比</h2>
-                <div id="pieChart" style="height: 340px;"></div>
+            <div class="bg-white rounded-xl shadow-md p-6 lg:col-span-2">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">🥧 线路客流占比</h2>
+                    <span class="text-xs text-gray-500">Top 线路更直观</span>
+                </div>
+                <div id="pieChart" style="height: 420px;"></div>
             </div>
         </div>
 
