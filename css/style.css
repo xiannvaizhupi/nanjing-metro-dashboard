@@ -51,3 +51,55 @@ table td {
         font-size: 10px;
     }
 }
+
+@media (max-width: 640px) {
+    .h-16 {
+        height: 3.5rem;
+    }
+
+    .p-6 {
+        padding: 1rem;
+    }
+
+    .px-4 {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .text-3xl {
+        font-size: 1.5rem;
+        line-height: 2rem;
+    }
+
+    .text-lg {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #trendChart {
+        height: 280px !important;
+    }
+
+    #pieChart {
+        height: 300px !important;
+    }
+
+    #lineTrendChart {
+        height: 300px !important;
+    }
+
+    #dataTable th,
+    #dataTable td {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.75rem;
+    }
+
+    .line-btn {
+        padding: 0.4rem 0.65rem;
+        font-size: 0.75rem;
+    }
+
+    .overflow-x-auto {
+        -webkit-overflow-scrolling: touch;
+    }
+}
