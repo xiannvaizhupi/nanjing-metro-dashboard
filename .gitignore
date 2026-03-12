@@ -2,3 +2,7 @@
 node_modules/
 .vercel
 *.log
+weibo_cookie.txt
+data/weibo_raw.txt
+data/weibo_parsed.json
+data/weibo_qr.png
