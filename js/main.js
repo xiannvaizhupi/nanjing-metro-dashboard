@@ -2,6 +2,7 @@
 let metroData = null;
 let linesInfo = null;
 let trendChart = null;
+let pieChart = null;
 let currentTrendRange = 'all';
 let selectedDateData = null;
 let selectedDate = null;
@@ -130,6 +131,8 @@ function updateTrendChart() {
         filteredData = metroData.slice(0, 7);
     } else if (currentTrendRange === 'month') {
         filteredData = metroData.slice(0, 30);
+    } else if (currentTrendRange === 'year') {
+        filteredData = metroData.slice(0, 365);
     }
 
     const dates = filteredData.map(d => d.date.slice(5)).reverse();
@@ -207,15 +210,23 @@ function setTrendRange(range) {
     document.getElementById('btn-week').className = range === 'week'
         ? 'px-3 py-1 text-sm rounded bg-blue-500 text-white'
         : 'px-3 py-1 text-sm rounded bg-gray-200 text-gray-700';
+    document.getElementById('btn-year').className = range === 'year'
+        ? 'px-3 py-1 text-sm rounded bg-blue-500 text-white'
+        : 'px-3 py-1 text-sm rounded bg-gray-200 text-gray-700';
 
     updateTrendChart();
 }
 
 // 饼图
 function initPieChart() {
-    const chart = echarts.init(document.getElementById('pieChart'));
+    pieChart = echarts.init(document.getElementById('pieChart'));
+    updatePieChart();
+    window.addEventListener('resize', () => pieChart.resize());
+}
 
-    const latest = metroData[0];
+function updatePieChart() {
+    if (!metroData || metroData.length === 0 || !pieChart) return;
+    const latest = selectedDateData || metroData[0];
     const pieData = Object.entries(latest.lines)
         .map(([lineId, value]) => {
             const lineInfo = linesInfo.find(l => l.id === lineId);
@@ -283,8 +294,7 @@ function initPieChart() {
         }]
     };
 
-    chart.setOption(option);
-    window.addEventListener('resize', () => chart.resize());
+    pieChart.setOption(option);
 }
 
 // 选择日期
@@ -315,6 +325,7 @@ function selectDate(data, options = {}) {
 
     // 重新渲染表格
     renderLinesTable();
+    updatePieChart();
 }
 
 // 渲染线路表格

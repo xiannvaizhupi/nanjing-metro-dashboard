@@ -61,6 +61,7 @@
                     <button onclick="setLineTrendRange('all')" id="line-btn-all" class="px-3 py-1 text-sm rounded bg-blue-500 text-white">所有数据</button>
                     <button onclick="setLineTrendRange('month')" id="line-btn-month" class="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700">近一个月</button>
                     <button onclick="setLineTrendRange('week')" id="line-btn-week" class="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700">近一周</button>
+                    <button onclick="setLineTrendRange('year')" id="line-btn-year" class="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700">近一年</button>
                 </div>
             </div>
             <div id="lineTrendChart" style="height: 400px;"></div>
@@ -130,6 +131,9 @@
             }
             if (currentLineTrendRange === 'month') {
                 return metroData.slice(0, 30);
+            }
+            if (currentLineTrendRange === 'year') {
+                return metroData.slice(0, 365);
             }
             return metroData;
         }
@@ -243,6 +247,9 @@
                 : 'px-3 py-1 text-sm rounded bg-gray-200 text-gray-700';
             document.getElementById('line-btn-week').className = range === 'week' 
                 ? 'px-3 py-1 text-sm rounded bg-blue-500 text-white' 
+                : 'px-3 py-1 text-sm rounded bg-gray-200 text-gray-700';
+            document.getElementById('line-btn-year').className = range === 'year'
+                ? 'px-3 py-1 text-sm rounded bg-blue-500 text-white'
                 : 'px-3 py-1 text-sm rounded bg-gray-200 text-gray-700';
             
             updateLineTrendChart();
