@@ -58,10 +58,10 @@
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-bold text-gray-800">📈 线路客流趋势</h2>
                 <div class="flex space-x-2">
-                    <button onclick="setLineTrendRange('all')" id="line-btn-all" class="px-3 py-1 text-sm rounded bg-blue-500 text-white">所有数据</button>
+                    <button onclick="setLineTrendRange('year')" id="line-btn-year" class="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700">近一年</button>
                     <button onclick="setLineTrendRange('month')" id="line-btn-month" class="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700">近一个月</button>
                     <button onclick="setLineTrendRange('week')" id="line-btn-week" class="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700">近一周</button>
-                    <button onclick="setLineTrendRange('year')" id="line-btn-year" class="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700">近一年</button>
+                    <button onclick="setLineTrendRange('all')" id="line-btn-all" class="px-3 py-1 text-sm rounded bg-blue-500 text-white">所有数据</button>
                 </div>
             </div>
             <div id="lineTrendChart" style="height: 400px;"></div>
