@@ -124,10 +124,21 @@
             initLineTrendChart();
         }
 
+        function getLineRangeData() {
+            if (currentLineTrendRange === 'week') {
+                return metroData.slice(0, 7);
+            }
+            if (currentLineTrendRange === 'month') {
+                return metroData.slice(0, 30);
+            }
+            return metroData;
+        }
+
         // 更新线路统计
         function updateLineStats() {
             const lineInfo = linesInfo.find(l => l.id === currentLineId);
-            const values = metroData.map(d => d.lines[currentLineId] || 0).filter(v => v > 0);
+            const rangeData = getLineRangeData();
+            const values = rangeData.map(d => d.lines[currentLineId] || 0).filter(v => v > 0);
             
             if (values.length === 0) {
                 document.getElementById('lineStats').innerHTML = '<div class="col-span-3 text-center text-gray-500">暂无数据</div>';
@@ -165,13 +176,7 @@
         // 更新线路趋势图
         function updateLineTrendChart() {
             const lineInfo = linesInfo.find(l => l.id === currentLineId);
-            
-            let filteredData = metroData;
-            if (currentLineTrendRange === 'week') {
-                filteredData = metroData.slice(0, 7);
-            } else if (currentLineTrendRange === 'month') {
-                filteredData = metroData.slice(0, 30);
-            }
+            const filteredData = getLineRangeData();
             
             const dates = filteredData.map(d => d.date.slice(5)).reverse();
             const values = filteredData.map(d => d.lines[currentLineId] || 0).reverse();
@@ -241,6 +246,7 @@
                 : 'px-3 py-1 text-sm rounded bg-gray-200 text-gray-700';
             
             updateLineTrendChart();
+            updateLineStats();
         }
 
         // 移动端菜单切换
