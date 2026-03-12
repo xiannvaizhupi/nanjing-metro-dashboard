@@ -62,10 +62,6 @@
                         <option value="flow_asc">客流从低到高</option>
                     </select>
                 </div>
-                <button onclick="applyFilter()" 
-                    class="w-[160px] h-[42px] px-6 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition box-border">
-                    筛选
-                </button>
             </div>
         </div>
 
@@ -109,6 +105,7 @@
                 
                 renderTableHead();
                 renderTable();
+                bindFilters();
             } catch (error) {
                 console.error('加载数据失败:', error);
             }
@@ -175,6 +172,19 @@
                 html += '</tr>';
                 return html;
             }).join('');
+        }
+
+        // 绑定筛选和排序事件
+        function bindFilters() {
+            const startDate = document.getElementById('startDate');
+            const endDate = document.getElementById('endDate');
+            const sortOrder = document.getElementById('sortOrder');
+
+            [startDate, endDate, sortOrder].forEach(el => {
+                if (!el) return;
+                el.addEventListener('change', applyFilter);
+                el.addEventListener('input', applyFilter);
+            });
         }
 
         // 应用筛选
