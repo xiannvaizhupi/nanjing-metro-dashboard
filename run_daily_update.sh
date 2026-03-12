@@ -53,6 +53,7 @@ upsert(data["daily_data"], parsed)
 
 data.setdefault("metadata", {})
 data["metadata"]["last_updated"] = parsed["date"]
+data["metadata"]["fetched_at"] = __import__("datetime").datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 with open(metro_path, "w", encoding="utf-8") as f:
     json.dump(data, f, ensure_ascii=False, indent=2)

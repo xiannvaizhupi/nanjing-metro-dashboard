@@ -135,6 +135,7 @@ def update_data_file(new_data):
         
         # 更新元数据
         existing_data["metadata"]["last_updated"] = new_data["date"]
+        existing_data["metadata"]["fetched_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
         # 保存文件
         with open(data_file, 'w', encoding='utf-8') as f:
