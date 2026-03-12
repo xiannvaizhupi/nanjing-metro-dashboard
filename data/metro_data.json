@@ -33,7 +33,7 @@
       {
         "id": "L5",
         "name": "5号线",
-        "color": "#F9A73E",
+        "color": "#F2DA51",
         "type": "main"
       },
       {
@@ -45,13 +45,13 @@
       {
         "id": "L10",
         "name": "10号线",
-        "color": "#EACF02",
+        "color": "#B9975B",
         "type": "main"
       },
       {
         "id": "S1",
         "name": "S1号线",
-        "color": "#00A0E9",
+        "color": "#4BBBB4",
         "type": "suburban"
       },
       {
@@ -69,19 +69,19 @@
       {
         "id": "S7",
         "name": "S7号线",
-        "color": "#E89CAE",
+        "color": "#B46B7A",
         "type": "suburban"
       },
       {
         "id": "S8",
         "name": "S8号线",
-        "color": "#EA5514",
+        "color": "#FF8000",
         "type": "suburban"
       },
       {
         "id": "S9",
         "name": "S9号线",
-        "color": "#F9A03E",
+        "color": "#FFC600",
         "type": "suburban"
       }
     ]
