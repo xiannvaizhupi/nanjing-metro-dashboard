@@ -2,6 +2,10 @@
 # 南京地铁每日数据更新脚本
 # 每天早上10点执行
 
+# 日志输出
+LOG_FILE="/tmp/nanjing-metro-daily-update.log"
+exec >> "$LOG_FILE" 2>&1
+
 # 设置工作目录
 PROJECT_DIR="/Users/zhuzhiwei/项目/nanjing-metro-dashboard"
 cd "$PROJECT_DIR"

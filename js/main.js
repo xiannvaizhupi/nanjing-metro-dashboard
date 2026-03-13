@@ -307,10 +307,14 @@ function selectDate(data, options = {}) {
     const dateLabel = document.getElementById('selectedDateLabel');
     const dateLabel2 = document.getElementById('selectedDateLabel2');
     if (dateLabel) {
-        dateLabel.textContent = `${data.date.slice(5)}总客流`;
+        dateLabel.textContent = `${data.date}总客流`;
     }
     if (dateLabel2) {
-        dateLabel2.textContent = `🚇 ${data.date.slice(5)}各线路客流`;
+        dateLabel2.textContent = `${data.date}各线路客流`;
+    }
+    const pieDateLabel = document.getElementById('pieDateLabel');
+    if (pieDateLabel) {
+        pieDateLabel.textContent = data.date;
     }
 
     // 更新总客流显示

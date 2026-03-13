@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>南京地铁客流数据 | Nanjing Metro Flow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 min-h-screen gh-theme">
     <!-- 导航栏 -->
     <nav class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -70,7 +73,7 @@
             <!-- 总客流趋势 -->
             <div class="bg-white rounded-xl shadow-md p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-bold text-gray-800">📈 总客流趋势</h2>
+                    <h2 class="text-lg font-bold text-gray-800">总客流趋势</h2>
                     <div class="flex space-x-2">
                         <button onclick="setTrendRange('year')" id="btn-year" class="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700">近一年</button>
                         <button onclick="setTrendRange('month')" id="btn-month" class="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700">近一个月</button>
@@ -86,7 +89,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <div class="bg-white rounded-xl shadow-md p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-bold text-gray-800" id="selectedDateLabel2">🚇 各线路昨日客流</h2>
+                    <h2 class="text-lg font-bold text-gray-800" id="selectedDateLabel2">各线路昨日客流</h2>
                     <span class="text-xs text-gray-500">按客流从高到低</span>
                 </div>
                 <div class="overflow-x-auto max-h-[420px]">
@@ -106,7 +109,9 @@
             </div>
             <div class="bg-white rounded-xl shadow-md p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-bold text-gray-800">🥧 线路客流占比</h2>
+                    <h2 class="text-lg font-bold text-gray-800">
+                        <span id="pieDateLabel">--</span> 线路客流占比
+                    </h2>
                     <span class="text-xs text-gray-500">Top 线路更直观</span>
                 </div>
                 <div id="pieChart" style="height: 420px;"></div>
