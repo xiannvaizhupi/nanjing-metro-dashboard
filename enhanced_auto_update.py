@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-增强版每日数据更新脚本
-包含微博获取和备用数据源
+南京地铁每日数据更新脚本
+只允许获取真实微博数据，不使用模拟数据
 """
 
 import requests
@@ -17,36 +17,6 @@ from weibo_fetcher import WeiboDataFetcher, parse_metro_data
 # 设置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-
-def get_recent_data():
-    """获取最近的数据作为备用"""
-    data_file = "/Users/zhuzhiwei/项目/nanjing-metro-dashboard/data/metro_data.json"
-    
-    if os.path.exists(data_file):
-        with open(data_file, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        
-        if data.get('data') and len(data['data']) > 0:
-            latest_data = data['data'][0]
-            logger.info(f"找到最近数据: {latest_data['date']}, 总客流: {latest_data['total']}")
-            
-            # 创建一个基于最新数据的更新版本
-            yesterday = datetime.now() - timedelta(days=1)
-            new_date = yesterday.strftime("%Y-%m-%d")
-            
-            # 如果不是最新的日期，创建模拟更新
-            if latest_data['date'] != new_date:
-                updated_data = latest_data.copy()
-                updated_data['date'] = new_date
-                # 稍微调整总客流，模拟自然波动
-                updated_data['total'] = latest_data['total'] * (0.95 + 0.1 * (latest_data['total'] / 300))
-                updated_data['note'] = "备用数据源生成"
-                
-                return updated_data
-            else:
-                return latest_data
-    
-    return None
 
 def get_weibo_data():
     """获取南京地铁微博最新数据，带备用机制"""
@@ -92,17 +62,8 @@ def get_weibo_data():
                 "note": "enhanced获取"
             }
         
-        logger.warning("enhanced获取失败")
-        
-        # 备用方案：使用最近的数据
-        logger.info("启用备用数据源...")
-        recent_data = get_recent_data()
-        if recent_data:
-            recent_data['note'] = "备用数据源 (微博获取失败时使用)"
-            logger.info("使用备用数据源")
-            return recent_data
-        
-        logger.error("所有数据源都失败了")
+        # enhanced获取失败，不使用备用数据源
+        logger.error("所有数据获取方法都失败，未获取到真实数据")
         return None
         
     except Exception as e:

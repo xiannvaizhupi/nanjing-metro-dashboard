@@ -157,64 +157,6 @@ class EnhancedWeiboFetcher:
             
         return None
     
-    def fetch_with_mock_data(self):
-        """如果所有方法都失败，生成合理的模拟数据"""
-        print("尝试方法5: 生成模拟数据...")
-        
-        yesterday = datetime.now() - timedelta(days=1)
-        date_str = yesterday.strftime("%m-%d")
-        
-        # 基于历史数据生成合理的变化
-        try:
-            data_file = "/Users/zhuzhiwei/项目/nanjing-metro-dashboard/data/metro_data.json"
-            if os.path.exists(data_file):
-                with open(data_file, 'r', encoding='utf-8') as f:
-                    existing_data = json.load(f)
-                
-                if existing_data.get('data') and len(existing_data['data']) > 0:
-                    latest = existing_data['data'][0]
-                    total_base = float(latest['total'])
-                    # 生成10%以内的随机波动
-                    total_new = total_base * (0.9 + 0.2 * (total_base / 300))
-                    
-                    # 保持线路数据比例
-                    lines_new = {}
-                    for line, count in latest['lines'].items():
-                        lines_new[line] = count * (total_new / total_base)
-                    
-                    result = (date_str, yesterday.month, yesterday.day, 
-                             round(total_new, 1), generate_lines_text(lines_new))
-                    
-                    print(f"✅ 基于历史数据生成模拟数据: {total_new}万人")
-                    return result
-        except:
-            pass
-        
-        # 如果没有历史数据，使用标准模式
-        result = (date_str, yesterday.month, yesterday.day, 320.5, "L1:70.2, L2:55.8, L3:60.1, L4:17.8, L5:35.2, L7:28.4, L10:18.9, S1:9.8, S3:9.6, S6:5.3, S7:1.9, S8:10.3, S9:2.2")
-        print("✅ 使用标准模式生成模拟数据")
-        return result
-
-def generate_lines_text(lines_dict):
-    """生成线路数据的文本格式"""
-    lines_text = []
-    for line_num in range(1, 6):  # 1-5号线
-        line_key = f"L{line_num}"
-        if line_key in lines_dict:
-            lines_text.append(f"{line_num}号线:{lines_dict[line_key]}")
-    
-    for line_num in [7, 10]:  # 7、10号线
-        line_key = f"L{line_num}"
-        if line_key in lines_dict:
-            lines_text.append(f"{line_num}号线:{lines_dict[line_key]}")
-    
-    for line_num in range(1, 10):  # S线
-        line_key = f"S{line_num}"
-        if line_key in lines_dict and line_num not in [2, 4, 5]:  # 跳过未开通的S线
-            lines_text.append(f"S{line_num}号线:{lines_dict[line_key]}")
-    
-    return "，".join(lines_text) + "（以上单位: 万）"
-
 def fetch_correct_data():
     """获取正确的客流数据"""
     fetcher = EnhancedWeiboFetcher()
@@ -224,17 +166,16 @@ def fetch_correct_data():
         ("搜狗微博搜索", fetcher.fetch_with_sogou_search),
         ("百度搜索", fetcher.fetch_with_baidu_search),
         ("新闻网站搜索", fetcher.fetch_recent_news),
-        ("模拟数据生成", fetcher.fetch_with_mock_data)
     ]
     
     for method_name, method in methods:
         print(f"\n=== {method_name} ===")
         result = method()
-        if result and result != fetcher.fetch_with_mock_data:
-            return result
-        elif result:  # 模拟数据也是有效的
+        if result:
             return result
     
+    # 所有方法都失败，返回 None（不允许模拟数据）
+    print("\n❌ 所有数据获取方法都失败，未获取到真实数据")
     return None
 
 if __name__ == "__main__":
