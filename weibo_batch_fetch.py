@@ -150,6 +150,7 @@ def main() -> int:
     parser.add_argument("--retries", type=int, default=6, help="retries per page on transient errors")
     parser.add_argument("--start-page", type=int, default=1, help="start page for resume")
     parser.add_argument("--skip-fail", action="store_true", help="skip failed pages and continue")
+    parser.add_argument("--max-empty", type=int, default=5, help="max consecutive empty pages before stopping")
     parser.add_argument("--cookie-keys", type=str, default="SUB,SUBP,SCF,SSOLoginState,ALF,XSRF-TOKEN,WBPSESS,_s_tentry,SINAGLOBAL,ULV,Apache", help="comma-separated cookie keys to keep")
     args = parser.parse_args()
 
@@ -182,6 +183,7 @@ def main() -> int:
 
     failed_pages = []
     page = args.start_page
+    empty_streak = 0
     while page <= args.max_pages:
         posts = None
         for attempt in range(args.retries):
@@ -205,7 +207,13 @@ def main() -> int:
             print(f"page {page} failed after retries, stopping to allow resume", file=sys.stderr)
             break
         if not posts:
-            break
+            empty_streak += 1
+            if empty_streak >= args.max_empty:
+                break
+            page += 1
+            time.sleep(args.sleep)
+            continue
+        empty_streak = 0
 
         oldest_date_in_page = None
         for post in posts:
