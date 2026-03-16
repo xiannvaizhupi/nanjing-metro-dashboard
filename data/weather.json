@@ -8,7 +8,9 @@
     "aqi": 76,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-02",
@@ -19,7 +21,9 @@
     "aqi": 81,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-03",
@@ -30,7 +34,9 @@
     "aqi": 91,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-04",
@@ -41,7 +47,9 @@
     "aqi": 77,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-05",
@@ -52,7 +60,9 @@
     "aqi": 98,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-06",
@@ -63,7 +73,9 @@
     "aqi": 82,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-07",
@@ -74,7 +86,9 @@
     "aqi": 46,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-08",
@@ -85,7 +99,9 @@
     "aqi": 61,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-09",
@@ -96,7 +112,9 @@
     "aqi": 37,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-10",
@@ -107,7 +125,9 @@
     "aqi": 46,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-11",
@@ -118,7 +138,9 @@
     "aqi": 60,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-12",
@@ -129,7 +151,9 @@
     "aqi": 63,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-13",
@@ -140,7 +164,9 @@
     "aqi": 74,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-14",
@@ -151,7 +177,9 @@
     "aqi": 93,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-15",
@@ -162,7 +190,9 @@
     "aqi": 66,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-16",
@@ -173,7 +203,9 @@
     "aqi": 58,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-17",
@@ -184,7 +216,9 @@
     "aqi": 66,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-18",
@@ -195,7 +229,9 @@
     "aqi": 76,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-19",
@@ -206,7 +242,9 @@
     "aqi": 101,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-20",
@@ -217,7 +255,9 @@
     "aqi": 107,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-21",
@@ -228,7 +268,9 @@
     "aqi": 122,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-22",
@@ -239,7 +281,9 @@
     "aqi": 135,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-23",
@@ -250,7 +294,9 @@
     "aqi": 69,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-24",
@@ -261,7 +307,9 @@
     "aqi": 50,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-25",
@@ -272,7 +320,9 @@
     "aqi": 31,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-26",
@@ -283,7 +333,9 @@
     "aqi": 64,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-27",
@@ -294,7 +346,9 @@
     "aqi": 50,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-28",
@@ -305,7 +359,9 @@
     "aqi": 43,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-29",
@@ -316,7 +372,9 @@
     "aqi": 63,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-30",
@@ -327,7 +385,9 @@
     "aqi": 56,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-01-31",
@@ -338,7 +398,9 @@
     "aqi": 69,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-01",
@@ -349,7 +411,9 @@
     "aqi": 36,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-02",
@@ -360,7 +424,9 @@
     "aqi": 61,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-03",
@@ -371,7 +437,9 @@
     "aqi": 81,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-04",
@@ -382,7 +450,9 @@
     "aqi": 72,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-05",
@@ -393,7 +463,9 @@
     "aqi": 49,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-06",
@@ -404,7 +476,9 @@
     "aqi": 40,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-07",
@@ -415,7 +489,9 @@
     "aqi": 59,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-08",
@@ -426,7 +502,9 @@
     "aqi": 33,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-09",
@@ -437,7 +515,9 @@
     "aqi": 38,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-10",
@@ -448,7 +528,9 @@
     "aqi": 54,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-11",
@@ -459,7 +541,9 @@
     "aqi": 52,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-12",
@@ -470,7 +554,9 @@
     "aqi": 100,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-13",
@@ -481,7 +567,9 @@
     "aqi": 62,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-14",
@@ -492,7 +580,9 @@
     "aqi": 68,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-15",
@@ -503,7 +593,9 @@
     "aqi": 96,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-16",
@@ -514,7 +606,9 @@
     "aqi": 91,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-17",
@@ -525,7 +619,9 @@
     "aqi": 66,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-18",
@@ -536,7 +632,9 @@
     "aqi": 48,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-19",
@@ -547,7 +645,9 @@
     "aqi": 62,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-20",
@@ -558,7 +658,9 @@
     "aqi": 50,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-21",
@@ -569,7 +671,9 @@
     "aqi": 45,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-22",
@@ -580,7 +684,9 @@
     "aqi": 63,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-23",
@@ -591,7 +697,9 @@
     "aqi": 72,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-24",
@@ -602,7 +710,9 @@
     "aqi": 63,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-25",
@@ -613,7 +723,9 @@
     "aqi": 84,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-26",
@@ -624,7 +736,9 @@
     "aqi": 105,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-27",
@@ -635,7 +749,9 @@
     "aqi": 90,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-02-28",
@@ -646,7 +762,9 @@
     "aqi": 64,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-01",
@@ -657,7 +775,9 @@
     "aqi": 52,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-02",
@@ -668,7 +788,9 @@
     "aqi": 59,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-03",
@@ -679,7 +801,9 @@
     "aqi": 27,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-04",
@@ -690,7 +814,9 @@
     "aqi": 35,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-05",
@@ -701,7 +827,9 @@
     "aqi": 52,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-06",
@@ -712,7 +840,9 @@
     "aqi": 51,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-07",
@@ -723,7 +853,9 @@
     "aqi": 60,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-08",
@@ -734,7 +866,9 @@
     "aqi": 77,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-09",
@@ -745,7 +879,9 @@
     "aqi": 71,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-10",
@@ -756,7 +892,9 @@
     "aqi": 57,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-11",
@@ -767,7 +905,9 @@
     "aqi": 86,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-12",
@@ -778,7 +918,9 @@
     "aqi": 118,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-13",
@@ -789,7 +931,9 @@
     "aqi": 68,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-14",
@@ -800,7 +944,9 @@
     "aqi": 40,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-15",
@@ -811,7 +957,9 @@
     "aqi": 36,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-16",
@@ -822,7 +970,9 @@
     "aqi": 44,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-17",
@@ -833,7 +983,9 @@
     "aqi": 34,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-18",
@@ -844,7 +996,9 @@
     "aqi": 42,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-19",
@@ -855,7 +1009,9 @@
     "aqi": 49,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-20",
@@ -866,7 +1022,9 @@
     "aqi": 51,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-21",
@@ -877,7 +1035,9 @@
     "aqi": 49,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-22",
@@ -888,7 +1048,9 @@
     "aqi": 53,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-23",
@@ -899,7 +1061,9 @@
     "aqi": 64,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-24",
@@ -910,7 +1074,9 @@
     "aqi": 71,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-25",
@@ -921,7 +1087,9 @@
     "aqi": 66,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-26",
@@ -932,7 +1100,9 @@
     "aqi": 67,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-27",
@@ -943,7 +1113,9 @@
     "aqi": 120,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-28",
@@ -954,7 +1126,9 @@
     "aqi": 67,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-29",
@@ -965,7 +1139,9 @@
     "aqi": 107,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-30",
@@ -976,7 +1152,9 @@
     "aqi": 75,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-03-31",
@@ -987,7 +1165,9 @@
     "aqi": 37,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-01",
@@ -998,7 +1178,9 @@
     "aqi": 46,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-02",
@@ -1009,7 +1191,9 @@
     "aqi": 59,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-03",
@@ -1020,7 +1204,9 @@
     "aqi": 35,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": true
   },
   {
     "date": "2025-04-04",
@@ -1031,7 +1217,9 @@
     "aqi": 60,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2025-04-05",
@@ -1042,7 +1230,9 @@
     "aqi": 77,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2025-04-06",
@@ -1053,7 +1243,9 @@
     "aqi": 65,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-07",
@@ -1064,7 +1256,9 @@
     "aqi": 66,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-08",
@@ -1075,7 +1269,9 @@
     "aqi": 66,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-09",
@@ -1086,7 +1282,9 @@
     "aqi": 77,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-10",
@@ -1097,7 +1295,9 @@
     "aqi": 81,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-11",
@@ -1108,7 +1308,9 @@
     "aqi": 77,
     "is_rainy": true,
     "is_heavy_rain": true,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-12",
@@ -1119,7 +1321,9 @@
     "aqi": 231,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-13",
@@ -1130,7 +1334,9 @@
     "aqi": 95,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-14",
@@ -1141,7 +1347,9 @@
     "aqi": 80,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-15",
@@ -1152,7 +1360,9 @@
     "aqi": 50,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-16",
@@ -1163,7 +1373,9 @@
     "aqi": 59,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-17",
@@ -1174,7 +1386,9 @@
     "aqi": 69,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-18",
@@ -1185,7 +1399,9 @@
     "aqi": 75,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-19",
@@ -1196,7 +1412,9 @@
     "aqi": 82,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-20",
@@ -1207,7 +1425,9 @@
     "aqi": 57,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-21",
@@ -1218,7 +1438,9 @@
     "aqi": 59,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-22",
@@ -1229,7 +1451,9 @@
     "aqi": 63,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-23",
@@ -1240,7 +1464,9 @@
     "aqi": 62,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-24",
@@ -1251,7 +1477,9 @@
     "aqi": 74,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-25",
@@ -1262,7 +1490,9 @@
     "aqi": 64,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-26",
@@ -1273,7 +1503,9 @@
     "aqi": 55,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-27",
@@ -1284,7 +1516,9 @@
     "aqi": 45,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-28",
@@ -1295,7 +1529,9 @@
     "aqi": 60,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-29",
@@ -1306,7 +1542,9 @@
     "aqi": 70,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-30",
@@ -1317,7 +1555,9 @@
     "aqi": 65,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": true
   },
   {
     "date": "2025-05-01",
@@ -1328,7 +1568,9 @@
     "aqi": 55,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2025-05-02",
@@ -1339,7 +1581,9 @@
     "aqi": 61,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2025-05-03",
@@ -1350,7 +1594,9 @@
     "aqi": 52,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2025-05-04",
@@ -1361,7 +1607,9 @@
     "aqi": 39,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2025-05-05",
@@ -1372,7 +1620,9 @@
     "aqi": 43,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-06",
@@ -1383,7 +1633,9 @@
     "aqi": 89,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-07",
@@ -1394,7 +1646,9 @@
     "aqi": 76,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-08",
@@ -1405,7 +1659,9 @@
     "aqi": 49,
     "is_rainy": true,
     "is_heavy_rain": true,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-09",
@@ -1416,7 +1672,9 @@
     "aqi": 31,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-10",
@@ -1427,7 +1685,9 @@
     "aqi": 41,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-11",
@@ -1438,7 +1698,9 @@
     "aqi": 43,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-12",
@@ -1449,7 +1711,9 @@
     "aqi": 54,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-13",
@@ -1460,7 +1724,9 @@
     "aqi": 55,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-14",
@@ -1471,7 +1737,9 @@
     "aqi": 68,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-15",
@@ -1482,7 +1750,9 @@
     "aqi": 72,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-16",
@@ -1493,7 +1763,9 @@
     "aqi": 41,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-17",
@@ -1504,7 +1776,9 @@
     "aqi": 51,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-18",
@@ -1515,7 +1789,9 @@
     "aqi": 77,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-19",
@@ -1526,7 +1802,9 @@
     "aqi": 79,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-20",
@@ -1537,7 +1815,9 @@
     "aqi": 55,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-21",
@@ -1548,7 +1828,9 @@
     "aqi": 34,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-22",
@@ -1559,7 +1841,9 @@
     "aqi": 58,
     "is_rainy": true,
     "is_heavy_rain": true,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-23",
@@ -1570,7 +1854,9 @@
     "aqi": 40,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-24",
@@ -1581,7 +1867,9 @@
     "aqi": 53,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-25",
@@ -1592,7 +1880,9 @@
     "aqi": 75,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-26",
@@ -1603,7 +1893,9 @@
     "aqi": 67,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-27",
@@ -1614,7 +1906,9 @@
     "aqi": 55,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-28",
@@ -1625,7 +1919,9 @@
     "aqi": 47,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-29",
@@ -1636,7 +1932,9 @@
     "aqi": 61,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-30",
@@ -1647,7 +1945,9 @@
     "aqi": 56,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": true
   },
   {
     "date": "2025-05-31",
@@ -1658,7 +1958,9 @@
     "aqi": 57,
     "is_rainy": true,
     "is_heavy_rain": true,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2025-06-01",
@@ -1669,7 +1971,9 @@
     "aqi": 31,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2025-06-02",
@@ -1680,7 +1984,9 @@
     "aqi": 27,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-03",
@@ -1691,7 +1997,9 @@
     "aqi": 53,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-04",
@@ -1702,7 +2010,9 @@
     "aqi": 80,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-05",
@@ -1713,7 +2023,9 @@
     "aqi": 59,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-06",
@@ -1724,7 +2036,9 @@
     "aqi": 55,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-07",
@@ -1735,7 +2049,9 @@
     "aqi": 28,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-08",
@@ -1746,7 +2062,9 @@
     "aqi": 27,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-09",
@@ -1757,7 +2075,9 @@
     "aqi": 29,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-10",
@@ -1768,7 +2088,9 @@
     "aqi": 37,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-11",
@@ -1779,7 +2101,9 @@
     "aqi": 45,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-12",
@@ -1790,7 +2114,9 @@
     "aqi": 32,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-13",
@@ -1801,7 +2127,9 @@
     "aqi": 30,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-14",
@@ -1812,7 +2140,9 @@
     "aqi": 40,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-15",
@@ -1823,7 +2153,9 @@
     "aqi": 22,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-16",
@@ -1834,7 +2166,9 @@
     "aqi": 44,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-17",
@@ -1845,7 +2179,9 @@
     "aqi": 68,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-18",
@@ -1856,7 +2192,9 @@
     "aqi": 65,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-19",
@@ -1867,7 +2205,9 @@
     "aqi": 16,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-20",
@@ -1878,7 +2218,9 @@
     "aqi": 17,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-21",
@@ -1889,7 +2231,9 @@
     "aqi": 22,
     "is_rainy": true,
     "is_heavy_rain": true,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-22",
@@ -1900,7 +2244,9 @@
     "aqi": 29,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-23",
@@ -1911,7 +2257,9 @@
     "aqi": 37,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-24",
@@ -1922,7 +2270,9 @@
     "aqi": 34,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-25",
@@ -1933,7 +2283,9 @@
     "aqi": 40,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-26",
@@ -1944,7 +2296,9 @@
     "aqi": 46,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-27",
@@ -1955,7 +2309,9 @@
     "aqi": 23,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-28",
@@ -1966,7 +2322,9 @@
     "aqi": 21,
     "is_rainy": true,
     "is_heavy_rain": true,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-29",
@@ -1977,7 +2335,9 @@
     "aqi": 21,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-30",
@@ -1988,7 +2348,9 @@
     "aqi": 24,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-01",
@@ -1999,7 +2361,9 @@
     "aqi": 38,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-02",
@@ -2010,7 +2374,9 @@
     "aqi": 35,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-03",
@@ -2021,7 +2387,9 @@
     "aqi": 49,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-04",
@@ -2032,7 +2400,9 @@
     "aqi": 52,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-05",
@@ -2043,7 +2413,9 @@
     "aqi": 58,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-06",
@@ -2054,7 +2426,9 @@
     "aqi": 60,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-07",
@@ -2065,7 +2439,9 @@
     "aqi": 41,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-08",
@@ -2076,7 +2452,9 @@
     "aqi": 23,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-09",
@@ -2087,7 +2465,9 @@
     "aqi": 21,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-10",
@@ -2098,7 +2478,9 @@
     "aqi": 43,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-11",
@@ -2109,7 +2491,9 @@
     "aqi": 36,
     "is_rainy": true,
     "is_heavy_rain": true,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-12",
@@ -2120,7 +2504,9 @@
     "aqi": 28,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-13",
@@ -2131,7 +2517,9 @@
     "aqi": 36,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-14",
@@ -2142,7 +2530,9 @@
     "aqi": 40,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-15",
@@ -2153,7 +2543,9 @@
     "aqi": 41,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-16",
@@ -2164,7 +2556,9 @@
     "aqi": 41,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-17",
@@ -2175,7 +2569,9 @@
     "aqi": 39,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-18",
@@ -2186,7 +2582,9 @@
     "aqi": 38,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-19",
@@ -2197,7 +2595,9 @@
     "aqi": 31,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-20",
@@ -2208,7 +2608,9 @@
     "aqi": 19,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-21",
@@ -2219,7 +2621,9 @@
     "aqi": 18,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-22",
@@ -2230,7 +2634,9 @@
     "aqi": 10,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-23",
@@ -2241,7 +2647,9 @@
     "aqi": 17,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-24",
@@ -2252,7 +2660,9 @@
     "aqi": 23,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-25",
@@ -2263,7 +2673,9 @@
     "aqi": 29,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-26",
@@ -2274,7 +2686,9 @@
     "aqi": 19,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-27",
@@ -2285,7 +2699,9 @@
     "aqi": 21,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-28",
@@ -2296,7 +2712,9 @@
     "aqi": 20,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-29",
@@ -2307,7 +2725,9 @@
     "aqi": 27,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-30",
@@ -2318,7 +2738,9 @@
     "aqi": 18,
     "is_rainy": true,
     "is_heavy_rain": true,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-07-31",
@@ -2329,7 +2751,9 @@
     "aqi": 14,
     "is_rainy": true,
     "is_heavy_rain": true,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-01",
@@ -2340,7 +2764,9 @@
     "aqi": 16,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-02",
@@ -2351,7 +2777,9 @@
     "aqi": 20,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-03",
@@ -2362,7 +2790,9 @@
     "aqi": 24,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-04",
@@ -2373,7 +2803,9 @@
     "aqi": 36,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-05",
@@ -2384,7 +2816,9 @@
     "aqi": 49,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-06",
@@ -2395,7 +2829,9 @@
     "aqi": 38,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-07",
@@ -2406,7 +2842,9 @@
     "aqi": 29,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-08",
@@ -2417,7 +2855,9 @@
     "aqi": 25,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-09",
@@ -2428,7 +2868,9 @@
     "aqi": 28,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-10",
@@ -2439,7 +2881,9 @@
     "aqi": 22,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-11",
@@ -2450,7 +2894,9 @@
     "aqi": 18,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-12",
@@ -2461,7 +2907,9 @@
     "aqi": 25,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-13",
@@ -2472,7 +2920,9 @@
     "aqi": 48,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-14",
@@ -2483,7 +2933,9 @@
     "aqi": 30,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-15",
@@ -2494,7 +2946,9 @@
     "aqi": 30,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-16",
@@ -2505,7 +2959,9 @@
     "aqi": 35,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-17",
@@ -2516,7 +2972,9 @@
     "aqi": 39,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-18",
@@ -2527,7 +2985,9 @@
     "aqi": 43,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-19",
@@ -2538,7 +2998,9 @@
     "aqi": 39,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-20",
@@ -2549,7 +3011,9 @@
     "aqi": 36,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-21",
@@ -2560,7 +3024,9 @@
     "aqi": 44,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-22",
@@ -2571,7 +3037,9 @@
     "aqi": 34,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-23",
@@ -2582,7 +3050,9 @@
     "aqi": 30,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-24",
@@ -2593,7 +3063,9 @@
     "aqi": 33,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-25",
@@ -2604,7 +3076,9 @@
     "aqi": 42,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-26",
@@ -2615,7 +3089,9 @@
     "aqi": 33,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-27",
@@ -2626,7 +3102,9 @@
     "aqi": 45,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-28",
@@ -2637,7 +3115,9 @@
     "aqi": 37,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-29",
@@ -2648,7 +3128,9 @@
     "aqi": 47,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-30",
@@ -2659,7 +3141,9 @@
     "aqi": 31,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-08-31",
@@ -2670,7 +3154,9 @@
     "aqi": 23,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-01",
@@ -2681,7 +3167,9 @@
     "aqi": 29,
     "is_rainy": true,
     "is_heavy_rain": true,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-02",
@@ -2692,7 +3180,9 @@
     "aqi": 32,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-03",
@@ -2703,7 +3193,9 @@
     "aqi": 38,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-04",
@@ -2714,7 +3206,9 @@
     "aqi": 49,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-05",
@@ -2725,7 +3219,9 @@
     "aqi": 66,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-06",
@@ -2736,7 +3232,9 @@
     "aqi": 47,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-07",
@@ -2747,7 +3245,9 @@
     "aqi": 51,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-08",
@@ -2758,7 +3258,9 @@
     "aqi": 41,
     "is_rainy": true,
     "is_heavy_rain": true,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-09",
@@ -2769,7 +3271,9 @@
     "aqi": 26,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-10",
@@ -2780,7 +3284,9 @@
     "aqi": 32,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-11",
@@ -2791,7 +3297,9 @@
     "aqi": 46,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-12",
@@ -2802,7 +3310,9 @@
     "aqi": 34,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-13",
@@ -2813,7 +3323,9 @@
     "aqi": 23,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-14",
@@ -2824,7 +3336,9 @@
     "aqi": 35,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-15",
@@ -2835,7 +3349,9 @@
     "aqi": 26,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-16",
@@ -2846,7 +3362,9 @@
     "aqi": 41,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-17",
@@ -2857,7 +3375,9 @@
     "aqi": 35,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-18",
@@ -2868,7 +3388,9 @@
     "aqi": 25,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-19",
@@ -2879,7 +3401,9 @@
     "aqi": 35,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-20",
@@ -2890,7 +3414,9 @@
     "aqi": 24,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-21",
@@ -2901,7 +3427,9 @@
     "aqi": 36,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-22",
@@ -2912,7 +3440,9 @@
     "aqi": 32,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-23",
@@ -2923,7 +3453,9 @@
     "aqi": 40,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-24",
@@ -2934,7 +3466,9 @@
     "aqi": 21,
     "is_rainy": true,
     "is_heavy_rain": true,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-25",
@@ -2945,7 +3479,9 @@
     "aqi": 16,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-26",
@@ -2956,7 +3492,9 @@
     "aqi": 18,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-27",
@@ -2967,7 +3505,9 @@
     "aqi": 37,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-28",
@@ -2978,7 +3518,9 @@
     "aqi": 36,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-29",
@@ -2989,7 +3531,9 @@
     "aqi": 37,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-09-30",
@@ -3000,7 +3544,9 @@
     "aqi": 32,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": true
   },
   {
     "date": "2025-10-01",
@@ -3011,7 +3557,9 @@
     "aqi": 32,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2025-10-02",
@@ -3022,7 +3570,9 @@
     "aqi": 35,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2025-10-03",
@@ -3033,7 +3583,9 @@
     "aqi": 21,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2025-10-04",
@@ -3044,7 +3596,9 @@
     "aqi": 28,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2025-10-05",
@@ -3055,7 +3609,9 @@
     "aqi": 58,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2025-10-06",
@@ -3066,7 +3622,9 @@
     "aqi": 51,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2025-10-07",
@@ -3077,7 +3635,9 @@
     "aqi": 49,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2025-10-08",
@@ -3088,7 +3648,9 @@
     "aqi": 36,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-09",
@@ -3099,7 +3661,9 @@
     "aqi": 35,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-10",
@@ -3110,7 +3674,9 @@
     "aqi": 44,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-11",
@@ -3121,7 +3687,9 @@
     "aqi": 74,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-12",
@@ -3132,7 +3700,9 @@
     "aqi": 57,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-13",
@@ -3143,7 +3713,9 @@
     "aqi": 22,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-14",
@@ -3154,7 +3726,9 @@
     "aqi": 16,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-15",
@@ -3165,7 +3739,9 @@
     "aqi": 40,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-16",
@@ -3176,7 +3752,9 @@
     "aqi": 25,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-17",
@@ -3187,7 +3765,9 @@
     "aqi": 32,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-18",
@@ -3198,7 +3778,9 @@
     "aqi": 22,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-19",
@@ -3209,7 +3791,9 @@
     "aqi": 22,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-20",
@@ -3220,7 +3804,9 @@
     "aqi": 26,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-21",
@@ -3231,7 +3817,9 @@
     "aqi": 21,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-22",
@@ -3242,7 +3830,9 @@
     "aqi": 28,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-23",
@@ -3253,7 +3843,9 @@
     "aqi": 30,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-24",
@@ -3264,7 +3856,9 @@
     "aqi": 37,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-25",
@@ -3275,7 +3869,9 @@
     "aqi": 37,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-26",
@@ -3286,7 +3882,9 @@
     "aqi": 47,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-27",
@@ -3297,7 +3895,9 @@
     "aqi": 61,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-28",
@@ -3308,7 +3908,9 @@
     "aqi": 40,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-29",
@@ -3319,7 +3921,9 @@
     "aqi": 32,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-30",
@@ -3330,7 +3934,9 @@
     "aqi": 28,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-31",
@@ -3341,7 +3947,9 @@
     "aqi": 33,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-01",
@@ -3352,7 +3960,9 @@
     "aqi": 117,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-02",
@@ -3363,7 +3973,9 @@
     "aqi": 65,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-03",
@@ -3374,7 +3986,9 @@
     "aqi": 30,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-04",
@@ -3385,7 +3999,9 @@
     "aqi": 44,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-05",
@@ -3396,7 +4012,9 @@
     "aqi": 45,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-06",
@@ -3407,7 +4025,9 @@
     "aqi": 36,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-07",
@@ -3418,7 +4038,9 @@
     "aqi": 26,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-08",
@@ -3429,7 +4051,9 @@
     "aqi": 18,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-09",
@@ -3440,7 +4064,9 @@
     "aqi": 42,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-10",
@@ -3451,7 +4077,9 @@
     "aqi": 66,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-11",
@@ -3462,7 +4090,9 @@
     "aqi": 35,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-12",
@@ -3473,7 +4103,9 @@
     "aqi": 42,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-13",
@@ -3484,7 +4116,9 @@
     "aqi": 67,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-14",
@@ -3495,7 +4129,9 @@
     "aqi": 125,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-15",
@@ -3506,7 +4142,9 @@
     "aqi": 82,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-16",
@@ -3517,7 +4155,9 @@
     "aqi": 67,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-17",
@@ -3528,7 +4168,9 @@
     "aqi": 40,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-18",
@@ -3539,7 +4181,9 @@
     "aqi": 42,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-19",
@@ -3550,7 +4194,9 @@
     "aqi": 47,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-20",
@@ -3561,7 +4207,9 @@
     "aqi": 51,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-21",
@@ -3572,7 +4220,9 @@
     "aqi": 62,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-22",
@@ -3583,7 +4233,9 @@
     "aqi": 92,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-23",
@@ -3594,7 +4246,9 @@
     "aqi": 101,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-24",
@@ -3605,7 +4259,9 @@
     "aqi": 104,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-25",
@@ -3616,7 +4272,9 @@
     "aqi": 85,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-26",
@@ -3627,7 +4285,9 @@
     "aqi": 71,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-27",
@@ -3638,7 +4298,9 @@
     "aqi": 270,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-28",
@@ -3649,7 +4311,9 @@
     "aqi": 128,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-29",
@@ -3660,7 +4324,9 @@
     "aqi": 87,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-11-30",
@@ -3671,7 +4337,9 @@
     "aqi": 80,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-01",
@@ -3682,7 +4350,9 @@
     "aqi": 103,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-02",
@@ -3693,7 +4363,9 @@
     "aqi": 56,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-03",
@@ -3704,7 +4376,9 @@
     "aqi": 48,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-04",
@@ -3715,7 +4389,9 @@
     "aqi": 49,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-05",
@@ -3726,7 +4402,9 @@
     "aqi": 60,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-06",
@@ -3737,7 +4415,9 @@
     "aqi": 68,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-07",
@@ -3748,7 +4428,9 @@
     "aqi": 71,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-08",
@@ -3759,7 +4441,9 @@
     "aqi": 84,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-09",
@@ -3770,7 +4454,9 @@
     "aqi": 60,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-10",
@@ -3781,7 +4467,9 @@
     "aqi": 61,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-11",
@@ -3792,7 +4480,9 @@
     "aqi": 110,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-12",
@@ -3803,7 +4493,9 @@
     "aqi": 37,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-13",
@@ -3814,7 +4506,9 @@
     "aqi": 39,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-14",
@@ -3825,7 +4519,9 @@
     "aqi": 65,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-15",
@@ -3836,7 +4532,9 @@
     "aqi": 62,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-16",
@@ -3847,7 +4545,9 @@
     "aqi": 72,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-17",
@@ -3858,7 +4558,9 @@
     "aqi": 104,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-18",
@@ -3869,7 +4571,9 @@
     "aqi": 93,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-19",
@@ -3880,7 +4584,9 @@
     "aqi": 92,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-20",
@@ -3891,7 +4597,9 @@
     "aqi": 118,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-21",
@@ -3902,7 +4610,9 @@
     "aqi": 37,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-22",
@@ -3913,7 +4623,9 @@
     "aqi": 28,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-23",
@@ -3924,7 +4636,9 @@
     "aqi": 34,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-24",
@@ -3935,7 +4649,9 @@
     "aqi": 80,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-25",
@@ -3946,7 +4662,9 @@
     "aqi": 73,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-26",
@@ -3957,7 +4675,9 @@
     "aqi": 33,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-27",
@@ -3968,7 +4688,9 @@
     "aqi": 54,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-28",
@@ -3979,7 +4701,9 @@
     "aqi": 70,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-29",
@@ -3990,7 +4714,9 @@
     "aqi": 83,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-30",
@@ -4001,7 +4727,9 @@
     "aqi": 110,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2025-12-31",
@@ -4012,7 +4740,9 @@
     "aqi": 31,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": true
   },
   {
     "date": "2026-01-01",
@@ -4023,7 +4753,9 @@
     "aqi": 25,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2026-01-02",
@@ -4034,7 +4766,9 @@
     "aqi": 54,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2026-01-03",
@@ -4045,7 +4779,9 @@
     "aqi": 53,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-04",
@@ -4056,7 +4792,9 @@
     "aqi": 94,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-05",
@@ -4067,7 +4805,9 @@
     "aqi": 124,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-06",
@@ -4078,7 +4818,9 @@
     "aqi": 114,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-07",
@@ -4089,7 +4831,9 @@
     "aqi": 46,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-08",
@@ -4100,7 +4844,9 @@
     "aqi": 73,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-09",
@@ -4111,7 +4857,9 @@
     "aqi": 69,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-10",
@@ -4122,7 +4870,9 @@
     "aqi": 87,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-11",
@@ -4133,7 +4883,9 @@
     "aqi": 59,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-12",
@@ -4144,7 +4896,9 @@
     "aqi": 63,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-13",
@@ -4155,7 +4909,9 @@
     "aqi": 73,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-14",
@@ -4166,7 +4922,9 @@
     "aqi": 72,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-15",
@@ -4177,7 +4935,9 @@
     "aqi": 80,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-16",
@@ -4188,7 +4948,9 @@
     "aqi": 110,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-17",
@@ -4199,7 +4961,9 @@
     "aqi": 120,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-18",
@@ -4210,7 +4974,9 @@
     "aqi": 65,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-19",
@@ -4221,7 +4987,9 @@
     "aqi": 23,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": true
+    "is_snow": true,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-21",
@@ -4232,7 +5000,9 @@
     "aqi": 48,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-22",
@@ -4243,7 +5013,9 @@
     "aqi": 42,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-23",
@@ -4254,7 +5026,9 @@
     "aqi": 63,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-24",
@@ -4265,7 +5039,9 @@
     "aqi": 87,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-25",
@@ -4276,7 +5052,9 @@
     "aqi": 94,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-26",
@@ -4287,7 +5065,9 @@
     "aqi": 23,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-27",
@@ -4298,7 +5078,9 @@
     "aqi": 61,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-28",
@@ -4309,7 +5091,9 @@
     "aqi": 63,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-29",
@@ -4320,7 +5104,9 @@
     "aqi": 57,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-30",
@@ -4331,7 +5117,9 @@
     "aqi": 29,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-31",
@@ -4342,7 +5130,9 @@
     "aqi": 29,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-01",
@@ -4353,7 +5143,9 @@
     "aqi": 53,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-02",
@@ -4364,7 +5156,9 @@
     "aqi": 68,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-03",
@@ -4375,7 +5169,9 @@
     "aqi": 92,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-04",
@@ -4386,7 +5182,9 @@
     "aqi": 79,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-05",
@@ -4397,7 +5195,9 @@
     "aqi": 82,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-06",
@@ -4408,7 +5208,9 @@
     "aqi": 68,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-07",
@@ -4419,7 +5221,9 @@
     "aqi": 39,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-08",
@@ -4430,7 +5234,9 @@
     "aqi": 47,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-09",
@@ -4441,7 +5247,9 @@
     "aqi": 36,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-10",
@@ -4452,7 +5260,9 @@
     "aqi": 51,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-11",
@@ -4463,7 +5273,9 @@
     "aqi": 82,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-12",
@@ -4474,7 +5286,9 @@
     "aqi": 90,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-13",
@@ -4485,7 +5299,9 @@
     "aqi": 78,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-14",
@@ -4496,7 +5312,9 @@
     "aqi": 65,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": true
   },
   {
     "date": "2026-02-15",
@@ -4507,7 +5325,9 @@
     "aqi": 71,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2026-02-16",
@@ -4518,7 +5338,9 @@
     "aqi": 39,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2026-02-17",
@@ -4529,7 +5351,9 @@
     "aqi": 58,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2026-02-18",
@@ -4540,7 +5364,9 @@
     "aqi": 69,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2026-02-19",
@@ -4551,7 +5377,9 @@
     "aqi": 70,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2026-02-20",
@@ -4562,7 +5390,9 @@
     "aqi": 55,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2026-02-21",
@@ -4573,7 +5403,9 @@
     "aqi": 43,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2026-02-22",
@@ -4584,7 +5416,9 @@
     "aqi": 117,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": true
   },
   {
     "date": "2026-02-23",
@@ -4595,7 +5429,9 @@
     "aqi": 84,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": true,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-24",
@@ -4606,7 +5442,9 @@
     "aqi": 30,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-25",
@@ -4617,7 +5455,9 @@
     "aqi": 51,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-26",
@@ -4628,7 +5468,9 @@
     "aqi": 30,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-27",
@@ -4639,7 +5481,9 @@
     "aqi": 21,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-28",
@@ -4650,7 +5494,9 @@
     "aqi": 41,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-03-01",
@@ -4661,7 +5507,9 @@
     "aqi": 35,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-03-02",
@@ -4672,7 +5520,9 @@
     "aqi": 29,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-03-03",
@@ -4683,7 +5533,9 @@
     "aqi": 61,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-03-04",
@@ -4694,7 +5546,9 @@
     "aqi": 48,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-03-05",
@@ -4705,7 +5559,9 @@
     "aqi": 52,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-03-06",
@@ -4716,7 +5572,9 @@
     "aqi": 66,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-03-07",
@@ -4727,7 +5585,9 @@
     "aqi": 50,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-03-08",
@@ -4738,7 +5598,9 @@
     "aqi": 46,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-03-09",
@@ -4749,7 +5611,9 @@
     "aqi": 76,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-03-10",
@@ -4760,7 +5624,9 @@
     "aqi": 56,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-03-11",
@@ -4771,7 +5637,9 @@
     "aqi": 74,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-03-12",
@@ -4782,7 +5650,9 @@
     "aqi": 74,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-03-13",
@@ -4793,7 +5663,9 @@
     "aqi": 71,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-03-14",
@@ -4804,7 +5676,9 @@
     "aqi": 81,
     "is_rainy": false,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-03-15",
@@ -4815,7 +5689,9 @@
     "aqi": 58,
     "is_rainy": true,
     "is_heavy_rain": false,
-    "is_snow": false
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-03-16",
@@ -4827,8 +5703,10 @@
     "wind": "未知",
     "aqi": 0,
     "is_rainy": true,
-    "is_heavy_rain": false,
-    "is_snow": false
+    "is_heavy_rain": true,
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   },
   {
     "date": "2026-03-17",
@@ -4840,7 +5718,9 @@
     "wind": "未知",
     "aqi": 0,
     "is_rainy": true,
-    "is_heavy_rain": false,
-    "is_snow": false
+    "is_heavy_rain": true,
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   }
 ]
