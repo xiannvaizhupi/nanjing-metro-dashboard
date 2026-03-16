@@ -4651,5 +4651,170 @@
     "is_rainy": true,
     "is_heavy_rain": false,
     "is_snow": false
+  },
+  {
+    "date": "2026-03-01",
+    "temp_max": 12,
+    "temp_min": 9,
+    "weather": "中雨",
+    "wind": "东北风3级",
+    "aqi": 35,
+    "is_rainy": true,
+    "is_heavy_rain": false,
+    "is_snow": false
+  },
+  {
+    "date": "2026-03-02",
+    "temp_max": 9,
+    "temp_min": 4,
+    "weather": "雾~阴",
+    "wind": "北风3级",
+    "aqi": 29,
+    "is_rainy": false,
+    "is_heavy_rain": false,
+    "is_snow": false
+  },
+  {
+    "date": "2026-03-03",
+    "temp_max": 8,
+    "temp_min": 5,
+    "weather": "多云~阴",
+    "wind": "东北风2级",
+    "aqi": 61,
+    "is_rainy": false,
+    "is_heavy_rain": false,
+    "is_snow": false
+  },
+  {
+    "date": "2026-03-04",
+    "temp_max": 9,
+    "temp_min": 6,
+    "weather": "多云~阴",
+    "wind": "东北风2级",
+    "aqi": 48,
+    "is_rainy": false,
+    "is_heavy_rain": false,
+    "is_snow": false
+  },
+  {
+    "date": "2026-03-05",
+    "temp_max": 13,
+    "temp_min": 5,
+    "weather": "阴~多云",
+    "wind": "东北风2级",
+    "aqi": 52,
+    "is_rainy": false,
+    "is_heavy_rain": false,
+    "is_snow": false
+  },
+  {
+    "date": "2026-03-06",
+    "temp_max": 11,
+    "temp_min": 3,
+    "weather": "雾~阴",
+    "wind": "东北风2级",
+    "aqi": 66,
+    "is_rainy": false,
+    "is_heavy_rain": false,
+    "is_snow": false
+  },
+  {
+    "date": "2026-03-07",
+    "temp_max": 11,
+    "temp_min": 4,
+    "weather": "多云",
+    "wind": "东北风2级",
+    "aqi": 50,
+    "is_rainy": false,
+    "is_heavy_rain": false,
+    "is_snow": false
+  },
+  {
+    "date": "2026-03-08",
+    "temp_max": 13,
+    "temp_min": 4,
+    "weather": "多云~阴",
+    "wind": "东风2级",
+    "aqi": 46,
+    "is_rainy": false,
+    "is_heavy_rain": false,
+    "is_snow": false
+  },
+  {
+    "date": "2026-03-09",
+    "temp_max": 14,
+    "temp_min": 1,
+    "weather": "多云~晴",
+    "wind": "东北风2级",
+    "aqi": 76,
+    "is_rainy": false,
+    "is_heavy_rain": false,
+    "is_snow": false
+  },
+  {
+    "date": "2026-03-10",
+    "temp_max": 15,
+    "temp_min": 4,
+    "weather": "晴",
+    "wind": "东南风2级",
+    "aqi": 56,
+    "is_rainy": false,
+    "is_heavy_rain": false,
+    "is_snow": false
+  },
+  {
+    "date": "2026-03-11",
+    "temp_max": 17,
+    "temp_min": 3,
+    "weather": "小雨~多云",
+    "wind": "东北风2级",
+    "aqi": 74,
+    "is_rainy": true,
+    "is_heavy_rain": false,
+    "is_snow": false
+  },
+  {
+    "date": "2026-03-12",
+    "temp_max": 16,
+    "temp_min": 2,
+    "weather": "多云~晴",
+    "wind": "东北风2级",
+    "aqi": 74,
+    "is_rainy": false,
+    "is_heavy_rain": false,
+    "is_snow": false
+  },
+  {
+    "date": "2026-03-13",
+    "temp_max": 16,
+    "temp_min": 6,
+    "weather": "晴",
+    "wind": "东南风2级",
+    "aqi": 71,
+    "is_rainy": false,
+    "is_heavy_rain": false,
+    "is_snow": false
+  },
+  {
+    "date": "2026-03-14",
+    "temp_max": 22,
+    "temp_min": 9,
+    "weather": "多云~阴",
+    "wind": "东南风2级",
+    "aqi": 81,
+    "is_rainy": false,
+    "is_heavy_rain": false,
+    "is_snow": false
+  },
+  {
+    "date": "2026-03-15",
+    "temp_max": 14,
+    "temp_min": 8,
+    "weather": "小雨",
+    "wind": "东北风2级",
+    "aqi": 58,
+    "is_rainy": true,
+    "is_heavy_rain": false,
+    "is_snow": false
   }
 ]
