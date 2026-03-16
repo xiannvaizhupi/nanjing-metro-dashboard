@@ -323,7 +323,7 @@ function selectDate(data, options = {}) {
     // 更新变化率（如果可能）
     if (metroData.length > 1) {
         const currentIndex = metroData.findIndex(item => item.date === data.date);
-        const previous = currentIndex >= 0 ? metroData[currentIndex + 1] : null;
+        const previous = currentIndex >= 0 ? metroData[currentIndex - 1] : null;
         updateChangeRate(data, previous, labelText);
     }
 
