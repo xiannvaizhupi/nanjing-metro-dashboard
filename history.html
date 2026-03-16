@@ -181,7 +181,7 @@
         // 绑定筛选和排序事件
         function applyDefaultSort() {
             // 默认按日期倒序
-            filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
+            filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
         }
 
         function bindFilters() {
@@ -214,7 +214,7 @@
                     filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
                     break;
                 case 'desc':
-                    filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
                     break;
                 case 'flow_asc':
                     filteredData.sort((a, b) => a.total - b.total);
