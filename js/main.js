@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const fetchedAt = data.metadata.fetched_at || '';
         lastUpdated = fetchedAt || data.metadata.last_updated || '';
         const displayDate = lastUpdated.includes(' ') ? lastUpdated.split(' ')[0] : lastUpdated;
-        updateLastUpdated(displayDate || (metroData[0] ? metroData[0].date : '--'));
+        updateLastUpdated(displayDate || (metroData[metroData.length - 1] ? metroData[metroData.length - 1].date : '--'));
 
         updateDashboard();
         initCharts();
@@ -72,7 +72,7 @@ function updateDashboard() {
     if (!metroData || metroData.length === 0) return;
     
     // 最新数据
-    const latest = metroData[0];
+    const latest = metroData[metroData.length - 1];
     
     // 设置默认日期
     selectDate(latest, { labelText: '较昨日' });
@@ -128,11 +128,11 @@ function updateTrendChart() {
     let filteredData = metroData;
 
     if (currentTrendRange === 'week') {
-        filteredData = metroData.slice(0, 7);
+        filteredData = metroData.slice(-7);
     } else if (currentTrendRange === 'month') {
-        filteredData = metroData.slice(0, 30);
+        filteredData = metroData.slice(-30);
     } else if (currentTrendRange === 'year') {
-        filteredData = metroData.slice(0, 365);
+        filteredData = metroData.slice(-365);
     }
 
     const dates = filteredData.map(d => d.date.slice(5));
@@ -226,7 +226,7 @@ function initPieChart() {
 
 function updatePieChart() {
     if (!metroData || metroData.length === 0 || !pieChart) return;
-    const latest = selectedDateData || metroData[0];
+    const latest = selectedDateData || metroData[metroData.length - 1];
     const pieData = Object.entries(latest.lines)
         .map(([lineId, value]) => {
             const lineInfo = linesInfo.find(l => l.id === lineId);
@@ -335,7 +335,7 @@ function selectDate(data, options = {}) {
 // 渲染线路表格
 function renderLinesTable() {
     const tbody = document.getElementById('linesTable');
-    const data = selectedDateData || metroData[0];
+    const data = selectedDateData || metroData[metroData.length - 1];
     const total = data.total;
 
     const sortedLines = Object.entries(data.lines)
