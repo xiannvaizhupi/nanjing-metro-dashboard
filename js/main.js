@@ -1,6 +1,11 @@
 // 主JavaScript文件
 let metroData = null;
 let linesInfo = null;
+let weatherData = null;
+let weatherMap = null;
+let regressionModel = null;
+let holidaySet = null;
+let holidayEveSet = null;
 let trendChart = null;
 let pieChart = null;
 let currentTrendRange = 'all';
@@ -19,10 +24,20 @@ function toggleMobileMenu() {
 // 加载数据
 document.addEventListener('DOMContentLoaded', async function() {
     try {
-        const response = await fetch('data/metro_data.json');
-        const data = await response.json();
+        const [metroResp, weatherResp] = await Promise.all([
+            fetch('data/metro_data.json'),
+            fetch('data/weather.json')
+        ]);
+        const data = await metroResp.json();
+        weatherData = await weatherResp.json();
+
         metroData = data.daily_data;
         linesInfo = data.metadata.lines;
+        weatherMap = new Map(weatherData.map(item => [item.date, item]));
+        const holidaySets = buildHolidaySets(metroData, weatherMap);
+        holidaySet = holidaySets.holidaySet;
+        holidayEveSet = holidaySets.holidayEveSet;
+        regressionModel = trainRidgeModel(metroData, weatherMap);
 
         const fetchedAt = data.metadata.fetched_at || '';
         lastUpdated = fetchedAt || data.metadata.last_updated || '';
@@ -67,85 +82,380 @@ function updateChangeRate(current, previous, labelText) {
     }
 }
 
-// 获取天气预报
-async function getForecast() {
-    try {
-        const resp = await fetch('https://api.open-meteo.com/v1/forecast?latitude=32.06&longitude=118.79&daily=weathercode,precipitation_sum&timezone=Asia/Shanghai&forecast_days=2');
-        const data = await resp.json();
-        // 明天(索引1)的天气
-        const tomorrowCode = data.daily.weathercode[1];
-        const tomorrowPrecip = data.daily.precipitation_sum[1];
-        
-        // 判断天气类型 (WMO代码)
-        // 0:晴, 1-3:多云, 45-48:雾, 51-67:雨, 71-77:雪, 80-82:阵雨, 95+:雷暴
-        if (tomorrowCode >= 71) return { type: 'snow', factor: 0.82 };  // 雪天 -18%
-        if (tomorrowCode >= 61) return { type: 'heavy_rain', factor: 0.90 };  // 大雨 -10%
-        if (tomorrowCode >= 51) return { type: 'rain', factor: 0.93 };  // 雨 -7%
-        if (tomorrowCode >= 45) return { type: 'fog', factor: 0.98 };  // 雾 -2%
-        return { type: 'clear', factor: 1.0 };  // 晴天
-    } catch(e) {
-        return { type: 'unknown', factor: 1.0 };
-    }
+function formatLocalDate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
 }
 
-// 预测明天客流量
-async function predictToday() {
-    if (!metroData || metroData.length === 0) return null;
-    
-    const today = new Date();
-    const dayOfWeek = today.getDay();
-    const forecast = await getForecast();
-    
-    // 基准: 最近30天平均 (40%)
-    let sum30 = 0, count30 = 0;
-    for (let i = 1; i <= 30; i++) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const ds = d.toISOString().split('T')[0];
-        const found = metroData.find(x => x.date === ds);
-        if (found) { sum30 += found.total; count30++; }
+function addDays(dateStr, offset) {
+    const d = new Date(`${dateStr}T00:00:00`);
+    d.setDate(d.getDate() + offset);
+    return formatLocalDate(d);
+}
+
+function buildHolidaySets(dailyData, weatherMapRef) {
+    const holidays = new Set();
+    const holidayEves = new Set();
+    const holidayKeywords = ['节', '假', '假期', '春节', '国庆', '元旦', '清明', '劳动', '端午', '中秋'];
+
+    if (Array.isArray(dailyData)) {
+        dailyData.forEach(item => {
+            if (!item || !item.date) return;
+            const note = String(item.note || '');
+            if (holidayKeywords.some(keyword => note.includes(keyword))) {
+                holidays.add(item.date);
+            }
+        });
     }
-    const base = count30 > 0 ? sum30 / count30 : 0;
-    
-    // 星期因素 (20%)
-    let weekdaySum = 0, weekdayCount = 0;
-    metroData.forEach(d => {
-        const dDate = new Date(d.date);
-        if (dDate.getDay() === dayOfWeek) { weekdaySum += d.total; weekdayCount++; }
-    });
-    const weekdayFactor = weekdayCount > 0 ? (weekdaySum / weekdayCount) / base : 1.0;
-    
-    // 月份因素 (10%)
-    const month = today.getMonth() + 1;
-    const monthFactors = {1:0.90, 2:0.88, 3:1.00, 4:1.02, 5:0.98, 6:0.95, 7:0.93, 8:1.02, 9:0.98, 10:1.03, 11:1.06, 12:1.02};
-    const monthFactor = monthFactors[month] || 1.0;
-    
-    // 天气因素 (15%)
-    const weatherFactor = forecast.factor;
-    
-    // 趋势因素 (15%)
-    let sum7 = 0, count7 = 0;
+
+    if (weatherMapRef) {
+        for (const [date, weather] of weatherMapRef.entries()) {
+            if (!weather) continue;
+            if (weather.is_holiday) holidays.add(date);
+        }
+    }
+
+    for (const date of holidays) {
+        const prev = addDays(date, -1);
+        if (!holidays.has(prev)) {
+            holidayEves.add(prev);
+        }
+    }
+
+    return { holidaySet: holidays, holidayEveSet: holidayEves };
+}
+
+function getHolidayFlags(dateStr) {
+    if (holidaySet && holidaySet.has(dateStr)) {
+        return { isHoliday: true, isHolidayEve: false };
+    }
+    return {
+        isHoliday: holidaySet ? holidaySet.has(dateStr) : false,
+        isHolidayEve: holidayEveSet ? holidayEveSet.has(dateStr) : false
+    };
+}
+
+function dot(a, b) {
+    let sum = 0;
+    for (let i = 0; i < a.length; i++) sum += a[i] * b[i];
+    return sum;
+}
+
+function transpose(matrix) {
+    const rows = matrix.length;
+    const cols = matrix[0].length;
+    const result = Array.from({ length: cols }, () => Array(rows).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            result[j][i] = matrix[i][j];
+        }
+    }
+    return result;
+}
+
+function matMul(A, B) {
+    const rows = A.length;
+    const cols = B[0].length;
+    const inner = B.length;
+    const result = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let k = 0; k < inner; k++) {
+            const aik = A[i][k];
+            if (aik === 0) continue;
+            for (let j = 0; j < cols; j++) {
+                result[i][j] += aik * B[k][j];
+            }
+        }
+    }
+    return result;
+}
+
+function matVecMul(A, v) {
+    const rows = A.length;
+    const cols = A[0].length;
+    const result = Array(rows).fill(0);
+    for (let i = 0; i < rows; i++) {
+        let sum = 0;
+        for (let j = 0; j < cols; j++) sum += A[i][j] * v[j];
+        result[i] = sum;
+    }
+    return result;
+}
+
+function invert(matrix) {
+    const n = matrix.length;
+    const A = matrix.map(row => row.slice());
+    const I = Array.from({ length: n }, (_, i) =>
+        Array.from({ length: n }, (_, j) => (i === j ? 1 : 0))
+    );
+
+    for (let i = 0; i < n; i++) {
+        let pivot = A[i][i];
+        if (Math.abs(pivot) < 1e-10) {
+            let swapRow = -1;
+            for (let r = i + 1; r < n; r++) {
+                if (Math.abs(A[r][i]) > 1e-10) {
+                    swapRow = r;
+                    break;
+                }
+            }
+            if (swapRow === -1) return null;
+            [A[i], A[swapRow]] = [A[swapRow], A[i]];
+            [I[i], I[swapRow]] = [I[swapRow], I[i]];
+            pivot = A[i][i];
+        }
+
+        const invPivot = 1 / pivot;
+        for (let j = 0; j < n; j++) {
+            A[i][j] *= invPivot;
+            I[i][j] *= invPivot;
+        }
+        for (let r = 0; r < n; r++) {
+            if (r === i) continue;
+            const factor = A[r][i];
+            if (factor === 0) continue;
+            for (let c = 0; c < n; c++) {
+                A[r][c] -= factor * A[i][c];
+                I[r][c] -= factor * I[i][c];
+            }
+        }
+    }
+    return I;
+}
+
+function standardizeFeatures(features, means, stds) {
+    const out = features.slice();
+    for (let i = 1; i < features.length; i++) {
+        const std = stds[i] || 1;
+        out[i] = (features[i] - means[i]) / std;
+    }
+    return out;
+}
+
+function buildFeatureVector(dateStr, isWeekend, isHoliday, isHolidayEve, weather, lag1, lag7, rolling7) {
+    const date = new Date(`${dateStr}T00:00:00`);
+    const dow = date.getDay();
+    const month = date.getMonth() + 1;
+    const dowAngle = 2 * Math.PI * dow / 7;
+    const monthAngle = 2 * Math.PI * (month - 1) / 12;
+    return [
+        1,
+        isWeekend ? 1 : 0,
+        isHoliday ? 1 : 0,
+        isHolidayEve ? 1 : 0,
+        Math.sin(dowAngle),
+        Math.cos(dowAngle),
+        Math.sin(monthAngle),
+        Math.cos(monthAngle),
+        weather.temp_max ?? 0,
+        weather.temp_min ?? 0,
+        weather.is_rainy ? 1 : 0,
+        weather.is_heavy_rain ? 1 : 0,
+        weather.is_snow ? 1 : 0,
+        lag1,
+        lag7,
+        rolling7
+    ];
+}
+
+function trainRidgeModelForFilter(dailyData, weatherMapRef, filterFn) {
+    if (!dailyData || dailyData.length < 30 || !weatherMapRef) return null;
+
+    const totalsByDate = new Map(dailyData.map(item => [item.date, item.total]));
+    const X = [];
+    const y = [];
+    const yForStats = [];
+
+    for (const item of dailyData) {
+        if (filterFn && !filterFn(item)) continue;
+        const weather = weatherMapRef.get(item.date);
+        if (!weather) continue;
+        const lag1 = totalsByDate.get(addDays(item.date, -1));
+        const lag7 = totalsByDate.get(addDays(item.date, -7));
+        if (lag1 == null || lag7 == null) continue;
+
+        let rollingSum = 0;
+        let rollingCount = 0;
+        for (let i = 1; i <= 7; i++) {
+            const v = totalsByDate.get(addDays(item.date, -i));
+            if (v != null) {
+                rollingSum += v;
+                rollingCount++;
+            }
+        }
+        if (rollingCount === 0) continue;
+        const rolling7 = rollingSum / rollingCount;
+        const isWeekend = item.is_weekend != null ? item.is_weekend : ([0, 6].includes(new Date(`${item.date}T00:00:00`).getDay()));
+        const holidayFlags = getHolidayFlags(item.date);
+        const features = buildFeatureVector(
+            item.date,
+            isWeekend,
+            holidayFlags.isHoliday,
+            holidayFlags.isHolidayEve,
+            weather,
+            lag1,
+            lag7,
+            rolling7
+        );
+        X.push(features);
+        y.push(item.total);
+        yForStats.push(item.total);
+    }
+
+    if (X.length < 30) return null;
+
+    const m = X[0].length;
+    const means = Array(m).fill(0);
+    const stds = Array(m).fill(1);
+
+    for (let j = 1; j < m; j++) {
+        let sum = 0;
+        for (let i = 0; i < X.length; i++) sum += X[i][j];
+        means[j] = sum / X.length;
+    }
+
+    for (let j = 1; j < m; j++) {
+        let variance = 0;
+        for (let i = 0; i < X.length; i++) {
+            const diff = X[i][j] - means[j];
+            variance += diff * diff;
+        }
+        stds[j] = Math.sqrt(variance / X.length) || 1;
+    }
+
+    const Xstd = X.map(row => standardizeFeatures(row, means, stds));
+    const Xt = transpose(Xstd);
+    const XtX = matMul(Xt, Xstd);
+
+    const lambda = 0.5;
+    for (let i = 0; i < m; i++) {
+        XtX[i][i] += lambda;
+    }
+    const Xty = matVecMul(Xt, y);
+    const inv = invert(XtX);
+    if (!inv) return null;
+    const weights = matVecMul(inv, Xty);
+
+    const floor = computeQuantile(yForStats, 0.10);
+    return { weights, means, stds, floor };
+}
+
+function trainRidgeModel(dailyData, weatherMapRef) {
+    if (!dailyData || !weatherMapRef) return null;
+
+    const weekdayModel = trainRidgeModelForFilter(
+        dailyData,
+        weatherMapRef,
+        item => {
+            const d = new Date(`${item.date}T00:00:00`);
+            return ![0, 6].includes(d.getDay());
+        }
+    );
+    const weekendModel = trainRidgeModelForFilter(
+        dailyData,
+        weatherMapRef,
+        item => {
+            const d = new Date(`${item.date}T00:00:00`);
+            return [0, 6].includes(d.getDay());
+        }
+    );
+
+    if (!weekdayModel && !weekendModel) return null;
+    return { weekdayModel, weekendModel };
+}
+
+function computeQuantile(values, q) {
+    if (!values || values.length === 0) return 0;
+    const sorted = values.slice().sort((a, b) => a - b);
+    const pos = (sorted.length - 1) * q;
+    const base = Math.floor(pos);
+    const rest = pos - base;
+    if (sorted[base + 1] !== undefined) {
+        return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+    }
+    return sorted[base];
+}
+
+function getWeatherFallback(targetDateStr) {
+    if (!weatherMap || weatherMap.size === 0) return null;
+    let sumMax = 0;
+    let sumMin = 0;
+    let count = 0;
+    let rainy = 0;
+    let heavyRain = 0;
+    let snow = 0;
     for (let i = 1; i <= 7; i++) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const ds = d.toISOString().split('T')[0];
-        const found = metroData.find(x => x.date === ds);
-        if (found) { sum7 += found.total; count7++; }
+        const d = addDays(targetDateStr, -i);
+        const w = weatherMap.get(d);
+        if (!w) continue;
+        sumMax += w.temp_max ?? 0;
+        sumMin += w.temp_min ?? 0;
+        rainy += w.is_rainy ? 1 : 0;
+        heavyRain += w.is_heavy_rain ? 1 : 0;
+        snow += w.is_snow ? 1 : 0;
+        count++;
     }
-    const avg7 = count7 > 0 ? sum7 / count7 : base;
-    const trendFactor = avg7 / base;
-    
-    // 计算: 基准40% + 星期20% + 月份10% + 天气15% + 趋势15%
-    let prediction = base * 0.40 + base * weekdayFactor * 0.20 + base * monthFactor * 0.10 + base * weatherFactor * 0.15 + base * trendFactor * 0.15;
-    
-    // 显示天气
-    const weatherEl = document.getElementById('predictedChange');
-    if (weatherEl) {
-        const weatherText = { snow: '❄️ 雪', heavy_rain: '🌧️ 大雨', rain: '🌧️ 小雨', fog: '🌫️ 雾', clear: '☀️ 晴', unknown: '' };
-        weatherEl.textContent = '今日' + (weatherText[forecast.type] || '');
+    if (count === 0) return null;
+    return {
+        date: targetDateStr,
+        temp_max: sumMax / count,
+        temp_min: sumMin / count,
+        is_rainy: rainy / count >= 0.5,
+        is_heavy_rain: heavyRain / count >= 0.5,
+        is_snow: snow / count >= 0.5,
+        source: 'avg7'
+    };
+}
+
+function getWeatherForDate(dateStr) {
+    const exact = weatherMap ? weatherMap.get(dateStr) : null;
+    if (exact) return { ...exact, source: 'actual' };
+    const fallback = getWeatherFallback(dateStr);
+    if (fallback) return fallback;
+    return null;
+}
+
+function predictForDate(dateStr, totalsByDate) {
+    if (!regressionModel) return null;
+    const weather = getWeatherForDate(dateStr);
+    if (!weather) return null;
+    const lag1 = totalsByDate.get(addDays(dateStr, -1));
+    const lag7 = totalsByDate.get(addDays(dateStr, -7));
+    if (lag1 == null || lag7 == null) return null;
+
+    let rollingSum = 0;
+    let rollingCount = 0;
+    for (let i = 1; i <= 7; i++) {
+        const v = totalsByDate.get(addDays(dateStr, -i));
+        if (v != null) {
+            rollingSum += v;
+            rollingCount++;
+        }
     }
-    
-    return prediction > 0 ? prediction : null;
+    if (rollingCount === 0) return null;
+    const rolling7 = rollingSum / rollingCount;
+
+    const dateObj = new Date(`${dateStr}T00:00:00`);
+    const isWeekend = [0, 6].includes(dateObj.getDay());
+    const model = isWeekend ? regressionModel.weekendModel : regressionModel.weekdayModel;
+    if (!model) return null;
+    const holidayFlags = getHolidayFlags(dateStr);
+    const features = buildFeatureVector(
+        dateStr,
+        isWeekend,
+        holidayFlags.isHoliday,
+        holidayFlags.isHolidayEve,
+        weather,
+        lag1,
+        lag7,
+        rolling7
+    );
+    const standardized = standardizeFeatures(features, model.means, model.stds);
+    const raw = dot(model.weights, standardized);
+    const floored = Math.max(raw, model.floor || 0);
+    return { value: Math.max(floored, 0), weatherSource: weather.source };
 }
 
 async function updateDashboard() {
@@ -158,11 +468,7 @@ async function updateDashboard() {
     selectDate(latest, { labelText: '较昨日' });
     
     // 显示预测
-        const predicted = await predictToday();
-        const predEl = document.getElementById('predictedTotal');
-        if (predEl && predicted) {
-            predEl.textContent = predicted.toFixed(1) + '万';
-        }
+    updatePredictions();
         
         // 获取当前月份数据
         const currentMonth = latest.date.slice(0, 7); // "2026-03"
@@ -184,6 +490,69 @@ async function updateDashboard() {
     // 最后更新
     const displayDate = lastUpdated && lastUpdated.includes(' ') ? lastUpdated.split(' ')[0] : lastUpdated;
     updateLastUpdated(displayDate || latest.date);
+}
+
+function updatePredictions() {
+    if (!metroData || metroData.length === 0) return;
+    if (!regressionModel) {
+        const todayEl = document.getElementById('predictedTotal');
+        const todayNoteEl = document.getElementById('predictedChange');
+        const tomorrowEl = document.getElementById('predictedTomorrowTotal');
+        const tomorrowNoteEl = document.getElementById('predictedTomorrowNote');
+        if (todayEl) todayEl.textContent = '--';
+        if (todayNoteEl) todayNoteEl.textContent = '模型训练失败';
+        if (tomorrowEl) tomorrowEl.textContent = '--';
+        if (tomorrowNoteEl) tomorrowNoteEl.textContent = '模型训练失败';
+        return;
+    }
+    const totalsByDate = new Map(metroData.map(item => [item.date, item.total]));
+
+    const todayStr = formatLocalDate(new Date());
+    const tomorrowStr = addDays(todayStr, 1);
+    const hasActualToday = totalsByDate.has(todayStr);
+
+    const todayResult = predictForDate(todayStr, totalsByDate);
+    if (todayResult && !hasActualToday) {
+        totalsByDate.set(todayStr, todayResult.value);
+    }
+    const tomorrowResult = predictForDate(tomorrowStr, totalsByDate);
+
+    const todayEl = document.getElementById('predictedTotal');
+    const todayNoteEl = document.getElementById('predictedChange');
+    if (todayEl) {
+        todayEl.textContent = todayResult ? todayResult.value.toFixed(1) + '万' : '--';
+    }
+    if (todayNoteEl) {
+        const note = [];
+        note.push(`预测日期 ${todayStr}`);
+        if (todayResult && todayResult.weatherSource === 'avg7') {
+            note.push('天气缺失，使用近7日均值');
+        }
+        if (hasActualToday) {
+            note.push('今日已有实际数据');
+        }
+        if (!todayResult) {
+            note.push('数据不足，无法预测');
+        }
+        todayNoteEl.textContent = note.join(' · ');
+    }
+
+    const tomorrowEl = document.getElementById('predictedTomorrowTotal');
+    const tomorrowNoteEl = document.getElementById('predictedTomorrowNote');
+    if (tomorrowEl) {
+        tomorrowEl.textContent = tomorrowResult ? tomorrowResult.value.toFixed(1) + '万' : '--';
+    }
+    if (tomorrowNoteEl) {
+        const note = [];
+        note.push(`预测日期 ${tomorrowStr}`);
+        if (tomorrowResult && tomorrowResult.weatherSource === 'avg7') {
+            note.push('天气缺失，使用近7日均值');
+        }
+        if (!tomorrowResult) {
+            note.push('数据不足，无法预测');
+        }
+        tomorrowNoteEl.textContent = note.join(' · ');
+    }
 }
 
 // 初始化图表

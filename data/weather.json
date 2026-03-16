@@ -1219,7 +1219,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-05",
@@ -1232,7 +1232,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2025-04-06",
@@ -1570,7 +1570,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-02",
@@ -1583,7 +1583,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-03",
@@ -1596,7 +1596,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-04",
@@ -1609,7 +1609,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2025-05-05",
@@ -1960,7 +1960,7 @@
     "is_heavy_rain": true,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-01",
@@ -1973,7 +1973,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2025-06-02",
@@ -3559,7 +3559,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-02",
@@ -3572,7 +3572,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-03",
@@ -3585,7 +3585,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-04",
@@ -3598,7 +3598,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-05",
@@ -3611,7 +3611,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-06",
@@ -3624,7 +3624,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-07",
@@ -3637,7 +3637,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2025-10-08",
@@ -4755,7 +4755,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-02",
@@ -4768,7 +4768,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2026-01-03",
@@ -5327,7 +5327,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-16",
@@ -5340,7 +5340,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-17",
@@ -5353,7 +5353,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-18",
@@ -5366,7 +5366,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-19",
@@ -5379,7 +5379,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-20",
@@ -5392,7 +5392,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-21",
@@ -5405,7 +5405,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-22",
@@ -5418,7 +5418,7 @@
     "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": true,
-    "is_holiday_eve": true
+    "is_holiday_eve": false
   },
   {
     "date": "2026-02-23",
