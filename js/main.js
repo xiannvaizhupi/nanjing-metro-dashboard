@@ -128,11 +128,11 @@ function updateTrendChart() {
     let filteredData = metroData;
 
     if (currentTrendRange === 'week') {
-        filteredData = metroData.slice(0, 7);
+        filteredData = metroData.slice(-7);
     } else if (currentTrendRange === 'month') {
-        filteredData = metroData.slice(0, 30);
+        filteredData = metroData.slice(-30);
     } else if (currentTrendRange === 'year') {
-        filteredData = metroData.slice(0, 365);
+        filteredData = metroData.slice(-365);
     }
 
     const dates = filteredData.map(d => d.date.slice(5));
