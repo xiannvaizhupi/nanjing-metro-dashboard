@@ -92,11 +92,9 @@ async function getForecast() {
 async function predictToday() {
     if (!metroData || metroData.length === 0) return null;
     
-    // 获取明天日期
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = tomorrow.toISOString().split('T')[0];
-    const dayOfWeek = tomorrow.getDay();
+    // 获取今天日期
+    const today = new Date();
+    const dayOfWeek = today.getDay();
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
     
     // 获取天气预报
@@ -136,7 +134,7 @@ async function predictToday() {
     const weekdayAvg = weekdayCount > 0 ? weekdaySum / weekdayCount : 0;
     
     // 4. 月份因素 (10%)
-    const month = tomorrow.getMonth() + 1;
+    const month = today.getMonth() + 1;
     const monthFactors = {1:0.90, 2:0.88, 3:1.00, 4:1.02, 5:0.98, 6:0.95, 7:0.93, 8:1.02, 9:0.98, 10:1.03, 11:1.06, 12:1.02};
     const monthFactor = monthFactors[month] || 1.0;
     
@@ -159,14 +157,14 @@ async function predictToday() {
     const weatherEl = document.getElementById('predictedChange');
     if (weatherEl) {
         const weatherText = { snow: '❄️ 雪天', heavy_rain: '🌧️ 大雨', rain: '🌧️ 小雨', fog: '🌫️ 雾', clear: '☀️ 晴天', unknown: '未知' };
-        weatherEl.textContent = '明天' + (weatherText[forecast.type] || '未知天气');
+        weatherEl.textContent = '今日' + (weatherText[forecast.type] || '未知天气');
     }
     
     return prediction > 0 ? prediction : null;
 }
 
 // 更新仪表板数据
-function updateDashboard() {
+async function updateDashboard() {
     if (!metroData || metroData.length === 0) return;
     
     // 最新数据
@@ -175,9 +173,16 @@ function updateDashboard() {
     // 设置默认日期
     selectDate(latest, { labelText: '较昨日' });
     
-    // 获取当前月份数据
-    const currentMonth = latest.date.slice(0, 7); // "2026-03"
-    const currentMonthData = metroData.filter(item => item.date.startsWith(currentMonth));
+    // 显示预测
+        const predicted = await predictToday();
+        const predEl = document.getElementById('predictedTotal');
+        if (predEl && predicted) {
+            predEl.textContent = predicted.toFixed(1) + '万';
+        }
+        
+        // 获取当前月份数据
+        const currentMonth = latest.date.slice(0, 7); // "2026-03"
+        const currentMonthData = metroData.filter(item => item.date.startsWith(currentMonth));
     
     // 本月最高
     if (currentMonthData.length > 0) {
