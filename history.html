@@ -109,7 +109,6 @@
                 renderTableHead();
                 renderTable();
                 applyDefaultSort();
-                applyDefaultSort();
                 bindFilters();
             } catch (error) {
                 console.error('加载数据失败:', error);
@@ -182,10 +181,8 @@
         // 绑定筛选和排序事件
         function applyDefaultSort() {
             // 默认按日期倒序
-            filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
-        }
-
-        function applyDefaultSort() {
+            filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
+        } {
             // 默认按日期倒序
             filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
         }
@@ -231,7 +228,6 @@
             }
             
             renderTable();
-                applyDefaultSort();
         }
 
         // 移动端菜单切换
