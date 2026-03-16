@@ -152,6 +152,10 @@
 
         // 渲染表格
         function renderTable() {
+            // 默认按日期倒序
+            if (!document.getElementById("sortOrder") || document.getElementById("sortOrder").value === "desc") {
+                filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
+            }
             const tbody = document.getElementById('tableBody');
             
             tbody.innerHTML = filteredData.map(item => {
