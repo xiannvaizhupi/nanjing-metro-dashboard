@@ -115,30 +115,11 @@ function initTrendChart() {
     trendChart.on('click', function(params) {
         if (params.componentType === 'series') {
             const clickedDate = params.name;
-            // 找到所有匹配的日期
-            const matches = metroData.filter(item => item.date.slice(5) === clickedDate);
-            
-            if (matches.length === 0) {
-                return;
-            } else if (matches.length === 1) {
-                // 只有一个匹配，直接选择
-                selectDate(matches[0]);
-            } else {
-                // 多个匹配，让用户选择
-                const years = matches.map(m => m.date.slice(0, 4));
-                const choice = confirm(`选择年份: 确定选择最新年份 ${Math.max(...years.map(Number))}，取消选择最早年份 ${Math.min(...years.map(Number))}`);
-                if (choice) {
-                    // 选择最新年份
-                    const latest = matches.reduce((a, b) => a.date > b.date ? a : b);
-                    selectDate(latest);
-                } else {
-                    // 选择最早年份
-                    const earliest = matches.reduce((a, b) => a.date < b.date ? a : b);
-                    selectDate(earliest);
-                }
+            const clickedData = [...metroData].reverse().find(item => item.date.slice(5) === clickedDate);
+            if (clickedData) {
+                selectDate(clickedData);
             }
         }
-    });
     });
 }
 
