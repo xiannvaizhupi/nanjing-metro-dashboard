@@ -115,7 +115,7 @@ function initTrendChart() {
     trendChart.on('click', function(params) {
         if (params.componentType === 'series') {
             const clickedDate = params.name;
-            const clickedData = metroData.find(item => item.date.slice(5) === clickedDate);
+            const clickedData = [...metroData].reverse().find(item => item.date.slice(5) === clickedDate);
             if (clickedData) {
                 selectDate(clickedData);
             }
