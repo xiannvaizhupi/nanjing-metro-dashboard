@@ -102,8 +102,8 @@
                 
                 // 设置默认日期范围
                 if (metroData.length > 0) {
-                    document.getElementById('startDate').value = metroData[metroData.length - 1].date;
-                    document.getElementById('endDate').value = metroData[0].date;
+                    document.getElementById('startDate').value = metroData[0].date;
+                    document.getElementById('endDate').value = metroData[metroData.length - 1].date;
                 }
                 
                 renderTableHead();
