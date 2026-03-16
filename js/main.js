@@ -67,26 +67,45 @@ function updateChangeRate(current, previous, labelText) {
     }
 }
 
-// 预测客流量
-function predictToday() {
+// 获取天气预报
+async function getForecast() {
+    try {
+        const resp = await fetch('https://api.open-meteo.com/v1/forecast?latitude=32.06&longitude=118.79&daily=weathercode,precipitation_sum&timezone=Asia/Shanghai&forecast_days=2');
+        const data = await resp.json();
+        // 明天(索引1)的天气
+        const tomorrowCode = data.daily.weathercode[1];
+        const tomorrowPrecip = data.daily.precipitation_sum[1];
+        
+        // 判断天气类型 (WMO代码)
+        // 0:晴, 1-3:多云, 45-48:雾, 51-67:雨, 71-77:雪, 80-82:阵雨, 95+:雷暴
+        if (tomorrowCode >= 71) return { type: 'snow', factor: 0.82 };  // 雪天 -18%
+        if (tomorrowCode >= 61) return { type: 'heavy_rain', factor: 0.90 };  // 大雨 -10%
+        if (tomorrowCode >= 51) return { type: 'rain', factor: 0.93 };  // 雨 -7%
+        if (tomorrowCode >= 45) return { type: 'fog', factor: 0.98 };  // 雾 -2%
+        return { type: 'clear', factor: 1.0 };  // 晴天
+    } catch(e) {
+        return { type: 'unknown', factor: 1.0 };
+    }
+}
+
+// 预测明天客流量
+async function predictToday() {
     if (!metroData || metroData.length === 0) return null;
     
-    const today = new Date();
-    const dayOfWeek = today.getDay();
+    // 获取明天日期
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    const dayOfWeek = tomorrow.getDay();
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
     
-    // 加载天气数据
-    let weatherData = null;
-    fetch('data/weather.json')
-        .then(r => r.json())
-        .then(w => {
-            weatherData = w;
-        });
+    // 获取天气预报
+    const forecast = await getForecast();
     
     // 1. 最近7天平均 (35%)
     let sum7 = 0, count7 = 0;
     for (let i = 1; i <= 7; i++) {
-        const d = new Date(today);
+        const d = new Date();
         d.setDate(d.getDate() - i);
         const ds = d.toISOString().split('T')[0];
         const found = metroData.find(x => x.date === ds);
@@ -97,7 +116,7 @@ function predictToday() {
     // 2. 最近30天平均 (25%)
     let sum30 = 0, count30 = 0;
     for (let i = 1; i <= 30; i++) {
-        const d = new Date(today);
+        const d = new Date();
         d.setDate(d.getDate() - i);
         const ds = d.toISOString().split('T')[0];
         const found = metroData.find(x => x.date === ds);
@@ -117,12 +136,12 @@ function predictToday() {
     const weekdayAvg = weekdayCount > 0 ? weekdaySum / weekdayCount : 0;
     
     // 4. 月份因素 (10%)
-    const month = today.getMonth() + 1;
+    const month = tomorrow.getMonth() + 1;
     const monthFactors = {1:0.90, 2:0.88, 3:1.00, 4:1.02, 5:0.98, 6:0.95, 7:0.93, 8:1.02, 9:0.98, 10:1.03, 11:1.06, 12:1.02};
     const monthFactor = monthFactors[month] || 1.0;
     
-    // 5. 天气因素 (10%) - 需要后天数据，这里默认晴天
-    const weatherFactor = 1.0;
+    // 5. 天气因素 (10%) - 根据天气预报
+    const weatherFactor = forecast.factor;
     
     // 6. 趋势因子 (5%)
     const recentAvg = avg7;
@@ -132,8 +151,16 @@ function predictToday() {
     // 综合计算
     let prediction = avg7 * 0.35 + avg30 * 0.25 + weekdayAvg * 0.20 + overallAvg * 0.10 * monthFactor + overallAvg * 0.05 * trendFactor;
     
-    // 周末折扣
+    // 周末折扣 + 天气折扣
     if (isWeekend) prediction *= 0.93;
+    prediction *= weatherFactor;
+    
+    // 显示天气预报
+    const weatherEl = document.getElementById('predictedChange');
+    if (weatherEl) {
+        const weatherText = { snow: '❄️ 雪天', heavy_rain: '🌧️ 大雨', rain: '🌧️ 小雨', fog: '🌫️ 雾', clear: '☀️ 晴天', unknown: '未知' };
+        weatherEl.textContent = '明天' + (weatherText[forecast.type] || '未知天气');
+    }
     
     return prediction > 0 ? prediction : null;
 }
