@@ -23,7 +23,7 @@
                 <div class="hidden md:flex space-x-6">
                     <a href="index.html" class="hover:text-blue-200 transition">首页</a>
                     <a href="lines.html" class="hover:text-blue-200 transition">线路详情</a>
-                    <a href="history.html" class="text-blue-200 font-medium">历史数据</a>
+                    <a href="history.html?v=20260316" class="text-blue-200 font-medium">历史数据</a>
                 </div>
                 <!-- 移动端汉堡菜单按钮 -->
                 <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg hover:bg-blue-700 transition">
@@ -36,7 +36,7 @@
             <div id="mobileMenu" class="hidden md:hidden pb-4">
                 <a href="index.html" class="block py-2 px-4 hover:text-blue-200 hover:bg-blue-700 rounded-lg mb-2 transition">首页</a>
                 <a href="lines.html" class="block py-2 px-4 hover:text-blue-200 hover:bg-blue-700 rounded-lg mb-2 transition">线路详情</a>
-                <a href="history.html" class="block py-2 px-4 text-blue-200 font-medium bg-blue-700 rounded-lg transition">历史数据</a>
+                <a href="history.html?v=20260316" class="block py-2 px-4 text-blue-200 font-medium bg-blue-700 rounded-lg transition">历史数据</a>
             </div>
         </div>
     </nav>
@@ -91,7 +91,7 @@
 
         document.addEventListener('DOMContentLoaded', async function() {
             try {
-                const response = await fetch('data/metro_data.json');
+                const response = await fetch('data/metro_data.json?v=20260316');
                 const data = await response.json();
                 metroData = data.daily_data;
                 linesInfo = data.metadata.lines;
