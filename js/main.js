@@ -150,9 +150,29 @@ function updateTrendChart() {
         grid: {
             left: '3%',
             right: '4%',
-            bottom: '3%',
+            bottom: '15%',
             containLabel: true
         },
+        dataZoom: [
+            {
+                type: 'inside',
+                start: 0,
+                end: 100
+            },
+            {
+                type: 'slider',
+                start: 0,
+                end: 100,
+                height: 20,
+                bottom: 5,
+                borderColor: 'transparent',
+                backgroundColor: '#f0f0f0',
+                fillerColor: 'rgba(59, 130, 246, 0.2)',
+                handleStyle: {
+                    color: '#3B82F6'
+                }
+            }
+        ],
         xAxis: {
             type: 'category',
             data: dates,
