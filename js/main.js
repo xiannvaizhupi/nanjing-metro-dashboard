@@ -128,11 +128,11 @@ function updateTrendChart() {
     let filteredData = metroData;
 
     if (currentTrendRange === 'week') {
-        filteredData = metroData.slice(-7);
+        filteredData = metroData.slice(0, 7);
     } else if (currentTrendRange === 'month') {
-        filteredData = metroData.slice(-30);
+        filteredData = metroData.slice(0, 30);
     } else if (currentTrendRange === 'year') {
-        filteredData = metroData.slice(-365);
+        filteredData = metroData.slice(0, 365);
     }
 
     const dates = filteredData.map(d => d.date.slice(5));
@@ -323,7 +323,7 @@ function selectDate(data, options = {}) {
     // 更新变化率（如果可能）
     if (metroData.length > 1) {
         const currentIndex = metroData.findIndex(item => item.date === data.date);
-        const previous = currentIndex >= 0 ? metroData[currentIndex - 1] : null;
+        const previous = currentIndex >= 0 ? metroData[currentIndex + 1] : null;
         updateChangeRate(data, previous, labelText);
     }
 
