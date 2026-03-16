@@ -73,42 +73,69 @@ function predictToday() {
     
     const today = new Date();
     const dayOfWeek = today.getDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
     
-    // 最近7天平均
+    // 加载天气数据
+    let weatherData = null;
+    fetch('data/weather.json')
+        .then(r => r.json())
+        .then(w => {
+            weatherData = w;
+        });
+    
+    // 1. 最近7天平均 (35%)
     let sum7 = 0, count7 = 0;
     for (let i = 1; i <= 7; i++) {
         const d = new Date(today);
         d.setDate(d.getDate() - i);
         const ds = d.toISOString().split('T')[0];
         const found = metroData.find(x => x.date === ds);
-        if (found) {
-            sum7 += found.total;
-            count7++;
-        }
+        if (found) { sum7 += found.total; count7++; }
     }
     const avg7 = count7 > 0 ? sum7 / count7 : 0;
     
-    // 最近30天平均
+    // 2. 最近30天平均 (25%)
     let sum30 = 0, count30 = 0;
     for (let i = 1; i <= 30; i++) {
         const d = new Date(today);
         d.setDate(d.getDate() - i);
         const ds = d.toISOString().split('T')[0];
         const found = metroData.find(x => x.date === ds);
-        if (found) {
-            sum30 += found.total;
-            count30++;
-        }
+        if (found) { sum30 += found.total; count30++; }
     }
     const avg30 = count30 > 0 ? sum30 / count30 : 0;
     
-    // 周日折扣
-    const weekendFactor = dayOfWeek === 0 || dayOfWeek === 6 ? 0.92 : 1.0;
+    // 3. 同星期历史均值 (20%)
+    let weekdaySum = 0, weekdayCount = 0;
+    metroData.forEach(d => {
+        const dDate = new Date(d.date);
+        if (dDate.getDay() === dayOfWeek) {
+            weekdaySum += d.total;
+            weekdayCount++;
+        }
+    });
+    const weekdayAvg = weekdayCount > 0 ? weekdaySum / weekdayCount : 0;
     
-    if (avg7 > 0 && avg30 > 0) {
-        return (avg7 * 0.4 + avg30 * 0.6) * weekendFactor;
-    }
-    return null;
+    // 4. 月份因素 (10%)
+    const month = today.getMonth() + 1;
+    const monthFactors = {1:0.90, 2:0.88, 3:1.00, 4:1.02, 5:0.98, 6:0.95, 7:0.93, 8:1.02, 9:0.98, 10:1.03, 11:1.06, 12:1.02};
+    const monthFactor = monthFactors[month] || 1.0;
+    
+    // 5. 天气因素 (10%) - 需要后天数据，这里默认晴天
+    const weatherFactor = 1.0;
+    
+    // 6. 趋势因子 (5%)
+    const recentAvg = avg7;
+    const overallAvg = avg30 || recentAvg;
+    const trendFactor = recentAvg > overallAvg ? 1.02 : (recentAvg < overallAvg ? 0.98 : 1.0);
+    
+    // 综合计算
+    let prediction = avg7 * 0.35 + avg30 * 0.25 + weekdayAvg * 0.20 + overallAvg * 0.10 * monthFactor + overallAvg * 0.05 * trendFactor;
+    
+    // 周末折扣
+    if (isWeekend) prediction *= 0.93;
+    
+    return prediction > 0 ? prediction : null;
 }
 
 // 更新仪表板数据
