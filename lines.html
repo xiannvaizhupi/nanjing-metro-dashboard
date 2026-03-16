@@ -130,13 +130,13 @@
 
         function getLineRangeData() {
             if (currentLineTrendRange === 'week') {
-                return metroData.slice(0, 7);
+                return metroData.slice(-7);
             }
             if (currentLineTrendRange === 'month') {
-                return metroData.slice(0, 30);
+                return metroData.slice(-30);
             }
             if (currentLineTrendRange === 'year') {
-                return metroData.slice(0, 365);
+                return metroData.slice(-365);
             }
             return metroData;
         }
@@ -185,8 +185,8 @@
             const lineInfo = linesInfo.find(l => l.id === currentLineId);
             const filteredData = getLineRangeData();
             
-            const dates = filteredData.map(d => d.date.slice(5)).reverse();
-            const values = filteredData.map(d => d.lines[currentLineId] || 0).reverse();
+            const dates = filteredData.map(d => d.date.slice(5));
+            const values = filteredData.map(d => d.lines[currentLineId] || 0);
             
             const option = {
                 tooltip: {
