@@ -123,10 +123,14 @@
             });
             // 按线路ID排序
             allLineIds = Array.from(lineIdSet).sort((a, b) => {
-                // L线在前，S线在后
+                // L线在前，S线在后，数字按数值排序
+                const getNum = (s) => parseInt(s.replace(/[^0-9]/g, ''));
+                const aNum = getNum(a), bNum = getNum(b);
+                if (a.startsWith('L') && b.startsWith('L')) return aNum - bNum;
+                if (a.startsWith('S') && b.startsWith('S')) return aNum - bNum;
                 if (a.startsWith('L') && b.startsWith('S')) return -1;
                 if (a.startsWith('S') && b.startsWith('L')) return 1;
-                return a.localeCompare(b);
+                return 0;
             });
         }
 
