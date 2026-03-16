@@ -166,7 +166,7 @@ async function predictToday() {
 }
 
 // 更新仪表板数据
-async function updateDashboard() {
+function updateDashboard() {
     if (!metroData || metroData.length === 0) return;
     
     // 最新数据
@@ -484,11 +484,4 @@ function renderLinesTable() {
             </td>
         </tr>
     `).join('');
-        
-        // 显示预测
-        const predicted = await predictToday();
-        const predEl = document.getElementById('predictedTotal');
-        if (predEl && predicted) {
-            predEl.textContent = predicted.toFixed(1) + '万';
-        }
 }
