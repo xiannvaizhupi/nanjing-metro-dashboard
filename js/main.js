@@ -135,8 +135,8 @@ function updateTrendChart() {
         filteredData = metroData.slice(0, 365);
     }
 
-    const dates = filteredData.map(d => d.date.slice(5)).reverse();
-    const values = filteredData.map(d => d.total).reverse();
+    const dates = filteredData.map(d => d.date.slice(5));
+    const values = filteredData.map(d => d.total);
 
     const option = {
         tooltip: {
