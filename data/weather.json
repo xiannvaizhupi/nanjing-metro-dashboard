@@ -4816,5 +4816,21 @@
     "is_rainy": true,
     "is_heavy_rain": false,
     "is_snow": false
+  },
+  {
+    "date": "2026-03-16",
+    "temp_max": 9.6,
+    "temp_min": 7.8,
+    "weather": "雨",
+    "precipitation": 5.9,
+    "weather_code": 61
+  },
+  {
+    "date": "2026-03-17",
+    "temp_max": 10.8,
+    "temp_min": 8.2,
+    "weather": "雨",
+    "precipitation": 10.9,
+    "weather_code": 61
   }
 ]
