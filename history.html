@@ -109,6 +109,7 @@
                 renderTableHead();
                 renderTable();
                 applyDefaultSort();
+                applyDefaultSort();
                 bindFilters();
             } catch (error) {
                 console.error('加载数据失败:', error);
@@ -184,6 +185,11 @@
             filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
         }
 
+        function applyDefaultSort() {
+            // 默认按日期倒序
+            filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
+        }
+
         function bindFilters() {
             const startDate = document.getElementById('startDate');
             const endDate = document.getElementById('endDate');
@@ -214,7 +220,7 @@
                     filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
                     break;
                 case 'desc':
-                    filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
+                    filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
                     break;
                 case 'flow_asc':
                     filteredData.sort((a, b) => a.total - b.total);
@@ -225,6 +231,7 @@
             }
             
             renderTable();
+                applyDefaultSort();
         }
 
         // 移动端菜单切换
