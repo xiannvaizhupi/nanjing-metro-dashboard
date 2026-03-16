@@ -67,6 +67,51 @@ function updateChangeRate(current, previous, labelText) {
     }
 }
 
+// 预测客流量
+function predictToday() {
+    if (!metroData || metroData.length === 0) return null;
+    
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    
+    // 最近7天平均
+    let sum7 = 0, count7 = 0;
+    for (let i = 1; i <= 7; i++) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const ds = d.toISOString().split('T')[0];
+        const found = metroData.find(x => x.date === ds);
+        if (found) {
+            sum7 += found.total;
+            count7++;
+        }
+    }
+    const avg7 = count7 > 0 ? sum7 / count7 : 0;
+    
+    // 最近30天平均
+    let sum30 = 0, count30 = 0;
+    for (let i = 1; i <= 30; i++) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const ds = d.toISOString().split('T')[0];
+        const found = metroData.find(x => x.date === ds);
+        if (found) {
+            sum30 += found.total;
+            count30++;
+        }
+    }
+    const avg30 = count30 > 0 ? sum30 / count30 : 0;
+    
+    // 周日折扣
+    const weekendFactor = dayOfWeek === 0 || dayOfWeek === 6 ? 0.92 : 1.0;
+    
+    // 综合预测
+    if (avg7 > 0 && avg30 > 0) {
+        return (avg7 * 0.4 + avg30 * 0.6) * weekendFactor;
+    }
+    return null;
+}
+
 // 更新仪表板数据
 function updateDashboard() {
     if (!metroData || metroData.length === 0) return;
