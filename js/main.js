@@ -92,26 +92,11 @@ async function getForecast() {
 async function predictToday() {
     if (!metroData || metroData.length === 0) return null;
     
-    // 获取今天日期
     const today = new Date();
     const dayOfWeek = today.getDay();
-    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-    
-    // 获取天气预报
     const forecast = await getForecast();
     
-    // 1. 最近7天平均 (35%)
-    let sum7 = 0, count7 = 0;
-    for (let i = 1; i <= 7; i++) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const ds = d.toISOString().split('T')[0];
-        const found = metroData.find(x => x.date === ds);
-        if (found) { sum7 += found.total; count7++; }
-    }
-    const avg7 = count7 > 0 ? sum7 / count7 : 0;
-    
-    // 2. 最近30天平均 (25%)
+    // 基准: 最近30天平均 (40%)
     let sum30 = 0, count30 = 0;
     for (let i = 1; i <= 30; i++) {
         const d = new Date();
@@ -120,50 +105,49 @@ async function predictToday() {
         const found = metroData.find(x => x.date === ds);
         if (found) { sum30 += found.total; count30++; }
     }
-    const avg30 = count30 > 0 ? sum30 / count30 : 0;
+    const base = count30 > 0 ? sum30 / count30 : 0;
     
-    // 3. 同星期历史均值 (20%)
+    // 星期因素 (20%)
     let weekdaySum = 0, weekdayCount = 0;
     metroData.forEach(d => {
         const dDate = new Date(d.date);
-        if (dDate.getDay() === dayOfWeek) {
-            weekdaySum += d.total;
-            weekdayCount++;
-        }
+        if (dDate.getDay() === dayOfWeek) { weekdaySum += d.total; weekdayCount++; }
     });
-    const weekdayAvg = weekdayCount > 0 ? weekdaySum / weekdayCount : 0;
+    const weekdayFactor = weekdayCount > 0 ? (weekdaySum / weekdayCount) / base : 1.0;
     
-    // 4. 月份因素 (10%)
+    // 月份因素 (10%)
     const month = today.getMonth() + 1;
     const monthFactors = {1:0.90, 2:0.88, 3:1.00, 4:1.02, 5:0.98, 6:0.95, 7:0.93, 8:1.02, 9:0.98, 10:1.03, 11:1.06, 12:1.02};
     const monthFactor = monthFactors[month] || 1.0;
     
-    // 5. 天气因素 (10%) - 根据天气预报
+    // 天气因素 (15%)
     const weatherFactor = forecast.factor;
     
-    // 6. 趋势因子 (5%)
-    const recentAvg = avg7;
-    const overallAvg = avg30 || recentAvg;
-    const trendFactor = recentAvg > overallAvg ? 1.02 : (recentAvg < overallAvg ? 0.98 : 1.0);
+    // 趋势因素 (15%)
+    let sum7 = 0, count7 = 0;
+    for (let i = 1; i <= 7; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const ds = d.toISOString().split('T')[0];
+        const found = metroData.find(x => x.date === ds);
+        if (found) { sum7 += found.total; count7++; }
+    }
+    const avg7 = count7 > 0 ? sum7 / count7 : base;
+    const trendFactor = avg7 / base;
     
-    // 综合计算
-    let prediction = avg7 * 0.35 + avg30 * 0.25 + weekdayAvg * 0.20 + overallAvg * 0.10 * monthFactor + overallAvg * 0.05 * trendFactor;
+    // 计算: 基准40% + 星期20% + 月份10% + 天气15% + 趋势15%
+    let prediction = base * 0.40 + base * weekdayFactor * 0.20 + base * monthFactor * 0.10 + base * weatherFactor * 0.15 + base * trendFactor * 0.15;
     
-    // 周末折扣 + 天气折扣
-    if (isWeekend) prediction *= 0.93;
-    prediction *= weatherFactor;
-    
-    // 显示天气预报
+    // 显示天气
     const weatherEl = document.getElementById('predictedChange');
     if (weatherEl) {
-        const weatherText = { snow: '❄️ 雪天', heavy_rain: '🌧️ 大雨', rain: '🌧️ 小雨', fog: '🌫️ 雾', clear: '☀️ 晴天', unknown: '未知' };
-        weatherEl.textContent = '今日' + (weatherText[forecast.type] || '未知天气');
+        const weatherText = { snow: '❄️ 雪', heavy_rain: '🌧️ 大雨', rain: '🌧️ 小雨', fog: '🌫️ 雾', clear: '☀️ 晴', unknown: '' };
+        weatherEl.textContent = '今日' + (weatherText[forecast.type] || '');
     }
     
     return prediction > 0 ? prediction : null;
 }
 
-// 更新仪表板数据
 async function updateDashboard() {
     if (!metroData || metroData.length === 0) return;
     
