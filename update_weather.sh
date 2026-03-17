@@ -72,7 +72,7 @@ params = {
     "forecast_days": 2
 }
 
-resp = requests.get(url, params=params)
+resp = requests.get(url, params=params, proxies={'http': None, 'https': None})
 data = resp.json()
 
 dates = data["daily"]["time"]
