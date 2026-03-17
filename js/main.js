@@ -95,6 +95,27 @@ function addDays(dateStr, offset) {
     return formatLocalDate(d);
 }
 
+function getSameTypeHistory(dateStr, totalsByDate, isWeekend, count) {
+    const values = [];
+    let cursor = dateStr;
+    let guard = 0;
+    while (values.length < count && guard < 366) {
+        cursor = addDays(cursor, -1);
+        const d = new Date(`${cursor}T00:00:00`);
+        const weekend = [0, 6].includes(d.getDay());
+        if (weekend !== isWeekend) {
+            guard++;
+            continue;
+        }
+        const v = totalsByDate.get(cursor);
+        if (v != null) {
+            values.push(v);
+        }
+        guard++;
+    }
+    return values;
+}
+
 function buildHolidaySets(dailyData, weatherMapRef) {
     const holidays = new Set();
     const holidayEves = new Set();
@@ -272,22 +293,12 @@ function trainRidgeModelForFilter(dailyData, weatherMapRef, filterFn) {
         if (filterFn && !filterFn(item)) continue;
         const weather = weatherMapRef.get(item.date);
         if (!weather) continue;
-        const lag1 = totalsByDate.get(addDays(item.date, -1));
-        const lag7 = totalsByDate.get(addDays(item.date, -7));
-        if (lag1 == null || lag7 == null) continue;
-
-        let rollingSum = 0;
-        let rollingCount = 0;
-        for (let i = 1; i <= 7; i++) {
-            const v = totalsByDate.get(addDays(item.date, -i));
-            if (v != null) {
-                rollingSum += v;
-                rollingCount++;
-            }
-        }
-        if (rollingCount === 0) continue;
-        const rolling7 = rollingSum / rollingCount;
         const isWeekend = item.is_weekend != null ? item.is_weekend : ([0, 6].includes(new Date(`${item.date}T00:00:00`).getDay()));
+        const history = getSameTypeHistory(item.date, totalsByDate, isWeekend, 7);
+        if (history.length < 2) continue;
+        const lag1 = history[0];
+        const lag7 = history.length >= 7 ? history[6] : history[history.length - 1];
+        const rolling7 = history.reduce((sum, v) => sum + v, 0) / history.length;
         const holidayFlags = getHolidayFlags(item.date);
         const features = buildFeatureVector(
             item.date,
@@ -421,24 +432,14 @@ function predictForDate(dateStr, totalsByDate) {
     if (!regressionModel) return null;
     const weather = getWeatherForDate(dateStr);
     if (!weather) return null;
-    const lag1 = totalsByDate.get(addDays(dateStr, -1));
-    const lag7 = totalsByDate.get(addDays(dateStr, -7));
-    if (lag1 == null || lag7 == null) return null;
-
-    let rollingSum = 0;
-    let rollingCount = 0;
-    for (let i = 1; i <= 7; i++) {
-        const v = totalsByDate.get(addDays(dateStr, -i));
-        if (v != null) {
-            rollingSum += v;
-            rollingCount++;
-        }
-    }
-    if (rollingCount === 0) return null;
-    const rolling7 = rollingSum / rollingCount;
 
     const dateObj = new Date(`${dateStr}T00:00:00`);
     const isWeekend = [0, 6].includes(dateObj.getDay());
+    const history = getSameTypeHistory(dateStr, totalsByDate, isWeekend, 7);
+    if (history.length < 2) return null;
+    const lag1 = history[0];
+    const lag7 = history.length >= 7 ? history[6] : history[history.length - 1];
+    const rolling7 = history.reduce((sum, v) => sum + v, 0) / history.length;
     const model = isWeekend ? regressionModel.weekendModel : regressionModel.weekdayModel;
     if (!model) return null;
     const holidayFlags = getHolidayFlags(dateStr);
