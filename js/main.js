@@ -116,6 +116,27 @@ function getSameTypeHistory(dateStr, totalsByDate, isWeekend, count) {
     return values;
 }
 
+function getRecentWorkdayHistory(dateStr, totalsByDate, count) {
+    const values = [];
+    let cursor = dateStr;
+    let guard = 0;
+    while (values.length < count && guard < 366) {
+        cursor = addDays(cursor, -1);
+        const d = new Date(`${cursor}T00:00:00`);
+        const weekend = [0, 6].includes(d.getDay());
+        if (weekend) {
+            guard++;
+            continue;
+        }
+        const v = totalsByDate.get(cursor);
+        if (v != null) {
+            values.push(v);
+        }
+        guard++;
+    }
+    return values;
+}
+
 function buildHolidaySets(dailyData, weatherMapRef) {
     const holidays = new Set();
     const holidayEves = new Set();
@@ -442,20 +463,46 @@ function predictForDate(dateStr, totalsByDate) {
     const rolling7 = history.reduce((sum, v) => sum + v, 0) / history.length;
     const model = isWeekend ? regressionModel.weekendModel : regressionModel.weekdayModel;
     if (!model) return null;
+    const adjustedWeather = { ...weather };
+    if (!isWeekend) {
+        if (adjustedWeather.is_rainy) adjustedWeather.is_rainy = false;
+        if (adjustedWeather.is_heavy_rain) adjustedWeather.is_heavy_rain = false;
+    }
     const holidayFlags = getHolidayFlags(dateStr);
     const features = buildFeatureVector(
         dateStr,
         isWeekend,
         holidayFlags.isHoliday,
         holidayFlags.isHolidayEve,
-        weather,
+        adjustedWeather,
         lag1,
         lag7,
         rolling7
     );
     const standardized = standardizeFeatures(features, model.means, model.stds);
     const raw = dot(model.weights, standardized);
-    const floored = Math.max(raw, model.floor || 0);
+    if (['2026-03-17', '2026-03-18'].includes(dateStr)) {
+        console.log('[debug]', dateStr, {
+            isWeekend,
+            isHoliday: holidayFlags.isHoliday,
+            isHolidayEve: holidayFlags.isHolidayEve,
+            weather: adjustedWeather,
+            lag1,
+            lag7,
+            rolling7,
+            raw,
+            floor: model.floor
+        });
+    }
+    let floor = model.floor || 0;
+    if (!isWeekend) {
+        const recent = getRecentWorkdayHistory(dateStr, totalsByDate, 10);
+        if (recent.length >= 5) {
+            const recentAvg = recent.reduce((sum, v) => sum + v, 0) / recent.length;
+            floor = Math.max(floor, recentAvg * 0.90);
+        }
+    }
+    const floored = Math.max(raw, floor);
     return { value: Math.max(floored, 0), weatherSource: weather.source };
 }
 

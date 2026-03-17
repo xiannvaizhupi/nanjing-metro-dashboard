@@ -5718,7 +5718,7 @@
     "wind": "未知",
     "aqi": 0,
     "is_rainy": true,
-    "is_heavy_rain": true,
+    "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": false,
     "is_holiday_eve": false
@@ -5733,7 +5733,7 @@
     "wind": "未知",
     "aqi": 0,
     "is_rainy": true,
-    "is_heavy_rain": true,
+    "is_heavy_rain": false,
     "is_snow": false,
     "is_holiday": false,
     "is_holiday_eve": false
