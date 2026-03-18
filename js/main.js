@@ -674,29 +674,24 @@ function updatePredictions() {
         const changeValue = (todayResult.value - yesterdayTotal) / yesterdayTotal * 100;
         const change = changeValue.toFixed(1);
         if (changeValue > 0) {
-            todayPredChangeEl.innerHTML = `<span>↗ +${change}%</span>`;
-            todayPredChangeEl.className = 'stat-indicator up';
+            todayPredChangeEl.innerHTML = `<span class="text-red-500">↗ +${change}%</span>`;
         } else if (changeValue < 0) {
-            todayPredChangeEl.innerHTML = `<span>↘ ${change}%</span>`;
-            todayPredChangeEl.className = 'stat-indicator down';
+            todayPredChangeEl.innerHTML = `<span class="text-green-500">↘ ${change}%</span>`;
         } else {
-            todayPredChangeEl.innerHTML = `<span>→ 0%</span>`;
-            todayPredChangeEl.className = 'stat-indicator';
+            todayPredChangeEl.innerHTML = `<span class="text-gray-500">→ ${change}%</span>`;
         }
     }
 
-    if (tomorrowResult && yesterdayTotal) {
-        const changeValue = (tomorrowResult.value - yesterdayTotal) / yesterdayTotal * 100;
+    // 明日预测与今日预测对比
+    if (tomorrowResult && todayResult) {
+        const changeValue = (tomorrowResult.value - todayResult.value) / todayResult.value * 100;
         const change = changeValue.toFixed(1);
         if (changeValue > 0) {
-            tomorrowPredChangeEl.innerHTML = `<span>↗ +${change}%</span>`;
-            tomorrowPredChangeEl.className = 'stat-indicator up';
+            tomorrowPredChangeEl.innerHTML = `<span class="text-red-500">↗ +${change}%</span>`;
         } else if (changeValue < 0) {
-            tomorrowPredChangeEl.innerHTML = `<span>↘ ${change}%</span>`;
-            tomorrowPredChangeEl.className = 'stat-indicator down';
+            tomorrowPredChangeEl.innerHTML = `<span class="text-green-500">↘ ${change}%</span>`;
         } else {
-            tomorrowPredChangeEl.innerHTML = `<span>→ 0%</span>`;
-            tomorrowPredChangeEl.className = 'stat-indicator';
+            tomorrowPredChangeEl.innerHTML = `<span class="text-gray-500">→ ${change}%</span>`;
         }
     }
 }
