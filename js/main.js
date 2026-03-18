@@ -564,11 +564,15 @@ function updateLastUpdated(text) {
     const lastUpdateEl = document.getElementById('lastUpdate');
     const footerUpdateEl = document.getElementById('footerUpdate');
     const heroDateEl = document.getElementById('heroDate');
+    const dataRangeEndEl = document.getElementById('dataRangeEnd');
     const displayText = text || '--';
-    
+
     if (lastUpdateEl) lastUpdateEl.textContent = displayText;
     if (footerUpdateEl) footerUpdateEl.textContent = displayText;
     if (heroDateEl) heroDateEl.textContent = `${displayText} 客流数据`;
+    if (dataRangeEndEl && metroData && metroData.length > 0) {
+        dataRangeEndEl.textContent = metroData[metroData.length - 1].date;
+    }
 }
 
 function updateDashboard() {
