@@ -512,10 +512,6 @@ function predictForDate(dateStr, totalsByDate) {
     const model = isWeekend ? regressionModel.weekendModel : regressionModel.weekdayModel;
     if (!model) return null;
     const adjustedWeather = { ...weather };
-    if (!isWeekend) {
-        if (adjustedWeather.is_rainy) adjustedWeather.is_rainy = false;
-        if (adjustedWeather.is_heavy_rain) adjustedWeather.is_heavy_rain = false;
-    }
     const holidayFlags = getHolidayFlags(dateStr);
     const features = buildFeatureVector(dateStr, isWeekend, holidayFlags.isHoliday, holidayFlags.isHolidayEve, adjustedWeather, lag1, lag7, rolling7);
     const standardized = standardizeFeatures(features, model.means, model.stds);
