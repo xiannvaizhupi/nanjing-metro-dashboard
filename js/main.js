@@ -524,7 +524,19 @@ function predictForDate(dateStr, totalsByDate) {
         }
     }
     const floored = Math.max(raw, floor);
-    return { value: Math.max(floored, 0), weatherSource: weather.source };
+    
+    // 天气影响调整 (基于历史数据分析)
+    let weatherMultiplier = 1.0;
+    if (isWeekend) {
+        if (weather.is_heavy_rain) weatherMultiplier = 0.80;
+        else if (weather.is_rainy) weatherMultiplier = 0.867; // 雨天降低13.3%
+    } else {
+        if (weather.is_heavy_rain) weatherMultiplier = 0.90;
+        else if (weather.is_rainy) weatherMultiplier = 0.953; // 雨天降低4.71%
+    }
+    
+    const finalValue = floored * weatherMultiplier;
+    return { value: Math.max(finalValue, 0), weatherSource: weather.source };
 }
 
 // DOM 加载完成后初始化
