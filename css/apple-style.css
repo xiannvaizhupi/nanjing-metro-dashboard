@@ -657,14 +657,42 @@ body {
     .stat-card {
         padding: 16px;
     }
-    
+
     .stat-value {
         font-size: 20px;
     }
-    
+
     .chart-tabs {
         width: 100%;
         overflow-x: auto;
+    }
+
+    /* 手机端图表优化 - 增加高度 */
+    .charts-section .chart-card {
+        overflow-x: auto;
+    }
+
+    .chart-container {
+        height: 280px !important;
+        overflow-x: auto;
+    }
+
+    #lineTrendChart {
+        height: 280px !important;
+        width: 100% !important;
+        min-width: 500px;
+    }
+
+    /* 手机端线路选择器优化 */
+    #lineSelector {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 8px;
+    }
+
+    #lineSelector .line-btn {
+        flex-shrink: 0;
     }
 }
 
