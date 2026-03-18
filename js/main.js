@@ -674,11 +674,14 @@ function updatePredictions() {
         const changeValue = (todayResult.value - yesterdayTotal) / yesterdayTotal * 100;
         const change = changeValue.toFixed(1);
         if (changeValue > 0) {
-            todayPredChangeEl.innerHTML = `<span class="text-red-500">+${change}%</span><br><span style="color: #ef4444;">↗</span>`;
+            todayPredChangeEl.innerHTML = `<span>↗ +${change}%</span>`;
+            todayPredChangeEl.className = 'stat-indicator up';
         } else if (changeValue < 0) {
-            todayPredChangeEl.innerHTML = `<span class="text-green-500">${change}%</span><br><span style="color: #22c55e;">↘</span>`;
+            todayPredChangeEl.innerHTML = `<span>↘ ${change}%</span>`;
+            todayPredChangeEl.className = 'stat-indicator down';
         } else {
-            todayPredChangeEl.innerHTML = `<span class="text-gray-500">0%</span>`;
+            todayPredChangeEl.innerHTML = `<span>→ 0%</span>`;
+            todayPredChangeEl.className = 'stat-indicator';
         }
     }
 
@@ -687,11 +690,14 @@ function updatePredictions() {
         const changeValue = (tomorrowResult.value - todayResult.value) / todayResult.value * 100;
         const change = changeValue.toFixed(1);
         if (changeValue > 0) {
-            tomorrowPredChangeEl.innerHTML = `<span class="text-red-500">+${change}%</span><br><span style="color: #ef4444;">↗</span>`;
+            tomorrowPredChangeEl.innerHTML = `<span>↗ +${change}%</span>`;
+            tomorrowPredChangeEl.className = 'stat-indicator up';
         } else if (changeValue < 0) {
-            tomorrowPredChangeEl.innerHTML = `<span class="text-green-500">${change}%</span><br><span style="color: #22c55e;">↘</span>`;
+            tomorrowPredChangeEl.innerHTML = `<span>↘ ${change}%</span>`;
+            tomorrowPredChangeEl.className = 'stat-indicator down';
         } else {
-            tomorrowPredChangeEl.innerHTML = `<span class="text-gray-500">0%</span>`;
+            tomorrowPredChangeEl.innerHTML = `<span>→ 0%</span>`;
+            tomorrowPredChangeEl.className = 'stat-indicator';
         }
     }
 }
