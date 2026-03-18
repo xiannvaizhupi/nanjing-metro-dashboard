@@ -5,7 +5,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-    --apple-blue: #0071e3;
+    --apple-blue: #007AFF;
     --apple-blue-hover: #0077ED;
     --apple-bg: #f5f5f7;
     --apple-surface: #ffffff;
@@ -663,7 +663,7 @@ body {
 }
 
 /* ============================================
-   Dark Mode Support (Optional)
+   Dark Mode Support
    ============================================ */
 @media (prefers-color-scheme: dark) {
     :root {
@@ -672,26 +672,182 @@ body {
         --apple-text: #f5f5f7;
         --apple-text-secondary: #86868b;
         --apple-border: #424245;
+        --apple-accent: #007AFF;
+    }
+    
+    body {
+        background: var(--apple-bg);
+        color: var(--apple-text);
     }
     
     .hero {
         background: linear-gradient(180deg, #1d1d1f 0%, #000000 100%);
     }
     
+    .hero-title {
+        background: linear-gradient(90deg, #f5f5f7 0%, #a1a1a6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .hero-subtitle {
+        color: #86868b;
+    }
+    
+    .hero-date {
+        background: #1d1d1f;
+        color: #f5f5f7;
+    }
+    
     .stat-card:not(.primary) {
         background: #1d1d1f;
+        border: 1px solid #424245;
+    }
+    
+    .stat-card .stat-label {
+        color: #86868b;
+    }
+    
+    .stat-card .stat-value {
+        color: #f5f5f7;
+    }
+    
+    .stat-card .stat-note {
+        color: #86868b;
+    }
+    
+    .stat-card .stat-indicator {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .stat-card .stat-indicator.up {
+        background: rgba(255, 69, 58, 0.2);
+        color: #ff453a;
+    }
+    
+    .stat-card .stat-indicator.down {
+        background: rgba(48, 209, 88, 0.2);
+        color: #32d74b;
     }
     
     .chart-card,
     .data-card {
         background: #1d1d1f;
+        border: 1px solid #424245;
+    }
+    
+    .chart-title {
+        color: #f5f5f7;
+    }
+    
+    .chart-tabs {
+        background: #2d2d2f;
+    }
+    
+    .chart-tab {
+        color: #86868b;
+    }
+    
+    .chart-tab:hover {
+        color: #f5f5f7;
+    }
+    
+    .chart-tab.active {
+        background: #3d3d3f;
+        color: #f5f5f7;
     }
     
     .data-table tbody tr:hover {
         background: #2d2d2f;
     }
     
+    .data-table th {
+        background: #2d2d2f;
+        color: #86868b;
+    }
+    
+    .data-table td {
+        color: #f5f5f7;
+        border-color: #424245;
+    }
+    
+    .data-card-title {
+        color: #f5f5f7;
+    }
+    
+    .data-card-badge {
+        background: #3d3d3f;
+        color: #86868b;
+    }
+    
+    .line-value {
+        color: #f5f5f7;
+    }
+    
+    .line-percent {
+        color: #86868b;
+    }
+    
+    .progress-bar {
+        background: #3d3d3f;
+    }
+    
     .footer {
         background: #000000;
+        border-top: 1px solid #424245;
+    }
+    
+    .footer-title {
+        color: #f5f5f7;
+    }
+    
+    .footer-text {
+        color: #86868b;
+    }
+    
+    .footer-note {
+        color: #6e6e73;
+    }
+    
+    .nav {
+        background: rgba(0, 0, 0, 0.8);
+        border-bottom: 1px solid #424245;
+    }
+    
+    .nav-title {
+        color: #f5f5f7;
+    }
+    
+    .nav-link {
+        color: #f5f5f7;
+    }
+    
+    .nav-link:hover {
+        color: #0a84ff;
+    }
+    
+    .nav-link.active {
+        color: #0a84ff;
+    }
+    
+    #lineShareModal > div {
+        background: #1d1d1f;
+        border: 1px solid #424245;
+    }
+    
+    #lineShareModal h3 {
+        color: #f5f5f7;
+    }
+    
+    input, select {
+        background: #1d1d1f;
+        border-color: #424245;
+        color: #f5f5f7;
+    }
+    
+    input:focus, select:focus {
+        border-color: #0a84ff;
+        box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.3);
     }
 }

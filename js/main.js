@@ -7,11 +7,93 @@ let regressionModel = null;
 let holidaySet = null;
 let holidayEveSet = null;
 let trendChart = null;
-let pieChart = null;
+let modalPieChart = null;
 let currentTrendRange = 'all';
 let selectedDateData = null;
 let selectedDate = null;
 let lastUpdated = null;
+
+// 显示线路占比弹窗
+let modalPieChart = null;
+
+function showLineShare() {
+    const modal = document.getElementById('lineShareModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const data = selectedDateData || metroData[metroData.length - 1];
+    
+    if (modalTitle) modalTitle.textContent = `${data.date} 线路占比`;
+    
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    
+    // 初始化弹窗饼图
+    setTimeout(() => {
+        if (!modalPieChart) {
+            modalPieChart = echarts.init(document.getElementById('modalPieChart'));
+        }
+        updateModalPieChart(data);
+    }, 100);
+}
+
+function closeLineShare() {
+    const modal = document.getElementById('lineShareModal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
+function updateModalPieChart(data) {
+    if (!modalPieChart || !data) return;
+    
+    const pieData = Object.entries(data.lines)
+        .map(([lineId, value]) => {
+            const lineInfo = linesInfo.find(l => l.id === lineId);
+            return {
+                name: lineInfo ? lineInfo.name : lineId,
+                value: value,
+                itemStyle: { color: lineInfo ? lineInfo.color : '#999' }
+            };
+        })
+        .sort((a, b) => b.value - a.value);
+
+    const option = {
+        tooltip: {
+            trigger: 'item',
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            borderColor: '#e0e0e0',
+            textStyle: { color: '#1d1d1f' },
+            formatter: '{b}: {c}万 ({d}%)'
+        },
+        legend: {
+            type: 'scroll',
+            orient: 'vertical',
+            right: '2%',
+            top: 'center',
+            textStyle: { color: '#1d1d1f', fontSize: 12 },
+            itemGap: 10
+        },
+        series: [{
+            type: 'pie',
+            radius: ['45%', '75%'],
+            center: ['40%', '50%'],
+            avoidLabelOverlap: true,
+            itemStyle: {
+                borderRadius: 8,
+                borderColor: '#fff',
+                borderWidth: 3
+            },
+            label: { show: false },
+            emphasis: {
+                label: { show: true, fontSize: 15, fontWeight: 'bold' }
+            },
+            data: pieData,
+            animationType: 'expansion',
+            animationDuration: 1000,
+            animationEasing: 'cubicOut'
+        }]
+    };
+
+    modalPieChart.setOption(option);
+}
 
 // 数字动画
 function animateNumber(element, endValue, duration = 1000) {
@@ -483,7 +565,7 @@ function updatePredictions() {
 // 图表初始化
 function initCharts() {
     initTrendChart();
-    initPieChart();
+    // 饼图现在通过弹窗显示
 }
 
 function initTrendChart() {
@@ -502,7 +584,7 @@ function initTrendChart() {
                 const value = params[0].value;
                 return `<div style="padding: 8px;">
                     <div style="font-weight: 600; margin-bottom: 4px;">${date}</div>
-                    <div>总客流: <span style="font-weight: 700; color: #0071e3;">${value}万</span></div>
+                    <div>总客流: <span style="font-weight: 700; color: #007AFF;">${value}万</span></div>
                 </div>`;
             }
         },
@@ -537,8 +619,8 @@ function initTrendChart() {
                 bottom: 5,
                 borderColor: 'transparent',
                 backgroundColor: '#f5f5f7',
-                fillerColor: 'rgba(0, 113, 227, 0.2)',
-                handleStyle: { color: '#0071e3', borderColor: '#0071e3' },
+                fillerColor: 'rgba(0, 122, 255, 0.2)',
+                handleStyle: { color: '#007AFF', borderColor: '#007AFF' },
                 textStyle: { color: '#86868b' }
             }
         ],
@@ -548,20 +630,32 @@ function initTrendChart() {
             smooth: 0.6,
             symbol: 'circle',
             symbolSize: 6,
-            lineStyle: { color: '#0071e3', width: 3 },
-            itemStyle: { color: '#0071e3' },
+            lineStyle: { 
+                color: {
+                    type: 'linear',
+                    x: 0, y: 0, x2: 1, y2: 0,
+                    colorStops: [
+                        { offset: 0, color: '#007AFF' },
+                        { offset: 0.5, color: '#5856D6' },
+                        { offset: 1, color: '#AF52DE' }
+                    ]
+                },
+                width: 3 
+            },
+            itemStyle: { color: '#007AFF' },
             areaStyle: {
                 color: {
                     type: 'linear',
                     x: 0, y: 0, x2: 0, y2: 1,
                     colorStops: [
-                        { offset: 0, color: 'rgba(0, 113, 227, 0.25)' },
-                        { offset: 1, color: 'rgba(0, 113, 227, 0.02)' }
+                        { offset: 0, color: 'rgba(0, 122, 255, 0.35)' },
+                        { offset: 0.4, color: 'rgba(88, 86, 214, 0.2)' },
+                        { offset: 1, color: 'rgba(175, 82, 222, 0.02)' }
                     ]
                 }
             },
             emphasis: {
-                itemStyle: { color: '#0077ED', symbolSize: 10 }
+                itemStyle: { color: '#007AFF', symbolSize: 10 }
             },
             animationDuration: 2000,
             animationEasing: 'cubicOut'
@@ -656,22 +750,8 @@ function initPieChart() {
 }
 
 function updatePieChart() {
-    if (!pieChart || !metroData || metroData.length === 0) return;
     const latest = selectedDateData || metroData[metroData.length - 1];
-    const pieData = Object.entries(latest.lines)
-        .map(([lineId, value]) => {
-            const lineInfo = linesInfo.find(l => l.id === lineId);
-            return {
-                name: lineInfo ? lineInfo.name : lineId,
-                value: value,
-                itemStyle: { color: lineInfo ? lineInfo.color : '#999' }
-            };
-        })
-        .sort((a, b) => b.value - a.value);
-
-    pieChart.setOption({
-        series: [{ data: pieData }]
-    });
+    updateModalPieChart(latest);
 }
 
 function selectDate(data, options = {}) {

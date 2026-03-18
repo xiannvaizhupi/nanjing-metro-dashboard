@@ -45,10 +45,17 @@
     <!-- Stats Section -->
     <section class="stats-section">
         <div class="stats-grid">
-            <div class="stat-card primary" id="statTotal">
-                <div class="stat-label">昨日总客流</div>
+            <!-- 总客流卡片 (可点击查看线路占比) -->
+            <div class="stat-card primary" id="statTotal" onclick="showLineShare()" style="cursor: pointer;">
+                <div class="stat-label">总客流</div>
                 <div class="stat-value" id="todayTotal">--</div>
                 <div class="stat-indicator" id="todayChange">--</div>
+                <div class="stat-note" style="opacity: 0.7; margin-top: 12px;">
+                    <span>点击查看线路占比</span>
+                    <svg style="width: 14px; height: 14px; vertical-align: middle; margin-left: 4px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">本月最高</div>
@@ -97,11 +104,11 @@
     <!-- Data Section -->
     <section class="data-section">
         <div class="data-grid">
-            <!-- Line Details Table -->
-            <div class="data-card">
+            <!-- 仅保留线路客流表格，点击总客流卡片可查看占比弹窗 -->
+            <div class="data-card" style="grid-column: 1 / -1;">
                 <div class="data-card-title">
                     <span id="selectedDateLabel">各线路客流</span>
-                    <span class="data-card-badge">按客流排序</span>
+                    <span class="data-card-badge">点击总客流查看占比</span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="data-table">
@@ -118,17 +125,26 @@
                     </table>
                 </div>
             </div>
-            
-            <!-- Pie Chart -->
-            <div class="data-card">
-                <div class="data-card-title">
-                    <span id="pieDateLabel">线路客流占比</span>
-                    <span class="data-card-badge">可视化</span>
-                </div>
-                <div class="chart-container" id="pieChart"></div>
-            </div>
         </div>
     </section>
+
+    <!-- 线路占比弹窗 -->
+    <div id="lineShareModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4" onclick="closeLineShare()">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6" onclick="event.stopPropagation()" style="animation: fadeInUp 0.3s ease;">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold" id="modalTitle">线路占比</h3>
+                <button onclick="closeLineShare()" class="p-2 hover:bg-gray-100 rounded-full transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="modalPieChart" style="height: 350px;"></div>
+            <div class="mt-4 text-center text-sm" style="color: var(--apple-text-secondary);">
+                点击外部区域或右上角关闭
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">
