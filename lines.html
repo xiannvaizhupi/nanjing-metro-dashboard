@@ -79,7 +79,7 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
-            <div class="footer-title">🚇 南京地铁</div>
+            <div class="footer-title">南京地铁</div>
             <p class="footer-text">持续更新 · 数据来源：南京地铁官方微博</p>
         </div>
     </footer>
@@ -109,6 +109,7 @@
         let currentLineId = 'L1';
         let lineTrendChart = null;
         let currentLineTrendRange = 'all';
+        const ALL_LINES_ID = 'ALL';
 
         // Mobile menu
         function toggleMobileMenu() {
@@ -152,7 +153,16 @@
 
         function initLineSelector() {
             const container = document.getElementById('lineSelector');
-            container.innerHTML = linesInfo.map(line => `
+            let html = `
+                <button onclick="selectLine('${ALL_LINES_ID}')" 
+                    class="line-btn px-5 py-2.5 rounded-full font-medium transition-all duration-300"
+                    data-line="${ALL_LINES_ID}"
+                    style="background-color: ${currentLineId === ALL_LINES_ID ? '#007AFF' : '#f5f5f7'}; 
+                           color: ${currentLineId === ALL_LINES_ID ? 'white' : '#1d1d1f'};">
+                    所有线路
+                </button>
+            `;
+            html += linesInfo.map(line => `
                 <button onclick="selectLine('${line.id}')" 
                     class="line-btn px-5 py-2.5 rounded-full font-medium transition-all duration-300"
                     data-line="${line.id}"
@@ -162,23 +172,43 @@
                 </button>
             `).join('');
             
+            container.innerHTML = html;
             updateSelectedLineName();
+            updateStatsVisibility();
         }
 
         function updateSelectedLineName() {
-            const lineInfo = linesInfo.find(l => l.id === currentLineId);
-            document.getElementById('selectedLineName').textContent = lineInfo ? lineInfo.name : '--';
-            document.getElementById('chartLineName').textContent = lineInfo ? lineInfo.name : '线路';
+            if (currentLineId === ALL_LINES_ID) {
+                document.getElementById('selectedLineName').textContent = '所有线路';
+                document.getElementById('chartLineName').textContent = '所有线路';
+            } else {
+                const lineInfo = linesInfo.find(l => l.id === currentLineId);
+                document.getElementById('selectedLineName').textContent = lineInfo ? lineInfo.name : '--';
+                document.getElementById('chartLineName').textContent = lineInfo ? lineInfo.name : '线路';
+            }
+        }
+
+        function updateStatsVisibility() {
+            const statsSection = document.getElementById('lineStats');
+            if (currentLineId === ALL_LINES_ID) {
+                statsSection.style.display = 'none';
+            } else {
+                statsSection.style.display = 'grid';
+            }
         }
 
         function selectLine(lineId) {
             currentLineId = lineId;
-            const lineInfo = linesInfo.find(l => l.id === lineId);
             
             document.querySelectorAll('.line-btn').forEach(btn => {
-                const line = linesInfo.find(l => l.id === btn.dataset.line);
-                if (btn.dataset.line === lineId) {
-                    btn.style.backgroundColor = line.color;
+                const btnLineId = btn.dataset.line;
+                if (btnLineId === currentLineId) {
+                    if (btnLineId === ALL_LINES_ID) {
+                        btn.style.backgroundColor = '#007AFF';
+                    } else {
+                        const line = linesInfo.find(l => l.id === btnLineId);
+                        btn.style.backgroundColor = line ? line.color : '#007AFF';
+                    }
                     btn.style.color = 'white';
                     btn.style.transform = 'scale(1.05)';
                 } else {
@@ -189,7 +219,10 @@
             });
             
             updateSelectedLineName();
-            updateLineStats();
+            updateStatsVisibility();
+            if (currentLineId !== ALL_LINES_ID) {
+                updateLineStats();
+            }
             updateLineTrendChart();
         }
 
@@ -201,6 +234,8 @@
         }
 
         function updateLineStats() {
+            if (currentLineId === ALL_LINES_ID) return;
+            
             const lineInfo = linesInfo.find(l => l.id === currentLineId);
             const rangeData = getLineRangeData();
             const values = rangeData.map(d => d.lines[currentLineId] || 0).filter(v => v > 0);
@@ -241,85 +276,158 @@
         }
 
         function updateLineTrendChart() {
-            const lineInfo = linesInfo.find(l => l.id === currentLineId);
             const filteredData = getLineRangeData();
-            
             const dates = filteredData.map(d => d.date.slice(5));
-            const values = filteredData.map(d => d.lines[currentLineId] || 0);
             
-            const option = {
-                tooltip: {
-                    trigger: 'axis',
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                    borderColor: '#e0e0e0',
-                    textStyle: { color: '#1d1d1f' },
-                    formatter: function(params) {
-                        const date = params[0].name;
-                        const value = params[0].value;
-                        return `<div style="padding: 8px;">
-                            <div style="font-weight: 600; margin-bottom: 4px;">${date}</div>
-                            <div><span style="display: inline-block; width: 10px; height: 10px; background: ${lineInfo.color}; border-radius: 50%; margin-right: 6px;"></span>${lineInfo.name}: <span style="font-weight: 700; color: ${lineInfo.color};">${value}万</span></div>
-                        </div>`;
-                    }
-                },
-                grid: {
-                    left: '3%',
-                    right: '4%',
-                    bottom: '15%',
-                    top: '10%',
-                    containLabel: true
-                },
-                xAxis: {
-                    type: 'category',
-                    data: dates,
-                    axisLine: { lineStyle: { color: '#e0e0e0' } },
-                    axisLabel: { color: '#86868b', rotate: 45 }
-                },
-                yAxis: {
-                    type: 'value',
-                    name: '万人次',
-                    nameTextStyle: { color: '#86868b' },
-                    axisLine: { show: false },
-                    splitLine: { lineStyle: { color: '#f0f0f0' } },
-                    axisLabel: { color: '#86868b' }
-                },
-                dataZoom: [
-                    { type: 'inside', start: 0, end: 100 },
-                    {
-                        type: 'slider',
-                        start: 0,
-                        end: 100,
-                        height: 20,
-                        bottom: 5,
-                        borderColor: 'transparent',
-                        backgroundColor: '#f5f5f7',
-                        fillerColor: 'rgba(120, 120, 128, 0.25)',
-                        handleStyle: { color: '#787880', borderColor: '#787880' }
-                    }
-                ],
-                series: [{
-                    data: values,
+            let option;
+            
+            if (currentLineId === ALL_LINES_ID) {
+                // Show all lines
+                const seriesData = linesInfo.map((line, index) => ({
+                    name: line.name,
                     type: 'line',
                     smooth: 0.6,
                     symbol: 'circle',
-                    symbolSize: 6,
-                    lineStyle: { color: lineInfo.color, width: 3 },
-                    itemStyle: { color: lineInfo.color },
-                    areaStyle: {
-                        color: {
-                            type: 'linear',
-                            x: 0, y: 0, x2: 0, y2: 1,
-                            colorStops: [
-                                { offset: 0, color: lineInfo.color + '40' },
-                                { offset: 1, color: lineInfo.color + '05' }
-                            ]
+                    symbolSize: 4,
+                    lineStyle: { color: line.color, width: 2 },
+                    itemStyle: { color: line.color },
+                    emphasis: { itemStyle: { symbolSize: 6 }, lineStyle: { width: 3 } },
+                    animationDuration: 2000,
+                    animationEasing: 'cubicOut',
+                    data: filteredData.map(d => d.lines[line.id] || 0)
+                }));
+                
+                option = {
+                    tooltip: {
+                        trigger: 'axis',
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        borderColor: '#e0e0e0',
+                        textStyle: { color: '#1d1d1f' }
+                    },
+                    legend: {
+                        type: 'scroll',
+                        orient: 'vertical',
+                        right: '2%',
+                        top: 'center',
+                        textStyle: { color: '#1d1d1f', fontSize: 11 },
+                        itemGap: 6
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '15%',
+                        bottom: '15%',
+                        top: '10%',
+                        containLabel: true
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: dates,
+                        axisLine: { lineStyle: { color: '#e0e0e0' } },
+                        axisLabel: { color: '#86868b', rotate: 45 }
+                    },
+                    yAxis: {
+                        type: 'value',
+                        name: '万人次',
+                        nameTextStyle: { color: '#86868b' },
+                        axisLine: { show: false },
+                        splitLine: { lineStyle: { color: '#f0f0f0' } },
+                        axisLabel: { color: '#86868b' }
+                    },
+                    dataZoom: [
+                        { type: 'inside', start: 0, end: 100 },
+                        {
+                            type: 'slider',
+                            start: 0,
+                            end: 100,
+                            height: 20,
+                            bottom: 5,
+                            borderColor: 'transparent',
+                            backgroundColor: '#f5f5f7',
+                            fillerColor: 'rgba(120, 120, 128, 0.25)',
+                            handleStyle: { color: '#787880', borderColor: '#787880' }
+                        }
+                    ],
+                    series: seriesData
+                };
+            } else {
+                // Show single line
+                const lineInfo = linesInfo.find(l => l.id === currentLineId);
+                const values = filteredData.map(d => d.lines[currentLineId] || 0);
+                
+                option = {
+                    tooltip: {
+                        trigger: 'axis',
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        borderColor: '#e0e0e0',
+                        textStyle: { color: '#1d1d1f' },
+                        formatter: function(params) {
+                            const date = params[0].name;
+                            const value = params[0].value;
+                            return `<div style="padding: 8px;">
+                                <div style="font-weight: 600; margin-bottom: 4px;">${date}</div>
+                                <div><span style="display: inline-block; width: 10px; height: 10px; background: ${lineInfo.color}; border-radius: 50%; margin-right: 6px;"></span>${lineInfo.name}: <span style="font-weight: 700; color: ${lineInfo.color};">${value}万</span></div>
+                            </div>`;
                         }
                     },
-                    emphasis: { itemStyle: { symbolSize: 10 } },
-                    animationDuration: 2000,
-                    animationEasing: 'cubicOut'
-                }]
-            };
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '15%',
+                        top: '10%',
+                        containLabel: true
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: dates,
+                        axisLine: { lineStyle: { color: '#e0e0e0' } },
+                        axisLabel: { color: '#86868b', rotate: 45 }
+                    },
+                    yAxis: {
+                        type: 'value',
+                        name: '万人次',
+                        nameTextStyle: { color: '#86868b' },
+                        axisLine: { show: false },
+                        splitLine: { lineStyle: { color: '#f0f0f0' } },
+                        axisLabel: { color: '#86868b' }
+                    },
+                    dataZoom: [
+                        { type: 'inside', start: 0, end: 100 },
+                        {
+                            type: 'slider',
+                            start: 0,
+                            end: 100,
+                            height: 20,
+                            bottom: 5,
+                            borderColor: 'transparent',
+                            backgroundColor: '#f5f5f7',
+                            fillerColor: 'rgba(120, 120, 128, 0.25)',
+                            handleStyle: { color: '#787880', borderColor: '#787880' }
+                        }
+                    ],
+                    series: [{
+                        data: values,
+                        type: 'line',
+                        smooth: 0.6,
+                        symbol: 'circle',
+                        symbolSize: 6,
+                        lineStyle: { color: lineInfo.color, width: 3 },
+                        itemStyle: { color: lineInfo.color },
+                        areaStyle: {
+                            color: {
+                                type: 'linear',
+                                x: 0, y: 0, x2: 0, y2: 1,
+                                colorStops: [
+                                    { offset: 0, color: lineInfo.color + '40' },
+                                    { offset: 1, color: lineInfo.color + '05' }
+                                ]
+                            }
+                        },
+                        emphasis: { itemStyle: { symbolSize: 10 } },
+                        animationDuration: 2000,
+                        animationEasing: 'cubicOut'
+                    }]
+                };
+            }
             
             lineTrendChart.setOption(option, true);
         }
@@ -329,7 +437,9 @@
             document.querySelectorAll('.chart-tab').forEach(tab => tab.classList.remove('active'));
             event.target.classList.add('active');
             updateLineTrendChart();
-            updateLineStats();
+            if (currentLineId !== ALL_LINES_ID) {
+                updateLineStats();
+            }
         }
     </script>
 </body>
