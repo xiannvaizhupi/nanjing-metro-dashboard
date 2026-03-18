@@ -190,10 +190,32 @@
 
         function updateStatsVisibility() {
             const statsSection = document.getElementById('lineStats');
+            const chartCard = document.querySelector('.charts-section .chart-card');
+            const chartContainer = document.getElementById('lineTrendChart');
+            
             if (currentLineId === ALL_LINES_ID) {
                 statsSection.style.display = 'none';
+                // Increase chart height and padding when stats are hidden
+                if (chartCard) {
+                    chartCard.style.paddingTop = '32px';
+                }
+                if (chartContainer) {
+                    chartContainer.style.height = '500px';
+                }
+                if (lineTrendChart) {
+                    lineTrendChart.resize();
+                }
             } else {
                 statsSection.style.display = 'grid';
+                if (chartCard) {
+                    chartCard.style.paddingTop = '0';
+                }
+                if (chartContainer) {
+                    chartContainer.style.height = '400px';
+                }
+                if (lineTrendChart) {
+                    lineTrendChart.resize();
+                }
             }
         }
 
