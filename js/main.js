@@ -85,7 +85,6 @@ function showPredictionFactors(type) {
         if (weather) {
             html += `<li style="margin-bottom: 8px;"><strong>天气：</strong>${weather.is_rainy ? '有雨' : (weather.is_snow ? '下雪' : '晴')}</li>`;
             html += `<li style="margin-bottom: 8px;"><strong>温度：</strong>${(weather.temp_min ?? '--').toFixed(0)}°C ~ ${(weather.temp_max ?? '--').toFixed(0)}°C</li>`;
-            html += `<li style="margin-bottom: 8px;"><strong>天气数据：</strong>${weather.source === 'actual' ? '实际数据' : '历史均值'}</li>`;
         }
         
         html += '</ul></div>';
