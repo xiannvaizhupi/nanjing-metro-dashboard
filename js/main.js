@@ -661,6 +661,44 @@ function updatePredictions() {
     if (tomorrowNoteEl) {
         tomorrowNoteEl.textContent = tomorrowResult ? `预测 · ${tomorrowStr}` : '数据不足';
     }
+
+    // 更新预测变化率
+    const todayPredChangeEl = document.getElementById('todayPredChange');
+    const tomorrowPredChangeEl = document.getElementById('tomorrowPredChange');
+
+    // 获取昨日数据作为对比基准
+    const yesterdayStr = addDays(todayStr, -1);
+    const yesterdayTotal = totalsByDate.get(yesterdayStr);
+
+    if (todayResult && yesterdayTotal) {
+        const changeValue = (todayResult.value - yesterdayTotal) / yesterdayTotal * 100;
+        const change = changeValue.toFixed(1);
+        if (changeValue > 0) {
+            todayPredChangeEl.innerHTML = `<span>↗ +${change}%</span>`;
+            todayPredChangeEl.className = 'stat-indicator up';
+        } else if (changeValue < 0) {
+            todayPredChangeEl.innerHTML = `<span>↘ ${change}%</span>`;
+            todayPredChangeEl.className = 'stat-indicator down';
+        } else {
+            todayPredChangeEl.innerHTML = `<span>→ 0%</span>`;
+            todayPredChangeEl.className = 'stat-indicator';
+        }
+    }
+
+    if (tomorrowResult && yesterdayTotal) {
+        const changeValue = (tomorrowResult.value - yesterdayTotal) / yesterdayTotal * 100;
+        const change = changeValue.toFixed(1);
+        if (changeValue > 0) {
+            tomorrowPredChangeEl.innerHTML = `<span>↗ +${change}%</span>`;
+            tomorrowPredChangeEl.className = 'stat-indicator up';
+        } else if (changeValue < 0) {
+            tomorrowPredChangeEl.innerHTML = `<span>↘ ${change}%</span>`;
+            tomorrowPredChangeEl.className = 'stat-indicator down';
+        } else {
+            tomorrowPredChangeEl.innerHTML = `<span>→ 0%</span>`;
+            tomorrowPredChangeEl.className = 'stat-indicator';
+        }
+    }
 }
 
 // 图表初始化
