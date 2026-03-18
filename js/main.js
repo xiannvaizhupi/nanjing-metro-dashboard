@@ -39,6 +39,69 @@ function closeLineShare() {
     document.body.style.overflow = '';
 }
 
+// 显示预测因素弹窗
+function showPredictionFactors(type) {
+    const modal = document.getElementById('predictionModal');
+    const title = document.getElementById('predictionModalTitle');
+    const factorsDiv = document.getElementById('predictionFactors');
+    
+    let dateStr, result;
+    const totalsByDate = new Map(metroData.map(item => [item.date, item.total]));
+    
+    if (type === 'today') {
+        dateStr = formatLocalDate(new Date());
+        title.textContent = '今日预测因素';
+        result = predictForDate(dateStr, totalsByDate);
+    } else {
+        dateStr = addDays(formatLocalDate(new Date()), 1);
+        title.textContent = '明日预测因素';
+        result = predictForDate(dateStr, totalsByDate);
+    }
+    
+    if (!result) {
+        factorsDiv.innerHTML = '<p>数据不足，无法分析预测因素</p>';
+    } else {
+        const weather = getWeatherForDate(dateStr);
+        const dateObj = new Date(`${dateStr}T00:00:00`);
+        const isWeekend = [0, 6].includes(dateObj.getDay());
+        const holidayFlags = getHolidayFlags(dateStr);
+        
+        let html = '<div style="margin-bottom: 16px;">';
+        html += `<p><strong>预测日期：</strong>${dateStr}</p>`;
+        html += `<p><strong>预测客流：</strong><span style="font-weight: 700; color: #007AFF;">${result.value.toFixed(1)}万</span></p>`;
+        html += '</div>';
+        
+        html += '<div style="background: #f5f5f7; border-radius: 10px; padding: 16px;">';
+        html += '<p style="font-weight: 600; margin-bottom: 12px;">影响因素：</p>';
+        html += '<ul style="list-style: none; padding: 0; margin: 0;">';
+        html += `<li style="margin-bottom: 8px;">📅 <strong>日期类型：</strong>${isWeekend ? '周末' : '工作日'}</li>`;
+        
+        if (holidayFlags.isHoliday) {
+            html += `<li style="margin-bottom: 8px;">🎉 <strong>节假日：</strong>是</li>`;
+        } else if (holidayFlags.isHolidayEve) {
+            html += `<li style="margin-bottom: 8px;">🎊 <strong>节假日前夕：</strong>是</li>`;
+        }
+        
+        if (weather) {
+            html += `<li style="margin-bottom: 8px;">🌤️ <strong>天气：</strong>${weather.is_rainy ? '有雨' : (weather.is_snow ? '下雪' : '晴')}</li>`;
+            html += `<li style="margin-bottom: 8px;">🌡️ <strong>温度：</strong>${(weather.temp_min ?? '--').toFixed(0)}°C ~ ${(weather.temp_max ?? '--').toFixed(0)}°C</li>`;
+            html += `<li style="margin-bottom: 8px;">📊 <strong>天气数据：</strong>${weather.source === 'actual' ? '实际数据' : '历史均值'}</li>`;
+        }
+        
+        html += '</ul></div>';
+        factorsDiv.innerHTML = html;
+    }
+    
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closePredictionFactors() {
+    const modal = document.getElementById('predictionModal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
 function updateModalPieChart(data) {
     if (!modalPieChart || !data) return;
     
@@ -474,7 +537,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         setTimeout(() => {
             updateDashboard();
             initCharts();
-            renderLinesTable();
         }, 500);
     } catch (error) {
         console.error('数据加载失败:', error);
@@ -496,23 +558,43 @@ function updateDashboard() {
     const latest = metroData[metroData.length - 1];
     selectDate(latest, { labelText: '较昨日' });
     updatePredictions();
-
-    const currentMonth = latest.date.slice(0, 7);
-    const currentMonthData = metroData.filter(item => item.date.startsWith(currentMonth));
-
-    if (currentMonthData.length > 0) {
-        const maxItem = currentMonthData.reduce((max, item) => item.total > max.total ? item : max, currentMonthData[0]);
-        document.getElementById('monthMax').textContent = maxItem.total.toFixed(1) + '万';
-        document.getElementById('monthMaxDate').textContent = maxItem.date;
-    }
-
-    if (currentMonthData.length > 0) {
-        const avg = currentMonthData.reduce((sum, item) => sum + item.total, 0) / currentMonthData.length;
-        document.getElementById('monthAvg').textContent = avg.toFixed(1);
-    }
+    updateRangeStats();
 
     const displayDate = lastUpdated && lastUpdated.includes(' ') ? lastUpdated.split(' ')[0] : lastUpdated;
     updateLastUpdated(displayDate || latest.date);
+}
+
+function updateRangeStats() {
+    if (!metroData || metroData.length === 0) return;
+    
+    let filteredData = metroData;
+    if (currentTrendRange === 'week') filteredData = metroData.slice(-7);
+    else if (currentTrendRange === 'month') filteredData = metroData.slice(-30);
+    else if (currentTrendRange === 'year') filteredData = metroData.slice(-365);
+    
+    if (filteredData.length === 0) return;
+    
+    const values = filteredData.map(d => d.total);
+    const maxItem = filteredData.reduce((max, item) => item.total > max.total ? item : max, filteredData[0]);
+    const avg = values.reduce((a, b) => a + b, 0) / values.length;
+    
+    let rangeLabel = '全部';
+    if (currentTrendRange === 'week') rangeLabel = '近一周';
+    else if (currentTrendRange === 'month') rangeLabel = '近一月';
+    else if (currentTrendRange === 'year') rangeLabel = '近一年';
+    
+    const rangeMaxLabel = document.getElementById('rangeMaxLabel');
+    const rangeAvgLabel = document.getElementById('rangeAvgLabel');
+    if (rangeMaxLabel) rangeMaxLabel.textContent = rangeLabel + '最高';
+    if (rangeAvgLabel) rangeAvgLabel.textContent = rangeLabel + '平均';
+    
+    const rangeMaxEl = document.getElementById('rangeMax');
+    const rangeMaxDateEl = document.getElementById('rangeMaxDate');
+    const rangeAvgEl = document.getElementById('rangeAvg');
+    
+    if (rangeMaxEl) rangeMaxEl.textContent = maxItem.total.toFixed(1);
+    if (rangeMaxDateEl) rangeMaxDateEl.textContent = maxItem.date;
+    if (rangeAvgEl) rangeAvgEl.textContent = avg.toFixed(1);
 }
 
 function updatePredictions() {
@@ -616,9 +698,9 @@ function initTrendChart() {
                 height: 20,
                 bottom: 5,
                 borderColor: 'transparent',
-                backgroundColor: '#f5f5f7',
-                fillerColor: 'rgba(0, 122, 255, 0.2)',
-                handleStyle: { color: '#007AFF', borderColor: '#007AFF' },
+                backgroundColor: '#e8e8ed',
+                fillerColor: 'rgba(120, 120, 128, 0.25)',
+                handleStyle: { color: '#787880', borderColor: '#787880' },
                 textStyle: { color: '#86868b' }
             }
         ],
@@ -701,6 +783,7 @@ function setTrendRange(range) {
     });
     event.target.classList.add('active');
     updateTrendChart();
+    updateRangeStats();
 }
 
 function initPieChart() {
@@ -776,7 +859,6 @@ function selectDate(data, options = {}) {
         updateChangeRate(data, previous, labelText);
     }
 
-    renderLinesTable();
     updatePieChart();
 }
 

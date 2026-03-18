@@ -57,26 +57,33 @@
                     </svg>
                 </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">本月最高</div>
-                <div class="stat-value" id="monthMax">--</div>
-                <div class="stat-note" id="monthMaxDate">--</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">本月平均</div>
-                <div class="stat-value" id="monthAvg">--</div>
-                <div class="stat-note">万人次/日</div>
-            </div>
-            <div class="stat-card">
+            <!-- 今日预测 (点击查看影响因素) -->
+            <div class="stat-card" onclick="showPredictionFactors('today')" style="cursor: pointer;">
                 <div class="stat-label">今日预测</div>
                 <div class="stat-value" id="predictedTotal">--</div>
-                <div class="stat-note" id="predictedNote">预测中...</div>
+                <div class="stat-note" id="predictedNote">点击查看因素</div>
             </div>
-            <div class="stat-card">
+            <!-- 明日预测 (点击查看影响因素) -->
+            <div class="stat-card" onclick="showPredictionFactors('tomorrow')" style="cursor: pointer;">
                 <div class="stat-label">明日预测</div>
                 <div class="stat-value" id="predictedTomorrowTotal">--</div>
-                <div class="stat-note" id="predictedTomorrowNote">预测中...</div>
+                <div class="stat-note" id="predictedTomorrowNote">点击查看因素</div>
             </div>
+        </div>
+        <div class="stats-grid" style="margin-top: 16px;">
+            <!-- 趋势内最高 (跟随趋势图范围) -->
+            <div class="stat-card">
+                <div class="stat-label" id="rangeMaxLabel">当前范围最高</div>
+                <div class="stat-value" id="rangeMax">--</div>
+                <div class="stat-note" id="rangeMaxDate">--</div>
+            </div>
+            <!-- 趋势内平均 (跟随趋势图范围) -->
+            <div class="stat-card">
+                <div class="stat-label" id="rangeAvgLabel">当前范围平均</div>
+                <div class="stat-value" id="rangeAvg">--</div>
+                <div class="stat-note">万人次/日</div>
+            </div>
+            <!-- 数据更新 -->
             <div class="stat-card">
                 <div class="stat-label">数据更新</div>
                 <div class="stat-value text-sm" id="lastUpdate">--</div>
@@ -101,32 +108,8 @@
         </div>
     </section>
 
-    <!-- Data Section -->
-    <section class="data-section">
-        <div class="data-grid">
-            <!-- 仅保留线路客流表格，点击总客流卡片可查看占比弹窗 -->
-            <div class="data-card" style="grid-column: 1 / -1;">
-                <div class="data-card-title">
-                    <span id="selectedDateLabel">各线路客流</span>
-                    <span class="data-card-badge">点击总客流查看占比</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>线路</th>
-                                <th>客流(万)</th>
-                                <th>占比</th>
-                            </tr>
-                        </thead>
-                        <tbody id="linesTable">
-                            <!-- Dynamic content -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </section>
+    <!-- 仅保留各线路客流表格，点击总客流卡片可查看占比弹窗 -->
+    <!-- 删除了单独的表格模块，线路客流在表格中查看 -->
 
     <!-- 线路占比弹窗 -->
     <div id="lineShareModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4" onclick="closeLineShare()">
@@ -142,6 +125,28 @@
             <div id="modalPieChart" style="height: 350px;"></div>
             <div class="mt-4 text-center text-sm" style="color: var(--apple-text-secondary);">
                 点击外部区域或右上角关闭
+            </div>
+        </div>
+    </div>
+
+    <!-- 预测因素弹窗 -->
+    <div id="predictionModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4" onclick="closePredictionFactors()">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6" onclick="event.stopPropagation()" style="animation: fadeInUp 0.3s ease;">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold" id="predictionModalTitle">预测因素</h3>
+                <button onclick="closePredictionFactors()" class="p-2 hover:bg-gray-100 rounded-full transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="predictionFactors" style="color: var(--apple-text-secondary); line-height: 1.8;">
+                <!-- Dynamic content -->
+            </div>
+            <div class="mt-6 pt-4 border-t" style="border-color: #f0f0f0;">
+                <p class="text-xs" style="color: var(--apple-text-secondary);">
+                    预测基于历史同期数据、天气情况、节假日等因素综合计算
+                </p>
             </div>
         </div>
     </div>

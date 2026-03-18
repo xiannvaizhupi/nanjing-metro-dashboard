@@ -846,6 +846,28 @@ body {
         color: #f5f5f7;
     }
     
+    #predictionModal > div {
+        background: #1d1d1f;
+        border: 1px solid #424245;
+    }
+    
+    #predictionModal h3 {
+        color: #f5f5f7;
+    }
+    
+    #predictionModal p,
+    #predictionModal li {
+        color: #86868b !important;
+    }
+    
+    #predictionModal strong {
+        color: #f5f5f7 !important;
+    }
+    
+    #predictionModal div[style*="background"] {
+        background: #2d2d2f !important;
+    }
+    
     input, select, button {
         background: #1d1d1f;
         border-color: #424245;
