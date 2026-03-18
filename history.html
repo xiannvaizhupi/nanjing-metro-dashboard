@@ -84,7 +84,7 @@
             </div>
             <div class="overflow-x-auto" style="max-height: 600px; overflow-y: auto;">
                 <table class="data-table" id="dataTable" style="min-width: 100%;">
-                    <thead id="tableHead" style="position: sticky; top: 0; z-index: 10; background: white;">
+                    <thead id="tableHead" style="position: sticky; top: 0; z-index: 10; background: white; transition: background 0.2s;">
                         <!-- Dynamic content -->
                     </thead>
                     <tbody id="tableBody">
@@ -172,6 +172,13 @@
         input:focus, select:focus {
             border-color: var(--apple-blue) !important;
             box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+        }
+        
+        /* Dark mode table header */
+        @media (prefers-color-scheme: dark) {
+            #tableHead {
+                background: #1c1c1e !important;
+            }
         }
     </style>
 

@@ -74,18 +74,18 @@ function showPredictionFactors(type) {
         html += '<div style="background: #f5f5f7; border-radius: 10px; padding: 16px;">';
         html += '<p style="font-weight: 600; margin-bottom: 12px;">影响因素：</p>';
         html += '<ul style="list-style: none; padding: 0; margin: 0;">';
-        html += `<li style="margin-bottom: 8px;">📅 <strong>日期类型：</strong>${isWeekend ? '周末' : '工作日'}</li>`;
+        html += `<li style="margin-bottom: 8px;"><strong>日期类型：</strong>${isWeekend ? '周末' : '工作日'}</li>`;
         
         if (holidayFlags.isHoliday) {
-            html += `<li style="margin-bottom: 8px;">🎉 <strong>节假日：</strong>是</li>`;
+            html += `<li style="margin-bottom: 8px;"><strong>节假日：</strong>是</li>`;
         } else if (holidayFlags.isHolidayEve) {
-            html += `<li style="margin-bottom: 8px;">🎊 <strong>节假日前夕：</strong>是</li>`;
+            html += `<li style="margin-bottom: 8px;"><strong>节假日前夕：</strong>是</li>`;
         }
         
         if (weather) {
-            html += `<li style="margin-bottom: 8px;">🌤️ <strong>天气：</strong>${weather.is_rainy ? '有雨' : (weather.is_snow ? '下雪' : '晴')}</li>`;
-            html += `<li style="margin-bottom: 8px;">🌡️ <strong>温度：</strong>${(weather.temp_min ?? '--').toFixed(0)}°C ~ ${(weather.temp_max ?? '--').toFixed(0)}°C</li>`;
-            html += `<li style="margin-bottom: 8px;">📊 <strong>天气数据：</strong>${weather.source === 'actual' ? '实际数据' : '历史均值'}</li>`;
+            html += `<li style="margin-bottom: 8px;"><strong>天气：</strong>${weather.is_rainy ? '有雨' : (weather.is_snow ? '下雪' : '晴')}</li>`;
+            html += `<li style="margin-bottom: 8px;"><strong>温度：</strong>${(weather.temp_min ?? '--').toFixed(0)}°C ~ ${(weather.temp_max ?? '--').toFixed(0)}°C</li>`;
+            html += `<li style="margin-bottom: 8px;"><strong>天气数据：</strong>${weather.source === 'actual' ? '实际数据' : '历史均值'}</li>`;
         }
         
         html += '</ul></div>';
