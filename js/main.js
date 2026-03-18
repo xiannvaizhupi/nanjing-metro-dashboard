@@ -674,11 +674,11 @@ function updatePredictions() {
         const changeValue = (todayResult.value - yesterdayTotal) / yesterdayTotal * 100;
         const change = changeValue.toFixed(1);
         if (changeValue > 0) {
-            todayPredChangeEl.innerHTML = `<span class="text-red-500">↗ +${change}%</span>`;
+            todayPredChangeEl.innerHTML = `<span class="text-red-500">+${change}%</span><br><span style="color: #ef4444;">↗</span>`;
         } else if (changeValue < 0) {
-            todayPredChangeEl.innerHTML = `<span class="text-green-500">↘ ${change}%</span>`;
+            todayPredChangeEl.innerHTML = `<span class="text-green-500">${change}%</span><br><span style="color: #22c55e;">↘</span>`;
         } else {
-            todayPredChangeEl.innerHTML = `<span class="text-gray-500">→ ${change}%</span>`;
+            todayPredChangeEl.innerHTML = `<span class="text-gray-500">0%</span>`;
         }
     }
 
@@ -687,11 +687,11 @@ function updatePredictions() {
         const changeValue = (tomorrowResult.value - todayResult.value) / todayResult.value * 100;
         const change = changeValue.toFixed(1);
         if (changeValue > 0) {
-            tomorrowPredChangeEl.innerHTML = `<span class="text-red-500">↗ +${change}%</span>`;
+            tomorrowPredChangeEl.innerHTML = `<span class="text-red-500">+${change}%</span><br><span style="color: #ef4444;">↗</span>`;
         } else if (changeValue < 0) {
-            tomorrowPredChangeEl.innerHTML = `<span class="text-green-500">↘ ${change}%</span>`;
+            tomorrowPredChangeEl.innerHTML = `<span class="text-green-500">${change}%</span><br><span style="color: #22c55e;">↘</span>`;
         } else {
-            tomorrowPredChangeEl.innerHTML = `<span class="text-gray-500">→ ${change}%</span>`;
+            tomorrowPredChangeEl.innerHTML = `<span class="text-gray-500">0%</span>`;
         }
     }
 }
