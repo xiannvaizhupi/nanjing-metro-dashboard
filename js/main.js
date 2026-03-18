@@ -14,8 +14,6 @@ let selectedDate = null;
 let lastUpdated = null;
 
 // 显示线路占比弹窗
-let modalPieChart = null;
-
 function showLineShare() {
     const modal = document.getElementById('lineShareModal');
     const modalTitle = document.getElementById('modalTitle');
