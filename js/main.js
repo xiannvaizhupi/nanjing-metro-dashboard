@@ -565,11 +565,10 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 function updateLastUpdated(text) {
-    // 固定显示 2026-03-18
     const targets = document.querySelectorAll('[id]');
     targets.forEach(el => {
-        if (el.id === 'lastUpdate' || el.id === 'footerUpdate') {
-            el.textContent = '2026-03-18';
+        if (el.getAttribute('data-last-update') !== null || el.id === 'lastUpdate' || el.id === 'footerUpdate') {
+            el.textContent = text || '--';
         }
     });
 }
