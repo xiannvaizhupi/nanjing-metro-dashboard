@@ -39,6 +39,13 @@ function closeLineShare() {
     document.body.style.overflow = '';
 }
 
+// 监听颜色方案变化，更新饼图
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (selectedDateData) {
+        updateModalPieChart(selectedDateData);
+    }
+});
+
 // 显示预测因素弹窗
 function showPredictionFactors(type) {
     const modal = document.getElementById('predictionModal');
@@ -107,20 +114,35 @@ function updateModalPieChart(data) {
     const pieData = Object.entries(data.lines)
         .map(([lineId, value]) => {
             const lineInfo = linesInfo.find(l => l.id === lineId);
+            // 简化图例名称：提取线路编号
+            let shortName = lineId.replace(/^L/, '').replace(/^S/, 'S');
+            if (lineInfo && lineInfo.name) {
+                const match = lineInfo.name.match(/(\d+线|S\d+)/);
+                if (match) {
+                    shortName = match[1];
+                }
+            }
             return {
-                name: lineInfo ? lineInfo.name : lineId,
+                name: shortName,
                 value: value,
                 itemStyle: { color: lineInfo ? lineInfo.color : '#999' }
             };
         })
         .sort((a, b) => b.value - a.value);
+    
+    // 检测深色模式
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const legendTextColor = isDark ? '#f5f5f7' : '#1d1d1f';
+    const tooltipBg = isDark ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)';
+    const tooltipBorder = isDark ? '#424245' : '#e0e0e0';
 
     const option = {
         tooltip: {
             trigger: 'item',
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            borderColor: '#e0e0e0',
-            textStyle: { color: '#1d1d1f' },
+            backgroundColor: tooltipBg,
+            borderColor: tooltipBorder,
+            borderWidth: 1,
+            textStyle: { color: legendTextColor },
             formatter: '{b}: {c}万 ({d}%)'
         },
         legend: {
@@ -128,7 +150,7 @@ function updateModalPieChart(data) {
             orient: 'vertical',
             right: '2%',
             top: 'center',
-            textStyle: { color: '#1d1d1f', fontSize: 12 },
+            textStyle: { color: legendTextColor, fontSize: 12 },
             itemGap: 10
         },
         series: [{
