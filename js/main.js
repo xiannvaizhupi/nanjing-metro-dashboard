@@ -549,7 +549,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         holidayEveSet = holidaySets.holidayEveSet;
         regressionModel = trainRidgeModel(metroData, weatherMap);
 
-        lastUpdated = data.metadata.fetched_at || data.metadata.last_updated || '';
+        lastUpdated = data.metadata.last_updated || data.metadata.fetched_at || '';
         const displayDate = lastUpdated.includes(' ') ? lastUpdated.split(' ')[0] : lastUpdated;
         
         updateLastUpdated(displayDate || (metroData[metroData.length - 1] ? metroData[metroData.length - 1].date : '--'));
