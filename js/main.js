@@ -565,12 +565,14 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 function updateLastUpdated(text) {
-    const targets = document.querySelectorAll('[id]');
-    targets.forEach(el => {
-        if (el.getAttribute('data-last-update') !== null || el.id === 'lastUpdate' || el.id === 'footerUpdate' || el.id === 'heroDate') {
-            el.textContent = text || '--';
-        }
-    });
+    const lastUpdateEl = document.getElementById('lastUpdate');
+    const footerUpdateEl = document.getElementById('footerUpdate');
+    const heroDateEl = document.getElementById('heroDate');
+    const displayText = text || '--';
+    
+    if (lastUpdateEl) lastUpdateEl.textContent = displayText;
+    if (footerUpdateEl) footerUpdateEl.textContent = displayText;
+    if (heroDateEl) heroDateEl.textContent = `${displayText} 客流数据`;
 }
 
 function updateDashboard() {
