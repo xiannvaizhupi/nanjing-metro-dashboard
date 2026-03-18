@@ -892,40 +892,43 @@ body {
         color-scheme: dark;
     }
 
-    /* Mobile menu dark mode */
-    #mobileMenu > div,
-    #mobileMenu div[class*="bg-"] {
+/* Mobile menu dark mode */
+@media (prefers-color-scheme: dark) {
+    #mobileMenu .absolute {
         background: #1d1d1f !important;
     }
 
-    #mobileMenu .text-lg {
+    #mobileMenu .absolute .text-lg {
         color: #f5f5f7 !important;
     }
 
-    #mobileMenu a,
-    #mobileMenu span {
+    #mobileMenu .absolute .font-semibold {
         color: #f5f5f7 !important;
     }
 
-    #mobileMenu a[href="index.html"]:not([href*="lines"]):not([href*="history"]) {
+    #mobileMenu .absolute a {
+        background: #2d2d2f !important;
+        color: #f5f5f7 !important;
+    }
+
+    #mobileMenu .absolute a:first-child {
         background: rgba(0, 122, 255, 0.15) !important;
         color: #007AFF !important;
     }
 
-    #mobileMenu a:hover {
-        background: #2d2d2f !important;
+    #mobileMenu .absolute a:hover {
+        background: #3d3d3f !important;
     }
 
-    #mobileMenu button {
+    #mobileMenu .absolute button {
         color: #f5f5f7 !important;
     }
 
-    #mobileMenu svg {
+    #mobileMenu .absolute svg {
         stroke: #f5f5f7 !important;
     }
-    
-    /* Ensure menu panel is dark */
-    #mobileMenu .absolute {
-        background: #1d1d1f !important;
+
+    #mobileMenu .absolute svg path {
+        stroke: #f5f5f7 !important;
     }
 }
