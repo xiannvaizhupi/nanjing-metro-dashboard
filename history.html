@@ -176,8 +176,18 @@
         
         /* Dark mode table header */
         @media (prefers-color-scheme: dark) {
-            #tableHead {
+            #tableHead,
+            #tableHead tr,
+            #tableHead th {
                 background: #1c1c1e !important;
+            }
+            
+            #tableBody tr {
+                background: #1d1d1f;
+            }
+            
+            #tableBody tr:hover {
+                background: #2d2d2f !important;
             }
         }
     </style>

@@ -567,7 +567,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 function updateLastUpdated(text) {
     const targets = document.querySelectorAll('[id]');
     targets.forEach(el => {
-        if (el.getAttribute('data-last-update') !== null || el.id === 'lastUpdate' || el.id === 'footerUpdate') {
+        if (el.getAttribute('data-last-update') !== null || el.id === 'lastUpdate' || el.id === 'footerUpdate' || el.id === 'heroDate') {
             el.textContent = text || '--';
         }
     });

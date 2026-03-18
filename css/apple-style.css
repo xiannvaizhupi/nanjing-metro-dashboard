@@ -893,7 +893,7 @@ body {
     }
 
     /* Mobile menu dark mode */
-    #mobileMenu > div {
+    #mobileMenu .bg-white {
         background: #1d1d1f !important;
     }
 
@@ -905,9 +905,17 @@ body {
         color: #f5f5f7 !important;
     }
 
-    #mobileMenu a.nav-link.active {
-        color: #007AFF !important;
+    #mobileMenu a[href="index.html"]:not([href*="lines"]):not([href*="history"]) {
         background: rgba(0, 122, 255, 0.15) !important;
+        color: #007AFF !important;
+    }
+
+    #mobileMenu a:hover {
+        background: #2d2d2f !important;
+    }
+
+    #mobileMenu button {
+        color: #f5f5f7;
     }
 
     #mobileMenu svg {
