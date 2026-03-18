@@ -6,150 +6,218 @@
     <title>南京地铁客流数据 | Nanjing Metro Flow</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/apple-style.css">
 </head>
-<body class="bg-gray-50 min-h-screen gh-theme">
-    <!-- 导航栏 -->
-    <nav class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center space-x-3">
-                    <img src="Nanjing_Metro_Logo.svg.png" alt="南京地铁" class="w-10 h-10">
-                    <span class="font-bold text-xl">南京地铁客流数据</span>
-                </div>
-                <!-- 桌面端导航 -->
-                <div class="hidden md:flex space-x-6">
-                    <a href="index.html" class="text-blue-200 font-medium">首页</a>
-                    <a href="lines.html" class="hover:text-blue-200 transition">线路详情</a>
-                    <a href="history.html" class="hover:text-blue-200 transition">历史数据</a>
-                </div>
-                <!-- 移动端汉堡菜单按钮 -->
-                <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg hover:bg-blue-700 transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
-                </button>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">
+                <img src="Nanjing_Metro_Logo.svg.png" alt="南京地铁" class="nav-logo">
+                <span class="nav-title">南京地铁客流</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link active">首页</a>
+                <a href="lines.html" class="nav-link">线路详情</a>
+                <a href="history.html" class="nav-link">历史数据</a>
             </div>
-            <!-- 移动端导航菜单 -->
-            <div id="mobileMenu" class="hidden md:hidden pb-4">
-                <a href="index.html" class="block py-2 px-4 text-blue-200 font-medium bg-blue-700 rounded-lg mb-2">首页</a>
-                <a href="lines.html" class="block py-2 px-4 hover:text-blue-200 hover:bg-blue-700 rounded-lg mb-2 transition">线路详情</a>
-                <a href="history.html" class="block py-2 px-4 hover:text-blue-200 hover:bg-blue-700 rounded-lg transition">历史数据</a>
-            </div>
+            <button class="nav-menu-btn" onclick="toggleMobileMenu()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
         </div>
     </nav>
 
-    <!-- 主要内容 -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- 今日概览卡片 -->
-        <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
-            <div class="bg-white rounded-xl shadow-md p-3 border-l-4 border-blue-500">
-                <p class="text-gray-500 text-sm" id="selectedDateLabel">昨日总客流</p>
-                <p class="text-3xl font-bold text-gray-800 mt-2" id="todayTotal">--</p>
-                <p class="text-sm mt-1" id="todayChange">--</p>
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1 class="hero-title">南京地铁客流数据</h1>
+        <p class="hero-subtitle">实时追踪地铁客流动态，智能预测出行趋势</p>
+        <div class="hero-date">
+            <span class="hero-date-dot"></span>
+            <span id="heroDate">加载中...</span>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-card primary" id="statTotal">
+                <div class="stat-label">昨日总客流</div>
+                <div class="stat-value" id="todayTotal">--</div>
+                <div class="stat-indicator" id="todayChange">--</div>
             </div>
-            <div class="bg-white rounded-xl shadow-md p-3 border-l-4 border-green-500">
-                <p class="text-gray-500 text-sm">本月最高</p>
-                <p class="text-3xl font-bold text-gray-800 mt-2" id="monthMax">--</p>
-                <p class="text-sm text-gray-400 mt-1" id="monthMaxDate">--</p>
+            <div class="stat-card">
+                <div class="stat-label">本月最高</div>
+                <div class="stat-value" id="monthMax">--</div>
+                <div class="stat-note" id="monthMaxDate">--</div>
             </div>
-            <div class="bg-white rounded-xl shadow-md p-3 border-l-4 border-yellow-500">
-                <p class="text-gray-500 text-sm">本月平均</p>
-                <p class="text-3xl font-bold text-gray-800 mt-2" id="monthAvg">--</p>
-                <p class="text-sm text-gray-400 mt-1">万人次/日</p>
+            <div class="stat-card">
+                <div class="stat-label">本月平均</div>
+                <div class="stat-value" id="monthAvg">--</div>
+                <div class="stat-note">万人次/日</div>
             </div>
-            <div class="bg-white rounded-xl shadow-md p-3 border-l-4 border-purple-500">
-                <p class="text-gray-500 text-sm">数据更新</p>
-                <p class="text-lg font-bold text-gray-800 mt-2" data-last-update>--</p>
-                <p class="text-sm text-gray-400 mt-1">每日上午更新</p>
+            <div class="stat-card">
+                <div class="stat-label">今日预测</div>
+                <div class="stat-value" id="predictedTotal">--</div>
+                <div class="stat-note" id="predictedNote">预测中...</div>
             </div>
-            <div class="bg-white rounded-xl shadow-md p-3 border-l-4 border-orange-500">
-                <p class="text-gray-500 text-sm">今日预测</p>
-                <p class="text-3xl font-bold text-gray-800 mt-2" id="predictedTotal">--</p>
-                <p class="text-sm text-gray-400 mt-1" id="predictedChange">--</p>
+            <div class="stat-card">
+                <div class="stat-label">明日预测</div>
+                <div class="stat-value" id="predictedTomorrowTotal">--</div>
+                <div class="stat-note" id="predictedTomorrowNote">预测中...</div>
             </div>
-            <div class="bg-white rounded-xl shadow-md p-3 border-l-4 border-teal-500">
-                <p class="text-gray-500 text-sm">明日预测</p>
-                <p class="text-3xl font-bold text-gray-800 mt-2" id="predictedTomorrowTotal">--</p>
-                <p class="text-sm text-gray-400 mt-1" id="predictedTomorrowNote">--</p>
+            <div class="stat-card">
+                <div class="stat-label">数据更新</div>
+                <div class="stat-value text-sm" id="lastUpdate">--</div>
+                <div class="stat-note">每日上午更新</div>
             </div>
         </div>
+    </section>
 
-        <!-- 图表区域 -->
-        <div class="grid grid-cols-1 gap-6 mb-8">
-            <!-- 总客流趋势 -->
-            <div class="bg-white rounded-xl shadow-md p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-bold text-gray-800">总客流趋势</h2>
-                    <div class="flex space-x-2">
-                        <button onclick="setTrendRange('year')" id="btn-year" class="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700">近一年</button>
-                        <button onclick="setTrendRange('month')" id="btn-month" class="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700">近一个月</button>
-                        <button onclick="setTrendRange('week')" id="btn-week" class="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700">近一周</button>
-                        <button onclick="setTrendRange('all')" id="btn-all" class="px-3 py-1 text-sm rounded bg-blue-500 text-white">所有数据</button>
-                    </div>
+    <!-- Charts Section -->
+    <section class="charts-section">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h2 class="chart-title">客流趋势</h2>
+                <div class="chart-tabs">
+                    <button class="chart-tab" onclick="setTrendRange('week')">近一周</button>
+                    <button class="chart-tab" onclick="setTrendRange('month')">近一月</button>
+                    <button class="chart-tab" onclick="setTrendRange('year')">近一年</button>
+                    <button class="chart-tab active" onclick="setTrendRange('all')">全部</button>
                 </div>
-                <div id="trendChart" style="height: 380px;"></div>
             </div>
+            <div class="chart-container" id="trendChart"></div>
         </div>
+    </section>
 
-        <!-- 各线路详情 + 占比 -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div class="bg-white rounded-xl shadow-md p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-bold text-gray-800" id="selectedDateLabel2">各线路昨日客流</h2>
-                    <span class="text-xs text-gray-500">按客流从高到低</span>
+    <!-- Data Section -->
+    <section class="data-section">
+        <div class="data-grid">
+            <!-- Line Details Table -->
+            <div class="data-card">
+                <div class="data-card-title">
+                    <span id="selectedDateLabel">各线路客流</span>
+                    <span class="data-card-badge">按客流排序</span>
                 </div>
-                <div class="overflow-x-auto max-h-[420px]">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
+                <div class="overflow-x-auto">
+                    <table class="data-table">
+                        <thead>
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">线路</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">客流(万)</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">占比</th>
+                                <th>线路</th>
+                                <th>客流(万)</th>
+                                <th>占比</th>
                             </tr>
                         </thead>
-                        <tbody id="linesTable" class="bg-white divide-y divide-gray-200">
-                            <!-- 动态生成 -->
+                        <tbody id="linesTable">
+                            <!-- Dynamic content -->
                         </tbody>
                     </table>
                 </div>
             </div>
-            <div class="bg-white rounded-xl shadow-md p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-bold text-gray-800">
-                        <span id="pieDateLabel">--</span> 线路客流占比
-                    </h2>
-                    <span class="text-xs text-gray-500">Top 线路更直观</span>
+            
+            <!-- Pie Chart -->
+            <div class="data-card">
+                <div class="data-card-title">
+                    <span id="pieDateLabel">线路客流占比</span>
+                    <span class="data-card-badge">可视化</span>
                 </div>
-                <div id="pieChart" style="height: 420px;"></div>
+                <div class="chart-container" id="pieChart"></div>
             </div>
         </div>
+    </section>
 
-    </main>
-
-    <!-- 数据说明 -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="bg-blue-50 rounded-xl p-6">
-            <h3 class="font-medium text-blue-900 mb-2">📢 数据说明</h3>
-            <ul class="text-sm text-blue-800 space-y-1 list-disc list-inside">
-                <li>数据自动从南京地铁官方微博抓取，每日更新</li>
-                <li>当前数据范围：2025-01-01 至 昨天</li>
-                <li>最后更新时间：<span data-last-update>--</span></li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- 页脚 -->
-    <footer class="bg-gray-800 text-gray-300 py-8 mt-12">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p>数据来源：南京地铁官方微博</p>
-            <p class="text-sm text-gray-500 mt-2">© 2026 Nanjing Metro Flow Dashboard</p>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-title">📢 数据说明</div>
+            <p class="footer-text">数据自动从南京地铁官方微博抓取，每日更新</p>
+            <p class="footer-text">当前数据范围：2025-01-01 至 昨天</p>
+            <p class="footer-note">最后更新：<span id="footerUpdate">--</span></p>
         </div>
     </footer>
 
+    <!-- Mobile Menu (Hidden by default) -->
+    <div id="mobileMenu" class="fixed inset-0 bg-black/50 z-50 hidden" onclick="toggleMobileMenu()">
+        <div class="bg-white absolute bottom-0 left-0 right-0 rounded-t-3xl p-6" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-6">
+                <span class="text-lg font-semibold">菜单</span>
+                <button onclick="toggleMobileMenu()" class="p-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="space-y-2">
+                <a href="index.html" class="block py-3 px-4 rounded-lg bg-gray-100 font-medium">首页</a>
+                <a href="lines.html" class="block py-3 px-4 rounded-lg hover:bg-gray-100">线路详情</a>
+                <a href="history.html" class="block py-3 px-4 rounded-lg hover:bg-gray-100">历史数据</a>
+            </div>
+        </div>
+    </div>
+
     <script src="js/main.js"></script>
+    <script>
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Animate numbers on load
+        function animateValue(element, start, end, duration) {
+            if (start === end) return;
+            const range = end - start;
+            const startTime = performance.now();
+            
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeProgress = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+                const current = start + (range * easeProgress);
+                element.textContent = current.toFixed(1);
+                
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+            
+            requestAnimationFrame(update);
+        }
+
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-reveal').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Add smooth transition to stat values
+        document.querySelectorAll('.stat-value').forEach(el => {
+            el.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+        });
+
+        // Update hero date
+        function updateHeroDate(date) {
+            const el = document.getElementById('heroDate');
+            if (el && date) {
+                el.textContent = `${date} 客流数据`;
+            }
+        }
+    </script>
 </body>
 </html>

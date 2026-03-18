@@ -6,82 +6,174 @@
     <title>历史数据 | 南京地铁客流数据</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/apple-style.css">
 </head>
-<body class="bg-gray-50 min-h-screen gh-theme">
-    <!-- 导航栏 -->
-    <nav class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center space-x-3">
-                    <img src="Nanjing_Metro_Logo.svg.png" alt="南京地铁" class="w-10 h-10">
-                    <span class="font-bold text-xl">南京地铁客流数据</span>
-                </div>
-                <!-- 桌面端导航 -->
-                <div class="hidden md:flex space-x-6">
-                    <a href="index.html" class="hover:text-blue-200 transition">首页</a>
-                    <a href="lines.html" class="hover:text-blue-200 transition">线路详情</a>
-                    <a href="history.html?v=20260316" class="text-blue-200 font-medium">历史数据</a>
-                </div>
-                <!-- 移动端汉堡菜单按钮 -->
-                <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg hover:bg-blue-700 transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
-                </button>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">
+                <img src="Nanjing_Metro_Logo.svg.png" alt="南京地铁" class="nav-logo">
+                <span class="nav-title">南京地铁客流</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">首页</a>
+                <a href="lines.html" class="nav-link">线路详情</a>
+                <a href="history.html" class="nav-link active">历史数据</a>
             </div>
-            <!-- 移动端导航菜单 -->
-            <div id="mobileMenu" class="hidden md:hidden pb-4">
-                <a href="index.html" class="block py-2 px-4 hover:text-blue-200 hover:bg-blue-700 rounded-lg mb-2 transition">首页</a>
-                <a href="lines.html" class="block py-2 px-4 hover:text-blue-200 hover:bg-blue-700 rounded-lg mb-2 transition">线路详情</a>
-                <a href="history.html?v=20260316" class="block py-2 px-4 text-blue-200 font-medium bg-blue-700 rounded-lg transition">历史数据</a>
-            </div>
+            <button class="nav-menu-btn" onclick="toggleMobileMenu()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- 筛选器 -->
-        <div class="bg-white rounded-xl shadow-md p-6 mb-6">
-            <div class="flex flex-wrap gap-4 items-end">
+    <!-- Hero -->
+    <section class="hero" style="padding: 120px 24px 40px;">
+        <h1 class="hero-title" style="font-size: clamp(32px, 6vw, 56px);">历史数据</h1>
+        <p class="hero-subtitle">查询与筛选历史客流记录</p>
+    </section>
+
+    <!-- Filters -->
+    <section class="data-section" style="margin-top: 0;">
+        <div class="data-card" style="opacity: 1;">
+            <div class="data-card-title">
+                <span>数据筛选</span>
+                <span class="data-card-badge" id="resultCount">-- 条记录</span>
+            </div>
+            <div class="flex flex-wrap gap-4 items-end" style="padding: 8px 0;">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">开始日期</label>
+                    <label class="block text-sm font-medium mb-2" style="color: var(--apple-text-secondary);">开始日期</label>
                     <input type="date" id="startDate" 
-                        class="w-[160px] h-[42px] px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 box-border">
+                        style="height: 44px; padding: 0 16px; border: 1px solid #d2d2d7; border-radius: 10px; font-size: 15px; outline: none; transition: border-color 0.2s;">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">结束日期</label>
+                    <label class="block text-sm font-medium mb-2" style="color: var(--apple-text-secondary);">结束日期</label>
                     <input type="date" id="endDate" 
-                        class="w-[160px] h-[42px] px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 box-border">
+                        style="height: 44px; padding: 0 16px; border: 1px solid #d2d2d7; border-radius: 10px; font-size: 15px; outline: none; transition: border-color 0.2s;">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">排序</label>
+                    <label class="block text-sm font-medium mb-2" style="color: var(--apple-text-secondary);">排序方式</label>
                     <select id="sortOrder" 
-                        class="w-[160px] h-[42px] px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 box-border">
+                        style="height: 44px; padding: 0 16px; border: 1px solid #d2d2d7; border-radius: 10px; font-size: 15px; outline: none; background: white; cursor: pointer;">
                         <option value="desc">日期倒序</option>
                         <option value="asc">日期正序</option>
                         <option value="flow_desc">客流从高到低</option>
                         <option value="flow_asc">客流从低到高</option>
                     </select>
                 </div>
+                <button onclick="resetFilters()" 
+                    style="height: 44px; padding: 0 20px; background: #f5f5f7; border: 1px solid #d2d2d7; border-radius: 10px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s;">
+                    重置
+                </button>
             </div>
         </div>
+    </section>
 
-        <!-- 数据表格 -->
-        <div class="bg-white rounded-xl shadow-md overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200" id="dataTable">
-                    <thead class="bg-gray-50" id="tableHead">
-                        <!-- 动态生成表头 -->
+    <!-- Data Table -->
+    <section class="data-section">
+        <div class="data-card" style="opacity: 1; padding: 0; overflow: hidden;">
+            <div style="padding: 20px 24px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
+                <h3 class="font-semibold" style="font-size: 16px;">数据列表</h3>
+                <span style="font-size: 13px; color: var(--apple-text-secondary);">
+                    拖动滚动查看更多线路
+                </span>
+            </div>
+            <div class="overflow-x-auto" style="max-height: 600px; overflow-y: auto;">
+                <table class="data-table" id="dataTable" style="min-width: 100%;">
+                    <thead id="tableHead" style="position: sticky; top: 0; z-index: 10; background: white;">
+                        <!-- Dynamic content -->
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200" id="tableBody">
-                        <!-- 动态生成 -->
+                    <tbody id="tableBody">
+                        <!-- Dynamic content -->
                     </tbody>
                 </table>
             </div>
         </div>
-    </main>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-title">🚇 南京地铁</div>
+            <p class="footer-text">持续更新 · 数据来源：南京地铁官方微博</p>
+        </div>
+    </footer>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="fixed inset-0 bg-black/50 z-50 hidden" onclick="toggleMobileMenu()">
+        <div class="bg-white absolute bottom-0 left-0 right-0 rounded-t-3xl p-6" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-6">
+                <span class="text-lg font-semibold">菜单</span>
+                <button onclick="toggleMobileMenu()" class="p-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="space-y-2">
+                <a href="index.html" class="block py-3 px-4 rounded-lg hover:bg-gray-100">首页</a>
+                <a href="lines.html" class="block py-3 px-4 rounded-lg hover:bg-gray-100">线路详情</a>
+                <a href="history.html" class="block py-3 px-4 rounded-lg bg-gray-100 font-medium">历史数据</a>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table th {
+            text-align: left;
+            padding: 14px 16px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--apple-text-secondary);
+            background: #fafafa;
+            border-bottom: 1px solid #f0f0f0;
+            white-space: nowrap;
+        }
+        .data-table td {
+            padding: 14px 16px;
+            font-size: 14px;
+            border-bottom: 1px solid #f5f5f5;
+            vertical-align: middle;
+        }
+        .data-table tbody tr {
+            transition: background 0.15s ease;
+        }
+        .data-table tbody tr:hover {
+            background: #fafafa;
+        }
+        .data-table tbody tr.weekend {
+            background: rgba(0, 113, 227, 0.03);
+        }
+        .data-table tbody tr.weekend:hover {
+            background: rgba(0, 113, 227, 0.06);
+        }
+        .line-badge-sm {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 42px;
+            height: 22px;
+            padding: 0 8px;
+            border-radius: 5px;
+            color: white;
+            font-weight: 600;
+            font-size: 11px;
+        }
+        input:focus, select:focus {
+            border-color: var(--apple-blue) !important;
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+        }
+    </style>
 
     <script>
         let metroData = null;
@@ -89,41 +181,40 @@
         let linesInfo = null;
         let allLineIds = [];
 
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            if (menu) menu.classList.toggle('hidden');
+        }
+
         document.addEventListener('DOMContentLoaded', async function() {
             try {
-                const response = await fetch('data/metro_data.json?v=20260316');
+                const response = await fetch('data/metro_data.json');
                 const data = await response.json();
                 metroData = data.daily_data;
                 linesInfo = data.metadata.lines;
                 filteredData = [...metroData];
                 
-                // 收集所有出现过的线路ID
                 collectAllLineIds();
                 
-                // 设置默认日期范围
                 if (metroData.length > 0) {
                     document.getElementById('startDate').value = metroData[0].date;
                     document.getElementById('endDate').value = metroData[metroData.length - 1].date;
                 }
                 
                 renderTableHead();
-                renderTable();
-                applyDefaultSort();
+                applyFilter();
                 bindFilters();
             } catch (error) {
                 console.error('加载数据失败:', error);
             }
         });
 
-        // 收集所有出现过的线路ID
         function collectAllLineIds() {
             const lineIdSet = new Set();
             metroData.forEach(day => {
                 Object.keys(day.lines).forEach(lineId => lineIdSet.add(lineId));
             });
-            // 按线路ID排序
             allLineIds = Array.from(lineIdSet).sort((a, b) => {
-                // L线在前，S线在后，数字按数值排序
                 const getNum = (s) => parseInt(s.replace(/[^0-9]/g, ''));
                 const aNum = getNum(a), bNum = getNum(b);
                 if (a.startsWith('L') && b.startsWith('L')) return aNum - bNum;
@@ -134,89 +225,27 @@
             });
         }
 
-        // 渲染表头
         function renderTableHead() {
             const thead = document.getElementById('tableHead');
-            let html = `
-                <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase sticky left-0 bg-gray-50">日期</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">星期</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">总客流(万)</th>
-            `;
+            let html = '<tr>';
+            html += '<th style="position: sticky; left: 0; z-index: 11;">日期</th>';
+            html += '<th>星期</th>';
+            html += '<th style="font-weight: 700; color: var(--apple-text);">总客流</th>';
             
             allLineIds.forEach(lineId => {
                 const lineInfo = linesInfo.find(l => l.id === lineId);
-                const displayName = lineInfo ? lineInfo.name : lineId;
-                html += `<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">${displayName}</th>`;
+                html += `<th>${lineInfo ? lineInfo.name : lineId}</th>`;
             });
             
             html += '</tr>';
             thead.innerHTML = html;
         }
 
-        // 渲染表格
         function renderTable() {
-            // 默认按日期倒序
-            if (!document.getElementById("sortOrder") || document.getElementById("sortOrder").value === "desc") {
-                filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
-            }
             const tbody = document.getElementById('tableBody');
-            
-            tbody.innerHTML = filteredData.map(item => {
-                const date = new Date(item.date);
-                const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
-                const weekday = weekdays[date.getDay()];
-                const isWeekend = item.is_weekend || date.getDay() === 0 || date.getDay() === 6;
-                
-                let html = `
-                    <tr class="hover:bg-gray-50 ${isWeekend ? 'bg-blue-50' : ''}">
-                        <td class="px-4 py-3 text-sm font-medium text-gray-900 sticky left-0 ${isWeekend ? 'bg-blue-50' : 'bg-white'}">${item.date}</td>
-                        <td class="px-4 py-3 text-sm text-gray-500">${isWeekend ? '<span class="text-blue-600">周' + weekday + '</span>' : '周' + weekday}</td>
-                        <td class="px-4 py-3 text-sm font-bold text-blue-600">${item.total.toFixed(1)}</td>
-                `;
-                
-                // 动态生成各线路数据列
-                allLineIds.forEach(lineId => {
-                    const value = item.lines[lineId] || 0;
-                    html += `<td class="px-4 py-3 text-sm text-gray-600">${value.toFixed(1)}</td>`;
-                });
-                
-                html += '</tr>';
-                return html;
-            }).join('');
-        }
-
-        // 绑定筛选和排序事件
-        function applyDefaultSort() {
-            // 默认按日期倒序
-            filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
-        }
-
-        function bindFilters() {
-            const startDate = document.getElementById('startDate');
-            const endDate = document.getElementById('endDate');
-            const sortOrder = document.getElementById('sortOrder');
-
-            [startDate, endDate, sortOrder].forEach(el => {
-                if (!el) return;
-                el.addEventListener('change', applyFilter);
-                el.addEventListener('input', applyFilter);
-            });
-        }
-
-        // 应用筛选
-        function applyFilter() {
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
             const sortOrder = document.getElementById('sortOrder').value;
             
-            filteredData = metroData.filter(item => {
-                if (startDate && item.date < startDate) return false;
-                if (endDate && item.date > endDate) return false;
-                return true;
-            });
-            
-            // 排序
+            // Sort before rendering
             switch(sortOrder) {
                 case 'asc':
                     filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -232,15 +261,68 @@
                     break;
             }
             
+            tbody.innerHTML = filteredData.map((item, index) => {
+                const date = new Date(item.date + 'T00:00:00');
+                const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+                const weekday = weekdays[date.getDay()];
+                const isWeekend = [0, 6].includes(date.getDay());
+                
+                let html = `<tr class="${isWeekend ? 'weekend' : ''}" style="animation: fadeInUp 0.3s ease ${index * 0.02}s forwards; opacity: 0;">`;
+                html += `<td style="font-weight: 600; white-space: nowrap;">${item.date}</td>`;
+                html += `<td><span style="color: ${isWeekend ? '#0071e3' : 'var(--apple-text-secondary)'};">${weekday}</span></td>`;
+                html += `<td><span style="font-weight: 700; color: var(--apple-text);">${item.total.toFixed(1)}</span> <span style="font-size: 12px; color: var(--apple-text-secondary);">万</span></td>`;
+                
+                allLineIds.forEach(lineId => {
+                    const value = item.lines[lineId] || 0;
+                    const lineInfo = linesInfo.find(l => l.id === lineId);
+                    const displayValue = value > 0 ? value.toFixed(1) : '-';
+                    const opacity = value > 0 ? '' : 'opacity: 0.4;';
+                    html += `<td style="font-size: 13px; ${opacity}">${displayValue}</td>`;
+                });
+                
+                html += '</tr>';
+                return html;
+            }).join('');
+            
+            document.getElementById('resultCount').textContent = `${filteredData.length} 条记录`;
+        }
+
+        function bindFilters() {
+            const startDate = document.getElementById('startDate');
+            const endDate = document.getElementById('endDate');
+            const sortOrder = document.getElementById('sortOrder');
+
+            [startDate, endDate].forEach(el => {
+                if (el) {
+                    el.addEventListener('change', applyFilter);
+                }
+            });
+            
+            if (sortOrder) {
+                sortOrder.addEventListener('change', applyFilter);
+            }
+        }
+
+        function applyFilter() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            filteredData = metroData.filter(item => {
+                if (startDate && item.date < startDate) return false;
+                if (endDate && item.date > endDate) return false;
+                return true;
+            });
+            
             renderTable();
         }
 
-        // 移动端菜单切换
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobileMenu');
-            if (menu) {
-                menu.classList.toggle('hidden');
+        function resetFilters() {
+            if (metroData.length > 0) {
+                document.getElementById('startDate').value = metroData[0].date;
+                document.getElementById('endDate').value = metroData[metroData.length - 1].date;
             }
+            document.getElementById('sortOrder').value = 'desc';
+            applyFilter();
         }
     </script>
 </body>

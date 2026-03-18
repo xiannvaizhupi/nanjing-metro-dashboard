@@ -6,71 +6,102 @@
     <title>线路详情 | 南京地铁客流数据</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/apple-style.css">
 </head>
-<body class="bg-gray-50 min-h-screen gh-theme">
-    <!-- 导航栏 -->
-    <nav class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center space-x-3">
-                    <img src="Nanjing_Metro_Logo.svg.png" alt="南京地铁" class="w-10 h-10">
-                    <span class="font-bold text-xl">南京地铁客流数据</span>
-                </div>
-                <!-- 桌面端导航 -->
-                <div class="hidden md:flex space-x-6">
-                    <a href="index.html" class="hover:text-blue-200 transition">首页</a>
-                    <a href="lines.html" class="text-blue-200 font-medium">线路详情</a>
-                    <a href="history.html" class="hover:text-blue-200 transition">历史数据</a>
-                </div>
-                <!-- 移动端汉堡菜单按钮 -->
-                <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg hover:bg-blue-700 transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
-                </button>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">
+                <img src="Nanjing_Metro_Logo.svg.png" alt="南京地铁" class="nav-logo">
+                <span class="nav-title">南京地铁客流</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">首页</a>
+                <a href="lines.html" class="nav-link active">线路详情</a>
+                <a href="history.html" class="nav-link">历史数据</a>
             </div>
-            <!-- 移动端导航菜单 -->
-            <div id="mobileMenu" class="hidden md:hidden pb-4">
-                <a href="index.html" class="block py-2 px-4 hover:text-blue-200 hover:bg-blue-700 rounded-lg mb-2 transition">首页</a>
-                <a href="lines.html" class="block py-2 px-4 text-blue-200 font-medium bg-blue-700 rounded-lg mb-2">线路详情</a>
-                <a href="history.html" class="block py-2 px-4 hover:text-blue-200 hover:bg-blue-700 rounded-lg transition">历史数据</a>
-            </div>
+            <button class="nav-menu-btn" onclick="toggleMobileMenu()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- 线路选择器 -->
-        <div class="bg-white rounded-xl shadow-md p-6 mb-6">
-            <h2 class="text-lg font-bold text-gray-800 mb-4">选择线路</h2>
-            <div class="flex flex-wrap gap-3" id="lineSelector">
-                <!-- 动态生成 -->
+    <!-- Hero -->
+    <section class="hero" style="padding: 120px 24px 40px;">
+        <h1 class="hero-title" style="font-size: clamp(32px, 6vw, 56px);">线路详情</h1>
+        <p class="hero-subtitle">查看各条线路的客流趋势与统计</p>
+    </section>
+
+    <!-- Line Selector -->
+    <section class="data-section" style="margin-top: 0;">
+        <div class="data-card" style="opacity: 1;">
+            <div class="data-card-title">
+                <span>选择线路</span>
+                <span class="data-card-badge" id="selectedLineName">--</span>
+            </div>
+            <div class="flex flex-wrap gap-3" id="lineSelector" style="padding: 8px 0;">
+                <!-- Dynamic content -->
             </div>
         </div>
+    </section>
 
-        <!-- 当前线路概览 -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6" id="lineStats">
-            <!-- 动态生成 -->
+    <!-- Line Stats -->
+    <section class="data-section">
+        <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);" id="lineStats">
+            <!-- Dynamic content -->
         </div>
+    </section>
 
-        <!-- 图表区域 -->
-        <div class="bg-white rounded-xl shadow-md p-6 mb-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold text-gray-800">📈 线路客流趋势</h2>
-                <div class="flex space-x-2">
-                    <button onclick="setLineTrendRange('year')" id="line-btn-year" class="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700">近一年</button>
-                    <button onclick="setLineTrendRange('month')" id="line-btn-month" class="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700">近一个月</button>
-                    <button onclick="setLineTrendRange('week')" id="line-btn-week" class="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700">近一周</button>
-                    <button onclick="setLineTrendRange('all')" id="line-btn-all" class="px-3 py-1 text-sm rounded bg-blue-500 text-white">所有数据</button>
+    <!-- Chart -->
+    <section class="charts-section">
+        <div class="chart-card" style="opacity: 1;">
+            <div class="chart-header">
+                <h2 class="chart-title">
+                    <span id="chartLineName">线路</span> 客流趋势
+                </h2>
+                <div class="chart-tabs">
+                    <button class="chart-tab" onclick="setLineTrendRange('week')">近一周</button>
+                    <button class="chart-tab" onclick="setLineTrendRange('month')">近一月</button>
+                    <button class="chart-tab" onclick="setLineTrendRange('year')">近一年</button>
+                    <button class="chart-tab active" onclick="setLineTrendRange('all')">全部</button>
                 </div>
             </div>
-            <div id="lineTrendChart" style="height: 400px;"></div>
+            <div class="chart-container" id="lineTrendChart"></div>
         </div>
+    </section>
 
-    </main>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-title">🚇 南京地铁</div>
+            <p class="footer-text">持续更新 · 数据来源：南京地铁官方微博</p>
+        </div>
+    </footer>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="fixed inset-0 bg-black/50 z-50 hidden" onclick="toggleMobileMenu()">
+        <div class="bg-white absolute bottom-0 left-0 right-0 rounded-t-3xl p-6" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-6">
+                <span class="text-lg font-semibold">菜单</span>
+                <button onclick="toggleMobileMenu()" class="p-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="space-y-2">
+                <a href="index.html" class="block py-3 px-4 rounded-lg hover:bg-gray-100">首页</a>
+                <a href="lines.html" class="block py-3 px-4 rounded-lg bg-gray-100 font-medium">线路详情</a>
+                <a href="history.html" class="block py-3 px-4 rounded-lg hover:bg-gray-100">历史数据</a>
+            </div>
+        </div>
+    </div>
 
     <script>
         let metroData = null;
@@ -79,6 +110,31 @@
         let lineTrendChart = null;
         let currentLineTrendRange = 'all';
 
+        // Mobile menu
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            if (menu) menu.classList.toggle('hidden');
+        }
+
+        // Animate numbers
+        function animateNumber(element, endValue, duration = 800) {
+            if (!element) return;
+            const startValue = parseFloat(element.textContent) || 0;
+            const startTime = performance.now();
+            const diff = endValue - startValue;
+            
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                const current = startValue + (diff * easeProgress);
+                element.textContent = current.toFixed(1);
+                if (progress < 1) requestAnimationFrame(update);
+            }
+            requestAnimationFrame(update);
+        }
+
+        // Initialize
         document.addEventListener('DOMContentLoaded', async function() {
             try {
                 const response = await fetch('data/metro_data.json');
@@ -94,54 +150,56 @@
             }
         });
 
-        // 初始化线路选择器
         function initLineSelector() {
             const container = document.getElementById('lineSelector');
             container.innerHTML = linesInfo.map(line => `
                 <button onclick="selectLine('${line.id}')" 
-                    class="line-btn px-4 py-2 rounded-lg font-medium transition"
+                    class="line-btn px-5 py-2.5 rounded-full font-medium transition-all duration-300"
                     data-line="${line.id}"
-                    style="background-color: ${line.id === currentLineId ? line.color : '#f3f4f6'}; 
-                           color: ${line.id === currentLineId ? 'white' : '#374151'}">
+                    style="background-color: ${line.id === currentLineId ? line.color : '#f5f5f7'}; 
+                           color: ${line.id === currentLineId ? 'white' : '#1d1d1f'};">
                     ${line.name}
                 </button>
             `).join('');
+            
+            updateSelectedLineName();
         }
 
-        // 选择线路
+        function updateSelectedLineName() {
+            const lineInfo = linesInfo.find(l => l.id === currentLineId);
+            document.getElementById('selectedLineName').textContent = lineInfo ? lineInfo.name : '--';
+            document.getElementById('chartLineName').textContent = lineInfo ? lineInfo.name : '线路';
+        }
+
         function selectLine(lineId) {
             currentLineId = lineId;
+            const lineInfo = linesInfo.find(l => l.id === lineId);
             
-            // 更新按钮样式
             document.querySelectorAll('.line-btn').forEach(btn => {
                 const line = linesInfo.find(l => l.id === btn.dataset.line);
                 if (btn.dataset.line === lineId) {
                     btn.style.backgroundColor = line.color;
                     btn.style.color = 'white';
+                    btn.style.transform = 'scale(1.05)';
                 } else {
-                    btn.style.backgroundColor = '#f3f4f6';
-                    btn.style.color = '#374151';
+                    btn.style.backgroundColor = '#f5f5f7';
+                    btn.style.color = '#1d1d1f';
+                    btn.style.transform = 'scale(1)';
                 }
             });
             
+            updateSelectedLineName();
             updateLineStats();
-            initLineTrendChart();
+            updateLineTrendChart();
         }
 
         function getLineRangeData() {
-            if (currentLineTrendRange === 'week') {
-                return metroData.slice(-7);
-            }
-            if (currentLineTrendRange === 'month') {
-                return metroData.slice(-30);
-            }
-            if (currentLineTrendRange === 'year') {
-                return metroData.slice(-365);
-            }
+            if (currentLineTrendRange === 'week') return metroData.slice(-7);
+            if (currentLineTrendRange === 'month') return metroData.slice(-30);
+            if (currentLineTrendRange === 'year') return metroData.slice(-365);
             return metroData;
         }
 
-        // 更新线路统计
         function updateLineStats() {
             const lineInfo = linesInfo.find(l => l.id === currentLineId);
             const rangeData = getLineRangeData();
@@ -158,29 +216,30 @@
             
             const container = document.getElementById('lineStats');
             container.innerHTML = `
-                <div class="bg-white rounded-xl shadow-md p-6 border-l-4" style="border-color: ${lineInfo.color}">
-                    <p class="text-gray-500 text-sm">最高客流</p>
-                    <p class="text-3xl font-bold text-gray-800 mt-2">${max.toFixed(1)}万</p>
+                <div class="stat-card" style="animation-delay: 0.1s; opacity: 1;">
+                    <div class="stat-label">最高客流</div>
+                    <div class="stat-value" id="statMax">${max.toFixed(1)}</div>
+                    <div class="stat-note">万人次</div>
                 </div>
-                <div class="bg-white rounded-xl shadow-md p-6 border-l-4" style="border-color: ${lineInfo.color}">
-                    <p class="text-gray-500 text-sm">最低客流</p>
-                    <p class="text-3xl font-bold text-gray-800 mt-2">${min.toFixed(1)}万</p>
+                <div class="stat-card" style="animation-delay: 0.2s; opacity: 1;">
+                    <div class="stat-label">最低客流</div>
+                    <div class="stat-value" id="statMin">${min.toFixed(1)}</div>
+                    <div class="stat-note">万人次</div>
                 </div>
-                <div class="bg-white rounded-xl shadow-md p-6 border-l-4" style="border-color: ${lineInfo.color}">
-                    <p class="text-gray-500 text-sm">平均客流</p>
-                    <p class="text-3xl font-bold text-gray-800 mt-2">${avg.toFixed(1)}万</p>
+                <div class="stat-card" style="animation-delay: 0.3s; opacity: 1;">
+                    <div class="stat-label">平均客流</div>
+                    <div class="stat-value" id="statAvg">${avg.toFixed(1)}</div>
+                    <div class="stat-note">万人次/日</div>
                 </div>
             `;
         }
 
-        // 线路趋势图
         function initLineTrendChart() {
             lineTrendChart = echarts.init(document.getElementById('lineTrendChart'));
             updateLineTrendChart();
             window.addEventListener('resize', () => lineTrendChart.resize());
         }
 
-        // 更新线路趋势图
         function updateLineTrendChart() {
             const lineInfo = linesInfo.find(l => l.id === currentLineId);
             const filteredData = getLineRangeData();
@@ -191,20 +250,41 @@
             const option = {
                 tooltip: {
                     trigger: 'axis',
-                    formatter: '{b}<br/>' + lineInfo.name + ': {c}万'
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    borderColor: '#e0e0e0',
+                    textStyle: { color: '#1d1d1f' },
+                    formatter: function(params) {
+                        const date = params[0].name;
+                        const value = params[0].value;
+                        return `<div style="padding: 8px;">
+                            <div style="font-weight: 600; margin-bottom: 4px;">${date}</div>
+                            <div><span style="display: inline-block; width: 10px; height: 10px; background: ${lineInfo.color}; border-radius: 50%; margin-right: 6px;"></span>${lineInfo.name}: <span style="font-weight: 700; color: ${lineInfo.color};">${value}万</span></div>
+                        </div>`;
+                    }
                 },
                 grid: {
                     left: '3%',
                     right: '4%',
                     bottom: '15%',
+                    top: '10%',
                     containLabel: true
                 },
+                xAxis: {
+                    type: 'category',
+                    data: dates,
+                    axisLine: { lineStyle: { color: '#e0e0e0' } },
+                    axisLabel: { color: '#86868b', rotate: 45 }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '万人次',
+                    nameTextStyle: { color: '#86868b' },
+                    axisLine: { show: false },
+                    splitLine: { lineStyle: { color: '#f0f0f0' } },
+                    axisLabel: { color: '#86868b' }
+                },
                 dataZoom: [
-                    {
-                        type: 'inside',
-                        start: 0,
-                        end: 100
-                    },
+                    { type: 'inside', start: 0, end: 100 },
                     {
                         type: 'slider',
                         start: 0,
@@ -212,79 +292,44 @@
                         height: 20,
                         bottom: 5,
                         borderColor: 'transparent',
-                        backgroundColor: '#f0f0f0',
-                        fillerColor: 'rgba(59, 130, 246, 0.2)',
-                        handleStyle: {
-                            color: '#3B82F6'
-                        }
+                        backgroundColor: '#f5f5f7',
+                        fillerColor: 'rgba(0, 113, 227, 0.2)',
+                        handleStyle: { color: '#0071e3', borderColor: '#0071e3' }
                     }
                 ],
-                xAxis: {
-                    type: 'category',
-                    data: dates,
-                    axisLabel: { rotate: 45 }
-                },
-                yAxis: {
-                    type: 'value',
-                    name: '万人次'
-                },
                 series: [{
                     data: values,
                     type: 'line',
-                    smooth: true,
+                    smooth: 0.6,
                     symbol: 'circle',
-                    symbolSize: 8,
-                    lineStyle: {
-                        color: lineInfo.color,
-                        width: 3
-                    },
-                    itemStyle: {
-                        color: lineInfo.color
-                    },
+                    symbolSize: 6,
+                    lineStyle: { color: lineInfo.color, width: 3 },
+                    itemStyle: { color: lineInfo.color },
                     areaStyle: {
                         color: {
                             type: 'linear',
                             x: 0, y: 0, x2: 0, y2: 1,
                             colorStops: [
-                                { offset: 0, color: lineInfo.color + '4D' },
-                                { offset: 1, color: lineInfo.color + '0D' }
+                                { offset: 0, color: lineInfo.color + '40' },
+                                { offset: 1, color: lineInfo.color + '05' }
                             ]
                         }
-                    }
+                    },
+                    emphasis: { itemStyle: { symbolSize: 10 } },
+                    animationDuration: 2000,
+                    animationEasing: 'cubicOut'
                 }]
             };
             
             lineTrendChart.setOption(option, true);
         }
 
-        // 设置线路趋势图时间范围
         function setLineTrendRange(range) {
             currentLineTrendRange = range;
-            
-            // 更新按钮样式
-            document.getElementById('line-btn-all').className = range === 'all' 
-                ? 'px-3 py-1 text-sm rounded bg-blue-500 text-white' 
-                : 'px-3 py-1 text-sm rounded bg-gray-200 text-gray-700';
-            document.getElementById('line-btn-month').className = range === 'month' 
-                ? 'px-3 py-1 text-sm rounded bg-blue-500 text-white' 
-                : 'px-3 py-1 text-sm rounded bg-gray-200 text-gray-700';
-            document.getElementById('line-btn-week').className = range === 'week' 
-                ? 'px-3 py-1 text-sm rounded bg-blue-500 text-white' 
-                : 'px-3 py-1 text-sm rounded bg-gray-200 text-gray-700';
-            document.getElementById('line-btn-year').className = range === 'year'
-                ? 'px-3 py-1 text-sm rounded bg-blue-500 text-white'
-                : 'px-3 py-1 text-sm rounded bg-gray-200 text-gray-700';
-            
+            document.querySelectorAll('.chart-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
             updateLineTrendChart();
             updateLineStats();
-        }
-
-        // 移动端菜单切换
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobileMenu');
-            if (menu) {
-                menu.classList.toggle('hidden');
-            }
         }
     </script>
 </body>

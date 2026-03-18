@@ -1,4 +1,4 @@
-// 主JavaScript文件
+// 主JavaScript文件 - Apple Style
 let metroData = null;
 let linesInfo = null;
 let weatherData = null;
@@ -13,7 +13,29 @@ let selectedDateData = null;
 let selectedDate = null;
 let lastUpdated = null;
 
-// 移动端菜单切换
+// 数字动画
+function animateNumber(element, endValue, duration = 1000) {
+    if (!element) return;
+    const startValue = parseFloat(element.textContent) || 0;
+    const startTime = performance.now();
+    const diff = endValue - startValue;
+    
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeProgress = 1 - Math.pow(1 - progress, 4);
+        const current = startValue + (diff * easeProgress);
+        element.textContent = current.toFixed(1);
+        
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        }
+    }
+    
+    requestAnimationFrame(update);
+}
+
+// 移动端菜单
 function toggleMobileMenu() {
     const menu = document.getElementById('mobileMenu');
     if (menu) {
@@ -21,67 +43,7 @@ function toggleMobileMenu() {
     }
 }
 
-// 加载数据
-document.addEventListener('DOMContentLoaded', async function() {
-    try {
-        const [metroResp, weatherResp] = await Promise.all([
-            fetch('data/metro_data.json'),
-            fetch('data/weather.json')
-        ]);
-        const data = await metroResp.json();
-        weatherData = await weatherResp.json();
-
-        metroData = data.daily_data;
-        linesInfo = data.metadata.lines;
-        weatherMap = new Map(weatherData.map(item => [item.date, item]));
-        const holidaySets = buildHolidaySets(metroData, weatherMap);
-        holidaySet = holidaySets.holidaySet;
-        holidayEveSet = holidaySets.holidayEveSet;
-        regressionModel = trainRidgeModel(metroData, weatherMap);
-
-        const fetchedAt = data.metadata.fetched_at || '';
-        lastUpdated = fetchedAt || data.metadata.last_updated || '';
-        const displayDate = lastUpdated.includes(' ') ? lastUpdated.split(' ')[0] : lastUpdated;
-        updateLastUpdated(displayDate || (metroData[metroData.length - 1] ? metroData[metroData.length - 1].date : '--'));
-
-        updateDashboard();
-        initCharts();
-        renderLinesTable();
-    } catch (error) {
-        console.error('加载数据失败:', error);
-        document.querySelector('main').innerHTML = `
-            <div class="text-center py-20">
-                <p class="text-red-500">数据加载失败，请检查数据文件</p>
-            </div>
-        `;
-    }
-});
-
-function updateLastUpdated(text) {
-    const targets = document.querySelectorAll('[data-last-update]');
-    targets.forEach(el => {
-        el.textContent = text || '--';
-    });
-}
-
-function updateChangeRate(current, previous, labelText) {
-    const changeEl = document.getElementById('todayChange');
-    if (!changeEl) return;
-    if (!previous || previous.total === 0) {
-        changeEl.textContent = '--';
-        return;
-    }
-    const changeValue = (current.total - previous.total) / previous.total * 100;
-    const change = changeValue.toFixed(1);
-    if (changeValue > 0) {
-        changeEl.innerHTML = `<span class="text-red-500">↗ +${change}%</span> ${labelText}`;
-    } else if (changeValue < 0) {
-        changeEl.innerHTML = `<span class="text-green-500">↘ ${change}%</span> ${labelText}`;
-    } else {
-        changeEl.innerHTML = `<span class="text-gray-500">→ ${change}%</span> ${labelText}`;
-    }
-}
-
+// 格式化日期
 function formatLocalDate(date) {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -95,48 +57,7 @@ function addDays(dateStr, offset) {
     return formatLocalDate(d);
 }
 
-function getSameTypeHistory(dateStr, totalsByDate, isWeekend, count) {
-    const values = [];
-    let cursor = dateStr;
-    let guard = 0;
-    while (values.length < count && guard < 366) {
-        cursor = addDays(cursor, -1);
-        const d = new Date(`${cursor}T00:00:00`);
-        const weekend = [0, 6].includes(d.getDay());
-        if (weekend !== isWeekend) {
-            guard++;
-            continue;
-        }
-        const v = totalsByDate.get(cursor);
-        if (v != null) {
-            values.push(v);
-        }
-        guard++;
-    }
-    return values;
-}
-
-function getRecentWorkdayHistory(dateStr, totalsByDate, count) {
-    const values = [];
-    let cursor = dateStr;
-    let guard = 0;
-    while (values.length < count && guard < 366) {
-        cursor = addDays(cursor, -1);
-        const d = new Date(`${cursor}T00:00:00`);
-        const weekend = [0, 6].includes(d.getDay());
-        if (weekend) {
-            guard++;
-            continue;
-        }
-        const v = totalsByDate.get(cursor);
-        if (v != null) {
-            values.push(v);
-        }
-        guard++;
-    }
-    return values;
-}
-
+// 构建假期集合
 function buildHolidaySets(dailyData, weatherMapRef) {
     const holidays = new Set();
     const holidayEves = new Set();
@@ -170,15 +91,13 @@ function buildHolidaySets(dailyData, weatherMapRef) {
 }
 
 function getHolidayFlags(dateStr) {
-    if (holidaySet && holidaySet.has(dateStr)) {
-        return { isHoliday: true, isHolidayEve: false };
-    }
     return {
         isHoliday: holidaySet ? holidaySet.has(dateStr) : false,
         isHolidayEve: holidayEveSet ? holidayEveSet.has(dateStr) : false
     };
 }
 
+// 工具函数
 function dot(a, b) {
     let sum = 0;
     for (let i = 0; i < a.length; i++) sum += a[i] * b[i];
@@ -188,42 +107,20 @@ function dot(a, b) {
 function transpose(matrix) {
     const rows = matrix.length;
     const cols = matrix[0].length;
-    const result = Array.from({ length: cols }, () => Array(rows).fill(0));
-    for (let i = 0; i < rows; i++) {
-        for (let j = 0; j < cols; j++) {
-            result[j][i] = matrix[i][j];
-        }
-    }
-    return result;
+    return Array.from({ length: cols }, () => Array(rows).fill(0));
 }
 
 function matMul(A, B) {
     const rows = A.length;
     const cols = B[0].length;
     const inner = B.length;
-    const result = Array.from({ length: rows }, () => Array(cols).fill(0));
-    for (let i = 0; i < rows; i++) {
-        for (let k = 0; k < inner; k++) {
-            const aik = A[i][k];
-            if (aik === 0) continue;
-            for (let j = 0; j < cols; j++) {
-                result[i][j] += aik * B[k][j];
-            }
-        }
-    }
-    return result;
+    return Array.from({ length: rows }, () => Array(cols).fill(0));
 }
 
 function matVecMul(A, v) {
-    const rows = A.length;
-    const cols = A[0].length;
-    const result = Array(rows).fill(0);
-    for (let i = 0; i < rows; i++) {
-        let sum = 0;
-        for (let j = 0; j < cols; j++) sum += A[i][j] * v[j];
-        result[i] = sum;
-    }
-    return result;
+    return Array.from({ length: A.length }, (_, i) => 
+        A[i].reduce((sum, aij, j) => sum + aij * v[j], 0)
+    );
 }
 
 function invert(matrix) {
@@ -238,10 +135,7 @@ function invert(matrix) {
         if (Math.abs(pivot) < 1e-10) {
             let swapRow = -1;
             for (let r = i + 1; r < n; r++) {
-                if (Math.abs(A[r][i]) > 1e-10) {
-                    swapRow = r;
-                    break;
-                }
+                if (Math.abs(A[r][i]) > 1e-10) { swapRow = r; break; }
             }
             if (swapRow === -1) return null;
             [A[i], A[swapRow]] = [A[swapRow], A[i]];
@@ -270,8 +164,7 @@ function invert(matrix) {
 function standardizeFeatures(features, means, stds) {
     const out = features.slice();
     for (let i = 1; i < features.length; i++) {
-        const std = stds[i] || 1;
-        out[i] = (features[i] - means[i]) / std;
+        out[i] = (features[i] - means[i]) / (stds[i] || 1);
     }
     return out;
 }
@@ -287,50 +180,65 @@ function buildFeatureVector(dateStr, isWeekend, isHoliday, isHolidayEve, weather
         isWeekend ? 1 : 0,
         isHoliday ? 1 : 0,
         isHolidayEve ? 1 : 0,
-        Math.sin(dowAngle),
-        Math.cos(dowAngle),
-        Math.sin(monthAngle),
-        Math.cos(monthAngle),
-        weather.temp_max ?? 0,
-        weather.temp_min ?? 0,
+        Math.sin(dowAngle), Math.cos(dowAngle),
+        Math.sin(monthAngle), Math.cos(monthAngle),
+        weather.temp_max ?? 0, weather.temp_min ?? 0,
         weather.is_rainy ? 1 : 0,
         weather.is_heavy_rain ? 1 : 0,
         weather.is_snow ? 1 : 0,
-        lag1,
-        lag7,
-        rolling7
+        lag1, lag7, rolling7
     ];
+}
+
+function getSameTypeHistory(dateStr, totalsByDate, isWeekend, count) {
+    const values = [];
+    let cursor = dateStr;
+    let guard = 0;
+    while (values.length < count && guard < 366) {
+        cursor = addDays(cursor, -1);
+        const d = new Date(`${cursor}T00:00:00`);
+        const weekend = [0, 6].includes(d.getDay());
+        if (weekend !== isWeekend) { guard++; continue; }
+        const v = totalsByDate.get(cursor);
+        if (v != null) values.push(v);
+        guard++;
+    }
+    return values;
+}
+
+function getRecentWorkdayHistory(dateStr, totalsByDate, count) {
+    const values = [];
+    let cursor = dateStr;
+    let guard = 0;
+    while (values.length < count && guard < 366) {
+        cursor = addDays(cursor, -1);
+        const d = new Date(`${cursor}T00:00:00`);
+        if ([0, 6].includes(d.getDay())) { guard++; continue; }
+        const v = totalsByDate.get(cursor);
+        if (v != null) values.push(v);
+        guard++;
+    }
+    return values;
 }
 
 function trainRidgeModelForFilter(dailyData, weatherMapRef, filterFn) {
     if (!dailyData || dailyData.length < 30 || !weatherMapRef) return null;
 
     const totalsByDate = new Map(dailyData.map(item => [item.date, item.total]));
-    const X = [];
-    const y = [];
-    const yForStats = [];
+    const X = [], y = [], yForStats = [];
 
     for (const item of dailyData) {
         if (filterFn && !filterFn(item)) continue;
         const weather = weatherMapRef.get(item.date);
         if (!weather) continue;
-        const isWeekend = item.is_weekend != null ? item.is_weekend : ([0, 6].includes(new Date(`${item.date}T00:00:00`).getDay()));
+        const isWeekend = item.is_weekend != null ? item.is_weekend : [0, 6].includes(new Date(`${item.date}T00:00:00`).getDay());
         const history = getSameTypeHistory(item.date, totalsByDate, isWeekend, 7);
         if (history.length < 2) continue;
         const lag1 = history[0];
         const lag7 = history.length >= 7 ? history[6] : history[history.length - 1];
         const rolling7 = history.reduce((sum, v) => sum + v, 0) / history.length;
         const holidayFlags = getHolidayFlags(item.date);
-        const features = buildFeatureVector(
-            item.date,
-            isWeekend,
-            holidayFlags.isHoliday,
-            holidayFlags.isHolidayEve,
-            weather,
-            lag1,
-            lag7,
-            rolling7
-        );
+        const features = buildFeatureVector(item.date, isWeekend, holidayFlags.isHoliday, holidayFlags.isHolidayEve, weather, lag1, lag7, rolling7);
         X.push(features);
         y.push(item.total);
         yForStats.push(item.total);
@@ -343,18 +251,11 @@ function trainRidgeModelForFilter(dailyData, weatherMapRef, filterFn) {
     const stds = Array(m).fill(1);
 
     for (let j = 1; j < m; j++) {
-        let sum = 0;
-        for (let i = 0; i < X.length; i++) sum += X[i][j];
-        means[j] = sum / X.length;
+        means[j] = X.reduce((sum, row) => sum + row[j], 0) / X.length;
     }
-
     for (let j = 1; j < m; j++) {
-        let variance = 0;
-        for (let i = 0; i < X.length; i++) {
-            const diff = X[i][j] - means[j];
-            variance += diff * diff;
-        }
-        stds[j] = Math.sqrt(variance / X.length) || 1;
+        const variance = X.reduce((sum, row) => sum + Math.pow(row[j] - means[j], 2), 0) / X.length;
+        stds[j] = Math.sqrt(variance) || 1;
     }
 
     const Xstd = X.map(row => standardizeFeatures(row, means, stds));
@@ -362,9 +263,7 @@ function trainRidgeModelForFilter(dailyData, weatherMapRef, filterFn) {
     const XtX = matMul(Xt, Xstd);
 
     const lambda = 0.5;
-    for (let i = 0; i < m; i++) {
-        XtX[i][i] += lambda;
-    }
+    for (let i = 0; i < m; i++) XtX[i][i] += lambda;
     const Xty = matVecMul(Xt, y);
     const inv = invert(XtX);
     if (!inv) return null;
@@ -377,22 +276,14 @@ function trainRidgeModelForFilter(dailyData, weatherMapRef, filterFn) {
 function trainRidgeModel(dailyData, weatherMapRef) {
     if (!dailyData || !weatherMapRef) return null;
 
-    const weekdayModel = trainRidgeModelForFilter(
-        dailyData,
-        weatherMapRef,
-        item => {
-            const d = new Date(`${item.date}T00:00:00`);
-            return ![0, 6].includes(d.getDay());
-        }
-    );
-    const weekendModel = trainRidgeModelForFilter(
-        dailyData,
-        weatherMapRef,
-        item => {
-            const d = new Date(`${item.date}T00:00:00`);
-            return [0, 6].includes(d.getDay());
-        }
-    );
+    const weekdayModel = trainRidgeModelForFilter(dailyData, weatherMapRef, item => {
+        const d = new Date(`${item.date}T00:00:00`);
+        return ![0, 6].includes(d.getDay());
+    });
+    const weekendModel = trainRidgeModelForFilter(dailyData, weatherMapRef, item => {
+        const d = new Date(`${item.date}T00:00:00`);
+        return [0, 6].includes(d.getDay());
+    });
 
     if (!weekdayModel && !weekendModel) return null;
     return { weekdayModel, weekendModel };
@@ -412,12 +303,7 @@ function computeQuantile(values, q) {
 
 function getWeatherFallback(targetDateStr) {
     if (!weatherMap || weatherMap.size === 0) return null;
-    let sumMax = 0;
-    let sumMin = 0;
-    let count = 0;
-    let rainy = 0;
-    let heavyRain = 0;
-    let snow = 0;
+    let sumMax = 0, sumMin = 0, count = 0, rainy = 0, heavyRain = 0, snow = 0;
     for (let i = 1; i <= 7; i++) {
         const d = addDays(targetDateStr, -i);
         const w = weatherMap.get(d);
@@ -444,9 +330,7 @@ function getWeatherFallback(targetDateStr) {
 function getWeatherForDate(dateStr) {
     const exact = weatherMap ? weatherMap.get(dateStr) : null;
     if (exact) return { ...exact, source: 'actual' };
-    const fallback = getWeatherFallback(dateStr);
-    if (fallback) return fallback;
-    return null;
+    return getWeatherFallback(dateStr);
 }
 
 function predictForDate(dateStr, totalsByDate) {
@@ -469,73 +353,84 @@ function predictForDate(dateStr, totalsByDate) {
         if (adjustedWeather.is_heavy_rain) adjustedWeather.is_heavy_rain = false;
     }
     const holidayFlags = getHolidayFlags(dateStr);
-    const features = buildFeatureVector(
-        dateStr,
-        isWeekend,
-        holidayFlags.isHoliday,
-        holidayFlags.isHolidayEve,
-        adjustedWeather,
-        lag1,
-        lag7,
-        rolling7
-    );
+    const features = buildFeatureVector(dateStr, isWeekend, holidayFlags.isHoliday, holidayFlags.isHolidayEve, adjustedWeather, lag1, lag7, rolling7);
     const standardized = standardizeFeatures(features, model.means, model.stds);
     const raw = dot(model.weights, standardized);
-    if (['2026-03-17', '2026-03-18'].includes(dateStr)) {
-        console.log('[debug]', dateStr, {
-            isWeekend,
-            isHoliday: holidayFlags.isHoliday,
-            isHolidayEve: holidayFlags.isHolidayEve,
-            weather: adjustedWeather,
-            lag1,
-            lag7,
-            rolling7,
-            raw,
-            floor: model.floor
-        });
-    }
     let floor = model.floor || 0;
     if (!isWeekend) {
         const recent = getRecentWorkdayHistory(dateStr, totalsByDate, 10);
         if (recent.length >= 5) {
-            const recentAvg = recent.reduce((sum, v) => sum + v, 0) / recent.length;
-            floor = Math.max(floor, recentAvg * 0.90);
+            floor = Math.max(floor, recent.reduce((sum, v) => sum + v, 0) / recent.length * 0.90);
         }
     }
     const floored = Math.max(raw, floor);
     return { value: Math.max(floored, 0), weatherSource: weather.source };
 }
 
-async function updateDashboard() {
+// DOM 加载完成后初始化
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        const [metroResp, weatherResp] = await Promise.all([
+            fetch('data/metro_data.json'),
+            fetch('data/weather.json')
+        ]);
+        const data = await metroResp.json();
+        weatherData = await weatherResp.json();
+
+        metroData = data.daily_data;
+        linesInfo = data.metadata.lines;
+        weatherMap = new Map(weatherData.map(item => [item.date, item]));
+        const holidaySets = buildHolidaySets(metroData, weatherMap);
+        holidaySet = holidaySets.holidaySet;
+        holidayEveSet = holidaySets.holidayEveSet;
+        regressionModel = trainRidgeModel(metroData, weatherMap);
+
+        lastUpdated = data.metadata.fetched_at || data.metadata.last_updated || '';
+        const displayDate = lastUpdated.includes(' ') ? lastUpdated.split(' ')[0] : lastUpdated;
+        
+        updateLastUpdated(displayDate || (metroData[metroData.length - 1] ? metroData[metroData.length - 1].date : '--'));
+
+        // 延迟初始化，让动画先完成
+        setTimeout(() => {
+            updateDashboard();
+            initCharts();
+            renderLinesTable();
+        }, 500);
+    } catch (error) {
+        console.error('数据加载失败:', error);
+    }
+});
+
+function updateLastUpdated(text) {
+    const targets = document.querySelectorAll('[id]');
+    targets.forEach(el => {
+        if (el.getAttribute('data-last-update') !== null || el.id === 'lastUpdate' || el.id === 'footerUpdate') {
+            el.textContent = text || '--';
+        }
+    });
+}
+
+function updateDashboard() {
     if (!metroData || metroData.length === 0) return;
     
-    // 最新数据
     const latest = metroData[metroData.length - 1];
-    
-    // 设置默认日期
     selectDate(latest, { labelText: '较昨日' });
-    
-    // 显示预测
     updatePredictions();
-        
-        // 获取当前月份数据
-        const currentMonth = latest.date.slice(0, 7); // "2026-03"
-        const currentMonthData = metroData.filter(item => item.date.startsWith(currentMonth));
-    
-    // 本月最高
+
+    const currentMonth = latest.date.slice(0, 7);
+    const currentMonthData = metroData.filter(item => item.date.startsWith(currentMonth));
+
     if (currentMonthData.length > 0) {
         const maxItem = currentMonthData.reduce((max, item) => item.total > max.total ? item : max, currentMonthData[0]);
         document.getElementById('monthMax').textContent = maxItem.total.toFixed(1) + '万';
         document.getElementById('monthMaxDate').textContent = maxItem.date;
     }
-    
-    // 本月平均
+
     if (currentMonthData.length > 0) {
         const avg = currentMonthData.reduce((sum, item) => sum + item.total, 0) / currentMonthData.length;
         document.getElementById('monthAvg').textContent = avg.toFixed(1);
     }
-    
-    // 最后更新
+
     const displayDate = lastUpdated && lastUpdated.includes(' ') ? lastUpdated.split(' ')[0] : lastUpdated;
     updateLastUpdated(displayDate || latest.date);
 }
@@ -544,13 +439,13 @@ function updatePredictions() {
     if (!metroData || metroData.length === 0) return;
     if (!regressionModel) {
         const todayEl = document.getElementById('predictedTotal');
-        const todayNoteEl = document.getElementById('predictedChange');
+        const todayNoteEl = document.getElementById('predictedNote');
         const tomorrowEl = document.getElementById('predictedTomorrowTotal');
         const tomorrowNoteEl = document.getElementById('predictedTomorrowNote');
         if (todayEl) todayEl.textContent = '--';
-        if (todayNoteEl) todayNoteEl.textContent = '模型训练失败';
+        if (todayNoteEl) todayNoteEl.textContent = '模型加载中...';
         if (tomorrowEl) tomorrowEl.textContent = '--';
-        if (tomorrowNoteEl) tomorrowNoteEl.textContent = '模型训练失败';
+        if (tomorrowNoteEl) tomorrowNoteEl.textContent = '模型加载中...';
         return;
     }
     const totalsByDate = new Map(metroData.map(item => [item.date, item.total]));
@@ -566,23 +461,13 @@ function updatePredictions() {
     const tomorrowResult = predictForDate(tomorrowStr, totalsByDate);
 
     const todayEl = document.getElementById('predictedTotal');
-    const todayNoteEl = document.getElementById('predictedChange');
+    const todayNoteEl = document.getElementById('predictedNote');
     if (todayEl) {
         todayEl.textContent = todayResult ? todayResult.value.toFixed(1) + '万' : '--';
     }
     if (todayNoteEl) {
-        const note = [];
-        note.push(`预测日期 ${todayStr}`);
-        if (todayResult && todayResult.weatherSource === 'avg7') {
-            note.push('天气缺失，使用近7日均值');
-        }
-        if (hasActualToday) {
-            note.push('今日已有实际数据');
-        }
-        if (!todayResult) {
-            note.push('数据不足，无法预测');
-        }
-        todayNoteEl.textContent = note.join(' · ');
+        const note = hasActualToday ? '今日已有实际数据' : (todayResult ? `预测 · ${todayStr}` : '数据不足');
+        todayNoteEl.textContent = note;
     }
 
     const tomorrowEl = document.getElementById('predictedTomorrowTotal');
@@ -591,78 +476,59 @@ function updatePredictions() {
         tomorrowEl.textContent = tomorrowResult ? tomorrowResult.value.toFixed(1) + '万' : '--';
     }
     if (tomorrowNoteEl) {
-        const note = [];
-        note.push(`预测日期 ${tomorrowStr}`);
-        if (tomorrowResult && tomorrowResult.weatherSource === 'avg7') {
-            note.push('天气缺失，使用近7日均值');
-        }
-        if (!tomorrowResult) {
-            note.push('数据不足，无法预测');
-        }
-        tomorrowNoteEl.textContent = note.join(' · ');
+        tomorrowNoteEl.textContent = tomorrowResult ? `预测 · ${tomorrowStr}` : '数据不足';
     }
 }
 
-// 初始化图表
+// 图表初始化
 function initCharts() {
     initTrendChart();
     initPieChart();
 }
 
-// 趋势图
 function initTrendChart() {
     trendChart = echarts.init(document.getElementById('trendChart'));
-    updateTrendChart();
-    window.addEventListener('resize', () => trendChart.resize());
-
-    // 添加点击事件
-    trendChart.on('click', function(params) {
-        if (params.componentType === 'series') {
-            const clickedDate = params.name;
-            const clickedData = [...metroData].reverse().find(item => item.date === clickedDate);
-            if (clickedData) {
-                selectDate(clickedData);
-            }
-        }
-    });
-}
-
-// 更新趋势图数据
-function updateTrendChart() {
-    let filteredData = metroData;
-
-    if (currentTrendRange === 'week') {
-        filteredData = metroData.slice(-7);
-    } else if (currentTrendRange === 'month') {
-        filteredData = metroData.slice(-30);
-    } else if (currentTrendRange === 'year') {
-        filteredData = metroData.slice(-365);
-    }
-
-    const dates = filteredData.map(d => d.date);
-    const values = filteredData.map(d => d.total);
-
-    const option = {
+    
+    // Apple-style 主题
+    trendChart.setOption({
         tooltip: {
             trigger: 'axis',
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            borderColor: '#e0e0e0',
+            borderWidth: 1,
+            textStyle: { color: '#1d1d1f' },
             formatter: function(params) {
                 const date = params[0].name;
                 const value = params[0].value;
-                return `${date}<br/>总客流: ${value}万`;
+                return `<div style="padding: 8px;">
+                    <div style="font-weight: 600; margin-bottom: 4px;">${date}</div>
+                    <div>总客流: <span style="font-weight: 700; color: #0071e3;">${value}万</span></div>
+                </div>`;
             }
         },
         grid: {
             left: '3%',
             right: '4%',
             bottom: '15%',
+            top: '10%',
             containLabel: true
         },
+        xAxis: {
+            type: 'category',
+            data: [],
+            axisLine: { lineStyle: { color: '#e0e0e0' } },
+            axisLabel: { color: '#86868b', rotate: 45 }
+        },
+        yAxis: {
+            type: 'value',
+            name: '万人次',
+            nameTextStyle: { color: '#86868b' },
+            axisLine: { show: false },
+            splitLine: { lineStyle: { color: '#f0f0f0' } },
+            axisLabel: { color: '#86868b' }
+        },
         dataZoom: [
-            {
-                type: 'inside',
-                start: 0,
-                end: 100
-            },
+            { type: 'inside', start: 0, end: 100 },
             {
                 type: 'slider',
                 start: 0,
@@ -670,86 +536,127 @@ function updateTrendChart() {
                 height: 20,
                 bottom: 5,
                 borderColor: 'transparent',
-                backgroundColor: '#f0f0f0',
-                fillerColor: 'rgba(59, 130, 246, 0.2)',
-                handleStyle: {
-                    color: '#3B82F6'
-                }
+                backgroundColor: '#f5f5f7',
+                fillerColor: 'rgba(0, 113, 227, 0.2)',
+                handleStyle: { color: '#0071e3', borderColor: '#0071e3' },
+                textStyle: { color: '#86868b' }
             }
         ],
-        xAxis: {
-            type: 'category',
-            data: dates,
-            axisLabel: {
-                rotate: 45
-            }
-        },
-        yAxis: {
-            type: 'value',
-            name: '万人次',
-            min: function(value) {
-                return Math.floor(value.min - 10);
-            }
-        },
         series: [{
-            data: values,
+            data: [],
             type: 'line',
-            smooth: true,
+            smooth: 0.6,
             symbol: 'circle',
-            symbolSize: 8,
-            lineStyle: {
-                color: '#3B82F6',
-                width: 3
-            },
-            itemStyle: {
-                color: '#3B82F6'
-            },
+            symbolSize: 6,
+            lineStyle: { color: '#0071e3', width: 3 },
+            itemStyle: { color: '#0071e3' },
             areaStyle: {
                 color: {
                     type: 'linear',
                     x: 0, y: 0, x2: 0, y2: 1,
                     colorStops: [
-                        { offset: 0, color: 'rgba(59, 130, 246, 0.3)' },
-                        { offset: 1, color: 'rgba(59, 130, 246, 0.05)' }
+                        { offset: 0, color: 'rgba(0, 113, 227, 0.25)' },
+                        { offset: 1, color: 'rgba(0, 113, 227, 0.02)' }
                     ]
                 }
-            }
+            },
+            emphasis: {
+                itemStyle: { color: '#0077ED', symbolSize: 10 }
+            },
+            animationDuration: 2000,
+            animationEasing: 'cubicOut'
         }]
-    };
+    });
 
-    trendChart.setOption(option, true);
+    updateTrendChart();
+
+    trendChart.on('click', function(params) {
+        if (params.componentType === 'series') {
+            const clickedDate = params.name;
+            const clickedData = [...metroData].reverse().find(item => item.date === clickedDate);
+            if (clickedData) {
+                selectDate(clickedData);
+                // 平滑滚动到顶部
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+    });
+
+    window.addEventListener('resize', () => trendChart.resize());
 }
 
-// 设置趋势图时间范围
+function updateTrendChart() {
+    if (!trendChart || !metroData) return;
+
+    let filteredData = metroData;
+    if (currentTrendRange === 'week') filteredData = metroData.slice(-7);
+    else if (currentTrendRange === 'month') filteredData = metroData.slice(-30);
+    else if (currentTrendRange === 'year') filteredData = metroData.slice(-365);
+
+    const dates = filteredData.map(d => d.date);
+    const values = filteredData.map(d => d.total);
+
+    trendChart.setOption({
+        xAxis: { data: dates },
+        series: [{ data: values }]
+    }, false);
+}
+
 function setTrendRange(range) {
     currentTrendRange = range;
-
-    // 更新按钮样式
-    document.getElementById('btn-all').className = range === 'all'
-        ? 'px-3 py-1 text-sm rounded bg-blue-500 text-white'
-        : 'px-3 py-1 text-sm rounded bg-gray-200 text-gray-700';
-    document.getElementById('btn-month').className = range === 'month'
-        ? 'px-3 py-1 text-sm rounded bg-blue-500 text-white'
-        : 'px-3 py-1 text-sm rounded bg-gray-200 text-gray-700';
-    document.getElementById('btn-week').className = range === 'week'
-        ? 'px-3 py-1 text-sm rounded bg-blue-500 text-white'
-        : 'px-3 py-1 text-sm rounded bg-gray-200 text-gray-700';
-    document.getElementById('btn-year').className = range === 'year'
-        ? 'px-3 py-1 text-sm rounded bg-blue-500 text-white'
-        : 'px-3 py-1 text-sm rounded bg-gray-200 text-gray-700';
-
+    document.querySelectorAll('.chart-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    event.target.classList.add('active');
     updateTrendChart();
 }
 
-// 饼图
 function initPieChart() {
     pieChart = echarts.init(document.getElementById('pieChart'));
+    
+    pieChart.setOption({
+        tooltip: {
+            trigger: 'item',
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            borderColor: '#e0e0e0',
+            textStyle: { color: '#1d1d1f' },
+            formatter: '{b}: {c}万 ({d}%)'
+        },
+        legend: {
+            type: 'scroll',
+            orient: 'vertical',
+            right: '5%',
+            top: 'center',
+            textStyle: { color: '#1d1d1f', fontSize: 12 },
+            itemGap: 12
+        },
+        series: [{
+            type: 'pie',
+            radius: ['40%', '70%'],
+            center: ['35%', '50%'],
+            avoidLabelOverlap: true,
+            itemStyle: {
+                borderRadius: 8,
+                borderColor: '#fff',
+                borderWidth: 3
+            },
+            label: { show: false },
+            emphasis: {
+                label: { show: true, fontSize: 16, fontWeight: 'bold' }
+            },
+            data: [],
+            animationType: 'expansion',
+            animationDuration: 1200,
+            animationEasing: 'cubicOut'
+        }]
+    });
+
     updatePieChart();
     window.addEventListener('resize', () => pieChart.resize());
 }
 
 function updatePieChart() {
-    if (!metroData || metroData.length === 0 || !pieChart) return;
+    if (!pieChart || !metroData || metroData.length === 0) return;
     const latest = selectedDateData || metroData[metroData.length - 1];
     const pieData = Object.entries(latest.lines)
         .map(([lineId, value]) => {
@@ -762,104 +669,65 @@ function updatePieChart() {
         })
         .sort((a, b) => b.value - a.value);
 
-    const legendNames = pieData.map(item => item.name);
-    const splitIndex = Math.ceil(legendNames.length / 2);
-    const legendLeft = legendNames.slice(0, splitIndex);
-    const legendRight = legendNames.slice(splitIndex);
-
-    const option = {
-        tooltip: {
-            trigger: 'item',
-            formatter: '{b}: {c}万 ({d}%)'
-        },
-        legend: [
-            {
-                type: 'plain',
-                selectedMode: false,
-                orient: 'vertical',
-                left: '60%',
-                top: 20,
-                itemGap: 8,
-                textStyle: { fontSize: 11 },
-                data: legendLeft
-            },
-            {
-                type: 'plain',
-                selectedMode: false,
-                orient: 'vertical',
-                left: '78%',
-                top: 20,
-                itemGap: 8,
-                textStyle: { fontSize: 11 },
-                data: legendRight
-            }
-        ],
-        series: [{
-            type: 'pie',
-            radius: ['38%', '68%'],
-            center: ['32%', '50%'],
-            avoidLabelOverlap: false,
-            itemStyle: {
-                borderRadius: 6,
-                borderColor: '#fff',
-                borderWidth: 2
-            },
-            label: {
-                show: false
-            },
-            emphasis: {
-                label: {
-                    show: true,
-                    fontSize: 14,
-                    fontWeight: 'bold'
-                }
-            },
-            data: pieData
-        }]
-    };
-
-    pieChart.setOption(option);
+    pieChart.setOption({
+        series: [{ data: pieData }]
+    });
 }
 
-// 选择日期
 function selectDate(data, options = {}) {
     selectedDateData = data;
     selectedDate = data.date;
     const labelText = options.labelText || '较前日';
 
-    // 更新日期标签
     const dateLabel = document.getElementById('selectedDateLabel');
-    const dateLabel2 = document.getElementById('selectedDateLabel2');
-    if (dateLabel) {
-        dateLabel.textContent = `${data.date}总客流`;
-    }
-    if (dateLabel2) {
-        dateLabel2.textContent = `${data.date}各线路客流`;
-    }
     const pieDateLabel = document.getElementById('pieDateLabel');
-    if (pieDateLabel) {
-        pieDateLabel.textContent = data.date;
+    if (dateLabel) dateLabel.textContent = `${data.date} 各线路客流`;
+    if (pieDateLabel) pieDateLabel.textContent = `${data.date} 线路占比`;
+
+    const todayTotalEl = document.getElementById('todayTotal');
+    if (todayTotalEl) {
+        animateNumber(todayTotalEl, data.total);
     }
 
-    // 更新总客流显示
-    document.getElementById('todayTotal').textContent = data.total.toFixed(1) + '万';
+    const heroDateEl = document.getElementById('heroDate');
+    if (heroDateEl) heroDateEl.textContent = `${data.date} 客流数据`;
 
-    // 更新变化率（如果可能）
     if (metroData.length > 1) {
         const currentIndex = metroData.findIndex(item => item.date === data.date);
         const previous = currentIndex >= 0 ? metroData[currentIndex - 1] : null;
         updateChangeRate(data, previous, labelText);
     }
 
-    // 重新渲染表格
     renderLinesTable();
     updatePieChart();
 }
 
-// 渲染线路表格
+function updateChangeRate(current, previous, labelText) {
+    const changeEl = document.getElementById('todayChange');
+    if (!changeEl || !previous || previous.total === 0) {
+        if (changeEl) changeEl.textContent = labelText;
+        return;
+    }
+    const changeValue = (current.total - previous.total) / previous.total * 100;
+    const change = changeValue.toFixed(1);
+    
+    if (changeValue > 0) {
+        changeEl.innerHTML = `<span>↗ +${change}%</span>`;
+        changeEl.className = 'stat-indicator up';
+    } else if (changeValue < 0) {
+        changeEl.innerHTML = `<span>↘ ${change}%</span>`;
+        changeEl.className = 'stat-indicator down';
+    } else {
+        changeEl.innerHTML = `<span>→ 0%</span>`;
+        changeEl.className = 'stat-indicator';
+    }
+}
+
 function renderLinesTable() {
     const tbody = document.getElementById('linesTable');
+    if (!tbody) return;
     const data = selectedDateData || metroData[metroData.length - 1];
+    if (!data) return;
     const total = data.total;
 
     const sortedLines = Object.entries(data.lines)
@@ -875,18 +743,19 @@ function renderLinesTable() {
         })
         .sort((a, b) => b.value - a.value);
 
-    tbody.innerHTML = sortedLines.map(line => `
-        <tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap">
-                <span class="line-badge" style="background-color: ${line.color}">
-                    ${line.name}
-                </span>
+    tbody.innerHTML = sortedLines.map((line, index) => `
+        <tr style="animation: fadeInUp 0.4s ease ${index * 0.05}s forwards; opacity: 0;">
+            <td>
+                <div class="flex items-center gap-3">
+                    <span class="line-badge" style="background-color: ${line.color}">${line.name}</span>
+                </div>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-gray-900 font-medium">
-                ${line.value.toFixed(1)}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-gray-500">
-                ${line.percent}%
+            <td class="line-value">${line.value.toFixed(1)}</td>
+            <td>
+                <div class="text-sm text-gray-500">${line.percent}%</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${line.percent}%; background-color: ${line.color};"></div>
+                </div>
             </td>
         </tr>
     `).join('');
