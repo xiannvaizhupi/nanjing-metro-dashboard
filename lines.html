@@ -195,12 +195,11 @@
             
             if (currentLineId === ALL_LINES_ID) {
                 statsSection.style.display = 'none';
-                // Increase chart height and padding when stats are hidden
                 if (chartCard) {
                     chartCard.style.paddingTop = '32px';
                 }
                 if (chartContainer) {
-                    chartContainer.style.height = '500px';
+                    chartContainer.style.height = '600px';
                 }
                 if (lineTrendChart) {
                     lineTrendChart.resize();
