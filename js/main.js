@@ -255,9 +255,11 @@ function buildHolidaySets(dailyData, weatherMapRef) {
 }
 
 function getHolidayFlags(dateStr) {
+    const date = new Date(`${dateStr}T00:00:00`);
+    const dow = date.getDay();
     return {
         isHoliday: holidaySet ? holidaySet.has(dateStr) : false,
-        isHolidayEve: holidayEveSet ? holidayEveSet.has(dateStr) : false
+        isHolidayEve: holidayEveSet ? holidayEveSet.has(dateStr) : false || dow === 5 // 周五也算节假日前夕
     };
 }
 
@@ -530,9 +532,10 @@ function predictForDate(dateStr, totalsByDate) {
 // DOM 加载完成后初始化
 document.addEventListener('DOMContentLoaded', async function() {
     try {
-        const [metroResp, weatherResp] = await Promise.all([
+        const [metroResp, weatherResp, predResp] = await Promise.all([
             fetch('data/metro_data.json'),
-            fetch('data/weather.json')
+            fetch('data/weather.json'),
+            fetch('data/prediction_log.json').then(r => r.ok ? r.json() : null).catch(() => null)
         ]);
         const data = await metroResp.json();
         weatherData = await weatherResp.json();
@@ -544,6 +547,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         holidaySet = holidaySets.holidaySet;
         holidayEveSet = holidaySets.holidayEveSet;
         regressionModel = trainRidgeModel(metroData, weatherMap);
+
+        // 显示预测评估统计
+        if (predResp && predResp.stats) {
+            displayPredictionStats(predResp.stats);
+        }
 
         lastUpdated = data.metadata.last_updated || data.metadata.fetched_at || '';
         const displayDate = lastUpdated.includes(' ') ? lastUpdated.split(' ')[0] : lastUpdated;
@@ -559,6 +567,42 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('数据加载失败:', error);
     }
 });
+
+// 显示预测评估统计
+function displayPredictionStats(stats) {
+    const container = document.getElementById('predictionStats');
+    if (!container) return;
+
+    const count = stats.total_comparisons || 0;
+    const mae = stats.mean_absolute_error;
+    const bias = stats.mean_bias;
+    const updated = stats.last_updated;
+
+    if (count === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    container.style.display = 'block';
+
+    const countEl = document.getElementById('statCount');
+    const maeEl = document.getElementById('statMAE');
+    const biasEl = document.getElementById('statBias');
+    const biasNoteEl = document.getElementById('statBiasNote');
+    const updatedEl = document.getElementById('statUpdated');
+
+    if (countEl) countEl.textContent = count;
+    if (maeEl) maeEl.textContent = mae != null ? mae.toFixed(1) : '--';
+    if (biasEl && bias != null) {
+        biasEl.textContent = (bias >= 0 ? '+' : '') + bias.toFixed(1);
+    }
+    if (biasNoteEl && bias != null) {
+        if (bias > 1) biasNoteEl.textContent = '(预测偏低)';
+        else if (bias < -1) biasNoteEl.textContent = '(预测偏高)';
+        else biasNoteEl.textContent = '(无明显偏差)';
+    }
+    if (updatedEl && updated) updatedEl.textContent = `统计更新时间：${updated}`;
+}
 
 function updateLastUpdated(text) {
     const lastUpdateEl = document.getElementById('lastUpdate');
@@ -583,6 +627,20 @@ function updateDashboard() {
 
     const displayDate = lastUpdated && lastUpdated.includes(' ') ? lastUpdated.split(' ')[0] : lastUpdated;
     updateLastUpdated(displayDate || latest.date);
+}
+
+// 重新训练模型（用于参数更新后）
+function retrainModel() {
+    if (!metroData || !weatherMap) {
+        console.warn('数据未加载，无法重新训练');
+        return;
+    }
+    const holidaySets = buildHolidaySets(metroData, weatherMap);
+    holidaySet = holidaySets.holidaySet;
+    holidayEveSet = holidaySets.holidayEveSet;
+    regressionModel = trainRidgeModel(metroData, weatherMap);
+    updatePredictions();
+    console.log('模型已重新训练，预测已更新');
 }
 
 function updateRangeStats() {

@@ -6,14 +6,22 @@
 
 import json
 import re
-from datetime import datetime, date
+import os
+import math
+from datetime import datetime, date, timedelta
 from urllib.request import urlopen
 from urllib.parse import quote
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.dirname(SCRIPT_DIR)
+METRO_DATA_PATH = os.path.join(REPO_DIR, 'data', 'metro_data.json')
+PREDICTION_LOG_PATH = os.path.join(REPO_DIR, 'data', 'prediction_log.json')
+
 
 def fetch_weibo_data():
     """从南京地铁官网微博组件获取数据"""
     url = "https://widget.weibo.com/weiboshow/index.php?language=&width=0&height=430&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=2638276292&verifier=138e3b0a&dpc=1"
-    
+
     try:
         response = urlopen(url, timeout=30)
         html = response.read().decode('utf-8')
@@ -22,24 +30,25 @@ def fetch_weibo_data():
         print(f"获取微博数据失败: {e}")
         return None
 
+
 def parse_weibo_flow(html):
     """解析微博内容中的客流数据"""
     if not html:
         return []
-    
+
     results = []
     # 匹配 #昨日客流# 格式的数据
     pattern = r'#昨日客流#[^#]*南京地铁(\d+)月(\d+)日客运量(\d+\.?\d*)[，,]([^#\n]+)（以上单位'
-    
+
     for match in re.finditer(pattern, html):
         month = int(match.group(1))
         day = int(match.group(2))
         total = float(match.group(3))
         lines_str = match.group(4)
-        
-        year = 2026  # 或使用当前年份
+
+        year = 2026
         date_str = f"{year}-{month:02d}-{day:02d}"
-        
+
         # 解析各线路
         lines = {}
         line_patterns = [
@@ -57,15 +66,15 @@ def parse_weibo_flow(html):
             (r'S8号线(\d+\.?\d*)', 'S8'),
             (r'S9号线(\d+\.?\d*)', 'S9'),
         ]
-        
+
         for pattern, line_id in line_patterns:
             m = re.search(pattern, lines_str)
             if m:
                 lines[line_id] = float(m.group(1))
-        
+
         d = date(year, month, day)
         is_weekend = d.weekday() >= 5
-        
+
         results.append({
             'date': date_str,
             'total': total,
@@ -73,83 +82,220 @@ def parse_weibo_flow(html):
             'note': '',
             'lines': lines
         })
-        
+
         print(f"解析: {date_str} - {total}万")
-    
+
     return results
 
+
 def update_metro_data(new_entries):
-    """更新metro_data.json"""
+    """更新metro_data.json，返回是否有新数据被添加"""
     try:
-        with open('data/metro_data.json', 'r') as f:
+        with open(METRO_DATA_PATH, 'r') as f:
             data = json.load(f)
     except FileNotFoundError:
         print("metro_data.json 不存在")
         return False
-    
+
     existing_dates = {item['date'] for item in data['daily_data']}
-    updated = False
-    
+    has_new = False
+    newly_added_dates = []
+
     for entry in new_entries:
         entry_date = entry['date']
         if entry_date in existing_dates:
-            # 更新已有数据
             for i, item in enumerate(data['daily_data']):
                 if item['date'] == entry_date:
-                    data['daily_data'][i] = entry
-                    print(f"更新: {entry_date}")
-                    updated = True
+                    if item['total'] != entry['total']:
+                        data['daily_data'][i] = entry
+                        print(f"数据有变，更新: {entry_date} ({item['total']} → {entry['total']})")
+                        has_new = True
                     break
         else:
-            # 添加新数据
             data['daily_data'].append(entry)
-            print(f"添加: {entry_date}")
-            updated = True
-    
-    if updated:
-        # 按日期排序
+            print(f"添加新数据: {entry_date} - {entry['total']}万")
+            has_new = True
+            newly_added_dates.append(entry_date)
+
+    if has_new:
         data['daily_data'].sort(key=lambda x: x['date'])
-        
-        # 更新 metadata
         data['metadata']['last_updated'] = datetime.now().strftime('%Y-%m-%d')
         data['metadata']['fetched_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        
-        # 保存
-        with open('data/metro_data.json', 'w') as f:
+
+        with open(METRO_DATA_PATH, 'w') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
-        
+
         print(f"数据已保存到 metro_data.json")
-        return True
+        return newly_added_dates
     else:
-        print("没有新数据需要更新")
-        return False
+        print("官网尚未更新，暂无新数据")
+        return []
+
+
+def load_metro_data():
+    """加载 metro_data.json"""
+    try:
+        with open(METRO_DATA_PATH, 'r') as f:
+            data = json.load(f)
+        return {item['date']: item for item in data['daily_data']}
+    except Exception as e:
+        print(f"加载 metro_data.json 失败: {e}")
+        return {}
+
+
+def load_prediction_log():
+    """加载 prediction_log.json"""
+    try:
+        with open(PREDICTION_LOG_PATH, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {
+            'predictions': {},
+            'comparison': [],
+            'stats': {
+                'total_comparisons': 0,
+                'mean_absolute_error': None,
+                'mean_bias': None,
+                'last_updated': None
+            }
+        }
+
+
+def save_prediction_log(log):
+    """保存 prediction_log.json"""
+    with open(PREDICTION_LOG_PATH, 'w') as f:
+        json.dump(log, f, ensure_ascii=False, indent=2)
+
+
+def date_str_to_weekday(date_str):
+    """返回星期几（0=周一，6=周日）"""
+    d = datetime.strptime(date_str, '%Y-%m-%d')
+    return d.weekday()
+
+
+def get_same_weekday_history(date_str, metro_map, count=4):
+    """获取过去 N 周同星期的历史数据"""
+    values = []
+    d = datetime.strptime(date_str, '%Y-%m-%d')
+    target_weekday = d.weekday()
+
+    cursor = d
+    guard = 0
+    while len(values) < count and guard < 365:
+        cursor = cursor - timedelta(days=1)
+        if cursor.weekday() == target_weekday:
+            ds = cursor.strftime('%Y-%m-%d')
+            if ds in metro_map:
+                values.append(metro_map[ds]['total'])
+        guard += 1
+
+    return values
+
+
+def baseline_predict(date_str, metro_map):
+    """简单基线预测：过去4周同星期均值"""
+    history = get_same_weekday_history(date_str, metro_map, count=4)
+    if not history:
+        return None
+    return sum(history) / len(history)
+
+
+def compare_and_log(newly_added_dates):
+    """对比新到数据与预测，记录误差"""
+    if not newly_added_dates:
+        return
+
+    metro_map = load_metro_data()
+    log = load_prediction_log()
+
+    for date_str in sorted(newly_added_dates):
+        actual = metro_map.get(date_str)
+        if not actual:
+            continue
+        actual_total = actual['total']
+
+        # 获取预测值（优先用记录的预测，否则用基线）
+        predicted = None
+        if date_str in log['predictions']:
+            predicted = log['predictions'][date_str].get('predicted_total')
+        else:
+            predicted = baseline_predict(date_str, metro_map)
+
+        if predicted is None:
+            print(f"[对比] {date_str}: 无预测值，跳过")
+            continue
+
+        error = actual_total - predicted
+        abs_error = abs(error)
+        pct_error = error / predicted * 100 if predicted != 0 else 0
+
+        entry = {
+            'date': date_str,
+            'actual': round(actual_total, 2),
+            'predicted': round(predicted, 2),
+            'error': round(error, 2),
+            'abs_error': round(abs_error, 2),
+            'pct_error': round(pct_error, 2),
+            'weekday': date_str_to_weekday(date_str),
+            'is_weekend': actual.get('is_weekend', False),
+            'compared_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }
+
+        log['comparison'].append(entry)
+
+        # 更新统计
+        errors = [c['error'] for c in log['comparison']]
+        abs_errors = [c['abs_error'] for c in log['comparison']]
+        n = len(errors)
+        log['stats']['total_comparisons'] = n
+        log['stats']['mean_absolute_error'] = round(sum(abs_errors) / n, 2)
+        log['stats']['mean_bias'] = round(sum(errors) / n, 2)
+        log['stats']['last_updated'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        print(f"[对比] {date_str}: 实际={actual_total} | 预测={predicted:.1f} | 误差={error:+.1f} ({pct_error:+.1f}%)")
+
+    save_prediction_log(log)
+
+    # 输出统计摘要
+    n = log['stats']['total_comparisons']
+    mae = log['stats']['mean_absolute_error']
+    bias = log['stats']['mean_bias']
+    print(f"\n[预测评估] 共 {n} 条记录 | MAE={mae}万 | 平均偏差={bias:+.2f}万")
+
+    # 检查是否需要模型重训练（MAE 超过阈值时提示）
+    if n >= 7 and mae is not None and mae > 15:
+        print(f"[警告] 连续 {n} 天 MAE={mae}万 偏高，建议重新训练模型")
+        print(f"[提示] 在仪表盘刷新页面即可重新训练模型")
+    elif n >= 7:
+        print(f"[预测评估] 模型误差正常，无需特殊处理")
+
 
 def main():
     import subprocess
-    
+
     print(f"=== 南京地铁客流数据抓取 ===")
     print(f"执行时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    
-    # 获取数据
+
     html = fetch_weibo_data()
-    
-    # 解析
     entries = parse_weibo_flow(html)
-    
+
     if entries:
-        # 更新
-        if update_metro_data(entries):
-            print("\n数据更新成功，准备推送...")
-            
+        newly_added = update_metro_data(entries)
+
+        if newly_added:
+            print("\n有新数据，准备推送...")
+
+            # 预测对比
+            compare_and_log(newly_added)
+
             # Git 推送
             try:
-                repo_dir = '/Users/zhuzhiwei/nanjing-metro-dashboard'
                 commit_msg = f"Auto update metro data - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
-                
-                subprocess.run(['git', 'add', '.'], cwd=repo_dir, check=True)
-                subprocess.run(['git', 'commit', '-m', commit_msg], cwd=repo_dir, check=True)
-                result = subprocess.run(['git', 'push'], cwd=repo_dir, capture_output=True, text=True)
-                
+
+                subprocess.run(['git', 'add', '.'], cwd=REPO_DIR, check=True)
+                subprocess.run(['git', 'commit', '-m', commit_msg], cwd=REPO_DIR, check=True)
+                result = subprocess.run(['git', 'push'], cwd=REPO_DIR, capture_output=True, text=True)
+
                 if result.returncode == 0:
                     print("Git 推送成功!")
                 else:
@@ -157,9 +303,10 @@ def main():
             except Exception as e:
                 print(f"Git 操作失败: {e}")
         else:
-            print("\n数据更新失败或无新数据")
+            print("无新数据，退出。10:00 兜底任务将再次尝试。")
     else:
-        print("\n未解析到客流数据")
+        print("未解析到客流数据，退出。10:00 兜底任务将再次尝试。")
+
 
 if __name__ == '__main__':
     main()

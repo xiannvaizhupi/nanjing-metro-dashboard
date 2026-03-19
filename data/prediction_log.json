@@ -1,0 +1,10 @@
+{
+  "predictions": {},
+  "comparison": [],
+  "stats": {
+    "total_comparisons": 0,
+    "mean_absolute_error": null,
+    "mean_bias": null,
+    "last_updated": null
+  }
+}
