@@ -144,12 +144,8 @@
                 linesInfo = data.metadata.lines;
                 
                 initLineSelector();
-                updateSelectedLineName();
                 updateLineStats();
-                measureStatsHeight();
                 initLineTrendChart();
-                measureChartCardHeight();
-                updateStatsVisibility();
             } catch (error) {
                 console.error('加载数据失败:', error);
             }
@@ -178,6 +174,7 @@
             
             container.innerHTML = html;
             updateSelectedLineName();
+            updateStatsVisibility();
         }
 
         function updateSelectedLineName() {
@@ -191,62 +188,29 @@
             }
         }
 
-        let statsSectionHeight = 0;
-        let singleModeChartCardH = 0;
-
-        function measureStatsHeight() {
-            const statsSection = document.getElementById('lineStats');
-            if (!statsSection) return;
-            statsSection.style.visibility = 'hidden';
-            statsSection.style.display = 'grid';
-            statsSectionHeight = statsSection.scrollHeight;
-            statsSection.style.display = '';
-            statsSection.style.visibility = '';
-        }
-
-        function measureChartCardHeight() {
-            const chartCard = document.querySelector('.charts-section .chart-card');
-            if (chartCard) {
-                singleModeChartCardH = chartCard.offsetHeight;
-            }
-        }
-
         function updateStatsVisibility() {
             const statsSection = document.getElementById('lineStats');
             const chartCard = document.querySelector('.charts-section .chart-card');
             const chartContainer = document.getElementById('lineTrendChart');
-
+            
             if (currentLineId === ALL_LINES_ID) {
-                // 折叠 stats 区
-                statsSection.style.height = '0';
-                statsSection.style.overflow = 'hidden';
-                statsSection.style.visibility = 'hidden';
-
-                if (chartCard && singleModeChartCardH > 0) {
-                    chartCard.style.height = singleModeChartCardH + 'px';
-                    chartCard.style.boxSizing = 'border-box';
+                statsSection.style.display = 'none';
+                if (chartCard) {
+                    chartCard.style.paddingTop = '32px';
                 }
                 if (chartContainer) {
-                    chartContainer.classList.remove('abs-positioned');
-                    // 图表容器高度 = card高 - header - card自己的padding
-                    chartContainer.style.cssText = 'position: relative; height: ' + (singleModeChartCardH - 64 - 32) + 'px;';
+                    chartContainer.style.height = '700px';
                 }
                 if (lineTrendChart) {
                     lineTrendChart.resize();
                 }
             } else {
-                // 恢复 stats 区
-                statsSection.style.height = '';
-                statsSection.style.overflow = '';
-                statsSection.style.visibility = '';
-
+                statsSection.style.display = 'grid';
                 if (chartCard) {
-                    chartCard.style.height = '';
-                    chartCard.style.boxSizing = '';
+                    chartCard.style.paddingTop = '0';
                 }
                 if (chartContainer) {
-                    chartContainer.classList.remove('abs-positioned');
-                    chartContainer.style.cssText = 'position: relative; height: 400px;';
+                    chartContainer.style.height = '400px';
                 }
                 if (lineTrendChart) {
                     lineTrendChart.resize();
@@ -292,20 +256,20 @@
 
         function updateLineStats() {
             if (currentLineId === ALL_LINES_ID) return;
-
+            
             const lineInfo = linesInfo.find(l => l.id === currentLineId);
             const rangeData = getLineRangeData();
             const values = rangeData.map(d => d.lines[currentLineId] || 0).filter(v => v > 0);
-
+            
             if (values.length === 0) {
                 document.getElementById('lineStats').innerHTML = '<div class="col-span-3 text-center text-gray-500">暂无数据</div>';
                 return;
             }
-
+            
             const max = Math.max(...values);
             const min = Math.min(...values);
             const avg = values.reduce((a, b) => a + b, 0) / values.length;
-
+            
             const container = document.getElementById('lineStats');
             container.innerHTML = `
                 <div class="stat-card" style="animation-delay: 0.1s; opacity: 1;">
@@ -324,9 +288,6 @@
                     <div class="stat-note">万人次/日</div>
                 </div>
             `;
-
-            // 记录 stats 区渲染后的高度，供 ALL 模式使用
-            statsSectionHeight = container.offsetHeight;
         }
 
         function initLineTrendChart() {

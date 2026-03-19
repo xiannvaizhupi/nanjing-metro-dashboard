@@ -369,31 +369,6 @@ body {
     position: relative;
 }
 
-.chart-container.abs-positioned {
-    position: absolute;
-    bottom: 32px;
-    left: 32px;
-    right: 32px;
-    top: auto;
-    height: auto;
-}
-
-@media (max-width: 768px) {
-    .chart-container.abs-positioned {
-        left: 16px;
-        right: 16px;
-        bottom: 16px;
-    }
-}
-
-@media (max-width: 480px) {
-    .chart-container.abs-positioned {
-        left: 12px;
-        right: 12px;
-        bottom: 12px;
-    }
-}
-
 /* ============================================
    Data Section
    ============================================ */
