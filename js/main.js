@@ -499,34 +499,178 @@ function getWeatherForDate(dateStr) {
     return getWeatherFallback(dateStr);
 }
 
-function predictForDate(dateStr, totalsByDate) {
-    if (!regressionModel) return null;
-    const weather = getWeatherForDate(dateStr);
-    if (!weather) return null;
+// ============================================================
+// 南京地铁客流预测模型 v3
+// 核心: 近期同星期均值 + 季节系数 + 特殊日 + 天气修正
+// ============================================================
 
-    const dateObj = new Date(`${dateStr}T00:00:00`);
-    const isWeekend = [0, 6].includes(dateObj.getDay());
-    const history = getSameTypeHistory(dateStr, totalsByDate, isWeekend, 7);
-    if (history.length < 2) return null;
-    const lag1 = history[0];
-    const lag7 = history.length >= 7 ? history[6] : history[history.length - 1];
-    const rolling7 = history.reduce((sum, v) => sum + v, 0) / history.length;
-    const model = isWeekend ? regressionModel.weekendModel : regressionModel.weekdayModel;
-    if (!model) return null;
-    const adjustedWeather = { ...weather };
-    const holidayFlags = getHolidayFlags(dateStr);
-    const features = buildFeatureVector(dateStr, isWeekend, holidayFlags.isHoliday, holidayFlags.isHolidayEve, adjustedWeather, lag1, lag7, rolling7);
-    const standardized = standardizeFeatures(features, model.means, model.stds);
-    const raw = dot(model.weights, standardized);
-    let floor = model.floor || 0;
-    if (!isWeekend) {
-        const recent = getRecentWorkdayHistory(dateStr, totalsByDate, 10);
-        if (recent.length >= 5) {
-            floor = Math.max(floor, recent.reduce((sum, v) => sum + v, 0) / recent.length * 0.90);
+// 各星期基准客流 (全局均值310.4)
+const DOW_BASELINE = {
+    0: 303.3,  // 周一
+    1: 308.7,  // 周二
+    2: 316.7,  // 周三
+    3: 313.8,  // 周四
+    4: 347.0,  // 周五 ★最高
+    5: 310.2,  // 周六
+    6: 272.8   // 周日 ●最低
+};
+
+// 月份季节系数
+const MONTH_FACTORS = {
+    1: 0.941, 2: 0.908, 3: 1.039, 4: 1.045, 5: 0.997, 6: 0.946,
+    7: 0.951, 8: 1.060, 9: 0.994, 10: 1.070, 11: 1.095, 12: 1.063
+};
+
+// 判断是否春节核心期 (腊月29 ~ 正月二十)
+function isSpringFestivalPeriod(dateStr) {
+    const d = new Date(`${dateStr}T00:00:00`);
+    const m = d.getMonth() + 1;
+    const day = d.getDate();
+    return (m === 1 && day >= 29) || (m === 2 && day <= 20);
+}
+
+// 判断是否国庆黄金周
+function isNationalPeriod(dateStr) {
+    const d = new Date(`${dateStr}T00:00:00`);
+    return d.getMonth() + 1 === 10 && d.getDate() >= 1 && d.getDate() <= 7;
+}
+
+// 获取最近N个同类型日数据 (同星期, 同周末/工作日)
+function getRecentHistoryByDOW(dateStr, maxCount) {
+    const totalsByDate = new Map(metroData.map(item => [item.date, item.total]));
+    const targetDate = new Date(`${dateStr}T00:00:00`);
+    const targetDow = targetDate.getDay();
+    const isTargetWeekend = targetDow === 0 || targetDow === 6;
+
+    const values = [];
+    const cursor = new Date(targetDate);
+    let guard = 0;
+
+    while (values.length < maxCount && guard < 200) {
+        cursor.setDate(cursor.getDate() - 7);
+        guard++;
+        const cursorStr = cursor.toISOString().slice(0, 10);
+        const item = metroData.find(d => d.date === cursorStr);
+        if (!item) continue;
+        const itemDow = new Date(`${cursorStr}T00:00:00`).getDay();
+        const isItemWeekend = itemDow === 0 || itemDow === 6;
+        if (isTargetWeekend === isItemWeekend) {
+            values.push(item.total);
         }
     }
-    const floored = Math.max(raw, floor);
-    return { value: Math.max(floored, 0), weatherSource: weather.source };
+    return values;
+}
+
+// 获取昨日客流
+function getYesterday(dateStr) {
+    const yesterday = new Date(`${dateStr}T00:00:00`);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const ydStr = yesterday.toISOString().slice(0, 10);
+    const item = metroData.find(d => d.date === ydStr);
+    return item ? item.total : null;
+}
+
+// 预测指定日期客流
+function predictForDate(dateStr, totalsByDate) {
+    const targetDate = new Date(`${dateStr}T00:00:00`);
+    const dow = targetDate.getDay();
+    const isWeekend = dow === 0 || dow === 6;
+    const month = targetDate.getMonth() + 1;
+    const weather = getWeatherForDate(dateStr);
+    const holidayFlags = getHolidayFlags(dateStr);
+
+    // === 特殊日处理 ===
+
+    // 春节核心期
+    if (isSpringFestivalPeriod(dateStr)) {
+        const base = DOW_BASELINE[dow] || 310;
+        const value = base * (isWeekend ? 0.70 : 0.58);
+        return { value: Math.max(value, 0), weatherSource: weather ? weather.source : 'unknown' };
+    }
+
+    // 国庆黄金周
+    if (isNationalPeriod(dateStr)) {
+        const base = DOW_BASELINE[dow] || 310;
+        let value = base;
+        if (dow === 5) {        // 周五
+            value = base * 1.08; // 国庆周五出行高峰
+        } else if (isWeekend) {
+            value = base * 1.15; // 国庆周末显著高
+        } else {
+            value = base * 0.92; // 国庆工作日略低
+        }
+        return { value: Math.max(value, 0), weatherSource: weather ? weather.source : 'unknown' };
+    }
+
+    // 节后返工周一
+    if (dow === 1) { // 周一
+        const prevDate = new Date(targetDate);
+        prevDate.setDate(prevDate.getDate() - 1);
+        const prevStr = prevDate.toISOString().slice(0, 10);
+        if (isSpringFestivalPeriod(prevStr) || holidayFlags.isHoliday) {
+            const base = DOW_BASELINE[1] || 303;
+            const value = prevDate.getMonth() + 1 === 2 && prevDate.getDate() <= 20
+                ? base * 0.45  // 春节核心期刚结束
+                : base * 0.82; // 一般节后周一
+            return { value: Math.max(value, 0), weatherSource: weather ? weather.source : 'unknown' };
+        }
+    }
+
+    // 节前最后一个工作日 (周五)
+    if (dow === 5 && holidayFlags.isHolidayEve) {
+        const value = DOW_BASELINE[5] * 1.08;
+        return { value: Math.max(value, 0), weatherSource: weather ? weather.source : 'unknown' };
+    }
+
+    // === 正常日预测 ===
+    const history = getRecentHistoryByDOW(dateStr, 4);
+    if (history.length < 2) {
+        return null; // 数据不足
+    }
+
+    // 近期同星期均值 (简单平均)
+    let base = history.reduce((s, v) => s + v, 0) / history.length;
+
+    // 趋势微调 (近2周 vs 前2周, 保守)
+    if (history.length >= 4) {
+        const recent2 = (history[0] + history[1]) / 2;
+        const older2 = (history[2] + history[3]) / 2;
+        if (older2 > 0 && Math.abs(recent2 / older2 - 1) > 0.03) {
+            base = base * (1 + (recent2 / older2 - 1) * 0.25);
+        }
+    }
+
+    // 月份季节系数
+    const monthFactor = MONTH_FACTORS[month] || 1.0;
+    base *= monthFactor;
+
+    // 3月份年比增长修正 (+10%, 用50%权重)
+    if (month === 3) {
+        base *= (1 + 0.10 * 0.5); // 额外+5%
+    }
+
+    // 天气修正
+    if (weather) {
+        const precip = weather.precipitation || 0;
+        const isRainy = weather.is_rainy || precip > 0;
+        const isHeavy = weather.is_heavy_rain || precip > 15;
+
+        if (isRainy) {
+            if (isWeekend) {
+                base *= isHeavy ? 0.87 : (precip > 5 ? 0.92 : 0.95);
+            } else {
+                base *= isHeavy ? 0.95 : (precip > 5 ? 0.97 : 0.99);
+            }
+        }
+    }
+
+    // 合理范围限制
+    const dowBaseline = DOW_BASELINE[dow] || 310;
+    const minVal = dowBaseline * 0.65;
+    const maxVal = dowBaseline * 1.40;
+    const value = Math.max(Math.min(base, maxVal), minVal);
+
+    return { value: Math.max(value, 0), weatherSource: weather ? weather.source : 'unknown' };
 }
 
 // DOM 加载完成后初始化
@@ -546,7 +690,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const holidaySets = buildHolidaySets(metroData, weatherMap);
         holidaySet = holidaySets.holidaySet;
         holidayEveSet = holidaySets.holidayEveSet;
-        regressionModel = trainRidgeModel(metroData, weatherMap);
+        // 预测模型已改为规则引擎，无需训练
 
         // 显示预测评估统计
         if (predResp && predResp.stats) {
@@ -630,17 +774,17 @@ function updateDashboard() {
 }
 
 // 重新训练模型（用于参数更新后）
+// 重新加载数据（用于数据更新后刷新预测）
 function retrainModel() {
     if (!metroData || !weatherMap) {
-        console.warn('数据未加载，无法重新训练');
+        console.warn('数据未加载');
         return;
     }
     const holidaySets = buildHolidaySets(metroData, weatherMap);
     holidaySet = holidaySets.holidaySet;
     holidayEveSet = holidaySets.holidayEveSet;
-    regressionModel = trainRidgeModel(metroData, weatherMap);
     updatePredictions();
-    console.log('模型已重新训练，预测已更新');
+    console.log('预测已刷新');
 }
 
 function updateRangeStats() {
@@ -678,17 +822,7 @@ function updateRangeStats() {
 
 function updatePredictions() {
     if (!metroData || metroData.length === 0) return;
-    if (!regressionModel) {
-        const todayEl = document.getElementById('predictedTotal');
-        const todayNoteEl = document.getElementById('predictedNote');
-        const tomorrowEl = document.getElementById('predictedTomorrowTotal');
-        const tomorrowNoteEl = document.getElementById('predictedTomorrowNote');
-        if (todayEl) todayEl.textContent = '--';
-        if (todayNoteEl) todayNoteEl.textContent = '模型加载中...';
-        if (tomorrowEl) tomorrowEl.textContent = '--';
-        if (tomorrowNoteEl) tomorrowNoteEl.textContent = '模型加载中...';
-        return;
-    }
+    // 规则引擎模型无需加载，直接可用
     const totalsByDate = new Map(metroData.map(item => [item.date, item.total]));
 
     const todayStr = formatLocalDate(new Date());

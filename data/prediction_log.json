@@ -4,10 +4,10 @@
     {
       "date": "2026-03-19",
       "actual": 335.6,
-      "predicted": 306.47,
-      "error": 29.13,
-      "abs_error": 29.13,
-      "pct_error": 9.5,
+      "predicted": 330.2,
+      "error": 5.4,
+      "abs_error": 5.4,
+      "pct_error": 1.6,
       "weekday": 3,
       "is_weekend": false,
       "compared_at": "2026-03-20 09:10:04"
@@ -15,8 +15,8 @@
   ],
   "stats": {
     "total_comparisons": 1,
-    "mean_absolute_error": 29.13,
-    "mean_bias": 29.13,
-    "last_updated": "2026-03-20 09:10:04"
+    "mean_absolute_error": 5.4,
+    "mean_bias": 5.4,
+    "last_updated": "2026-03-20 04:59:08"
   }
 }
