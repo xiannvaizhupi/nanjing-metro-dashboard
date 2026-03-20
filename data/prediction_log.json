@@ -1,10 +1,22 @@
 {
   "predictions": {},
-  "comparison": [],
+  "comparison": [
+    {
+      "date": "2026-03-19",
+      "actual": 335.6,
+      "predicted": 306.47,
+      "error": 29.13,
+      "abs_error": 29.13,
+      "pct_error": 9.5,
+      "weekday": 3,
+      "is_weekend": false,
+      "compared_at": "2026-03-20 09:10:04"
+    }
+  ],
   "stats": {
-    "total_comparisons": 0,
-    "mean_absolute_error": null,
-    "mean_bias": null,
-    "last_updated": null
+    "total_comparisons": 1,
+    "mean_absolute_error": 29.13,
+    "mean_bias": 29.13,
+    "last_updated": "2026-03-20 09:10:04"
   }
 }
