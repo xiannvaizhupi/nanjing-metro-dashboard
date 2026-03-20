@@ -5755,8 +5755,8 @@
   },
   {
     "date": "2026-03-20",
-    "temp_max": 15.8,
-    "temp_min": 7.4,
+    "temp_max": 14.6,
+    "temp_min": 7.1,
     "weather": "多云",
     "precipitation": 0.0,
     "weather_code": 3,
@@ -5770,8 +5770,8 @@
   },
   {
     "date": "2026-03-21",
-    "temp_max": 17.5,
-    "temp_min": 7.5,
+    "temp_max": 17.1,
+    "temp_min": 6.9,
     "weather": "多云",
     "precipitation": 0.0,
     "weather_code": 3,
