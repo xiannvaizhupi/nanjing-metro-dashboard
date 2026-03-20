@@ -535,24 +535,29 @@ function isNationalPeriod(dateStr) {
     return d.getMonth() + 1 === 10 && d.getDate() >= 1 && d.getDate() <= 7;
 }
 
+// 将日期转为本地 YYYY-MM-DD 字符串（避免 toISOString 的 UTC 偏移问题）
+function toLocalDateStr(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
 // 获取最近N个同类型日数据 (同星期, 同周末/工作日)
 function getRecentHistoryByDOW(dateStr, maxCount) {
-    const totalsByDate = new Map(metroData.map(item => [item.date, item.total]));
     const targetDate = new Date(`${dateStr}T00:00:00`);
     const targetDow = targetDate.getDay();
     const isTargetWeekend = targetDow === 0 || targetDow === 6;
 
     const values = [];
     const cursor = new Date(targetDate);
-    let guard = 0;
 
-    while (values.length < maxCount && guard < 200) {
+    for (let guard = 0; values.length < maxCount && guard < 200; guard++) {
         cursor.setDate(cursor.getDate() - 7);
-        guard++;
-        const cursorStr = cursor.toISOString().slice(0, 10);
+        const cursorStr = toLocalDateStr(cursor);
         const item = metroData.find(d => d.date === cursorStr);
         if (!item) continue;
-        const itemDow = new Date(`${cursorStr}T00:00:00`).getDay();
+        const itemDow = cursor.getDay();
         const isItemWeekend = itemDow === 0 || itemDow === 6;
         if (isTargetWeekend === isItemWeekend) {
             values.push(item.total);
@@ -565,7 +570,7 @@ function getRecentHistoryByDOW(dateStr, maxCount) {
 function getYesterday(dateStr) {
     const yesterday = new Date(`${dateStr}T00:00:00`);
     yesterday.setDate(yesterday.getDate() - 1);
-    const ydStr = yesterday.toISOString().slice(0, 10);
+    const ydStr = toLocalDateStr(yesterday);
     const item = metroData.find(d => d.date === ydStr);
     return item ? item.total : null;
 }
@@ -606,7 +611,7 @@ function predictForDate(dateStr, totalsByDate) {
     if (dow === 1) { // 周一
         const prevDate = new Date(targetDate);
         prevDate.setDate(prevDate.getDate() - 1);
-        const prevStr = prevDate.toISOString().slice(0, 10);
+        const prevStr = toLocalDateStr(prevDate);
         if (isSpringFestivalPeriod(prevStr) || holidayFlags.isHoliday) {
             const base = DOW_BASELINE[1] || 303;
             const value = prevDate.getMonth() + 1 === 2 && prevDate.getDate() <= 20
