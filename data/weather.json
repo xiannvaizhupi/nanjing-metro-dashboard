@@ -5887,5 +5887,35 @@
     "is_snow": false,
     "is_holiday": false,
     "is_holiday_eve": false
+  },
+  {
+    "date": "2026-03-30",
+    "temp_max": 18.8,
+    "temp_min": 13.0,
+    "weather": "雨",
+    "precipitation": 12.0,
+    "weather_code": 63,
+    "wind": "未知",
+    "aqi": 0,
+    "is_rainy": true,
+    "is_heavy_rain": true,
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
+  },
+  {
+    "date": "2026-03-31",
+    "temp_max": 15.6,
+    "temp_min": 11.2,
+    "weather": "雨",
+    "precipitation": 0.1,
+    "weather_code": 61,
+    "wind": "未知",
+    "aqi": 0,
+    "is_rainy": true,
+    "is_heavy_rain": true,
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
   }
 ]
