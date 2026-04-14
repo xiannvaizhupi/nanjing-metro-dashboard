@@ -187,12 +187,56 @@
       "weekday": 3,
       "is_weekend": false,
       "compared_at": "2026-04-10 09:10:28"
+    },
+    {
+      "date": "2026-04-10",
+      "actual": 394.22,
+      "predicted": 411.15,
+      "error": -16.93,
+      "abs_error": 16.93,
+      "pct_error": -4.12,
+      "weekday": 4,
+      "is_weekend": false,
+      "compared_at": "2026-04-14 10:58:54"
+    },
+    {
+      "date": "2026-04-11",
+      "actual": 334.28,
+      "predicted": 425.68,
+      "error": -91.4,
+      "abs_error": 91.4,
+      "pct_error": -21.47,
+      "weekday": 5,
+      "is_weekend": true,
+      "compared_at": "2026-04-14 10:58:54"
+    },
+    {
+      "date": "2026-04-12",
+      "actual": 272.41,
+      "predicted": 350.92,
+      "error": -78.51,
+      "abs_error": 78.51,
+      "pct_error": -22.37,
+      "weekday": 6,
+      "is_weekend": true,
+      "compared_at": "2026-04-14 10:58:54"
+    },
+    {
+      "date": "2026-04-13",
+      "actual": 338.47,
+      "predicted": 328.57,
+      "error": 9.9,
+      "abs_error": 9.9,
+      "pct_error": 3.01,
+      "weekday": 0,
+      "is_weekend": false,
+      "compared_at": "2026-04-14 10:58:54"
     }
   ],
   "stats": {
-    "total_comparisons": 17,
-    "mean_absolute_error": 42.18,
-    "mean_bias": 31.6,
-    "last_updated": "2026-04-10 09:10:28"
+    "total_comparisons": 21,
+    "mean_absolute_error": 43.51,
+    "mean_bias": 17.16,
+    "last_updated": "2026-04-14 10:58:54"
   }
 }
