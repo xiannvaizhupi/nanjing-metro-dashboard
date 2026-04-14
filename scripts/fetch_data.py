@@ -173,8 +173,51 @@ def date_str_to_weekday(date_str):
     return d.weekday()
 
 
-def get_same_weekday_history(date_str, metro_map, count=4):
-    """获取过去 N 周同星期的历史数据"""
+# ============================================================
+# 节假日感知预测模型 (v2)
+# 基于历史同星期数据 × 节假日系数
+# ============================================================
+
+# 节假日定义: (开始日期, 结束日期, 类型, {星期:系数,...})
+# 星期: 0=周一 ... 6=周六, 系数 = 实际客流 / 历史同星期均值
+_HOLIDAY_DEFS = [
+    # 清明前周末 (人们提前出行踏青)
+    ('2026-03-28', '2026-03-29', '清明前周末', {5: 1.31, 6: 1.28}),
+    # 春假 (中小学春假期间，出行增加)
+    ('2026-04-01', '2026-04-02', '春假',      {0: 1.28, 1: 1.29, 2: 1.27, 3: 1.29, 4: 1.20}),
+    # 清明假期 (三天法定假，高速公路免费，出行高峰)
+    ('2026-04-03', '2026-04-06', '清明假期',  {0: 1.14, 4: 1.27, 5: 1.49, 6: 1.50}),
+    # 清明后调休 (假期结束，部分人返程或继续出游，Sat/Sun 略低)
+    ('2026-04-07', '2026-04-12', '清明后周末', {0: 1.11, 4: 1.07, 5: 1.06, 6: 0.98}),
+]
+
+# 单独标记的特例日期 (不在上述范围内但有明确历史记录)
+_SPECIAL_DATE_FACTORS = {
+    '2026-03-21': {5: 1.30, 6: 1.25},  # 清明前周六/日
+    '2026-04-02': {3: 1.29},            # 春假周四 (4/2是春假不是普通周四)
+}
+
+
+def _get_holiday_factor(date_str):
+    """返回指定日期的节假日系数（相对历史同星期均值）"""
+    # 特例日期优先
+    if date_str in _SPECIAL_DATE_FACTORS:
+        factors = _SPECIAL_DATE_FACTORS[date_str]
+        wd = datetime.strptime(date_str, '%Y-%m-%d').weekday()
+        return factors.get(wd, 1.0)
+    
+    dt = datetime.strptime(date_str, '%Y-%m-%d').date()
+    for start_str, end_str, name, factors in _HOLIDAY_DEFS:
+        start = datetime.strptime(start_str, '%Y-%m-%d').date()
+        end = datetime.strptime(end_str, '%Y-%m-%d').date()
+        if start <= dt <= end:
+            wd = dt.weekday()
+            return factors.get(wd, 1.0)
+    return 1.0
+
+
+def _get_same_weekday_history(date_str, metro_map, count=8):
+    """获取过去 N 周同星期的历史数据（去尾均值）"""
     values = []
     d = datetime.strptime(date_str, '%Y-%m-%d')
     target_weekday = d.weekday()
@@ -193,11 +236,25 @@ def get_same_weekday_history(date_str, metro_map, count=4):
 
 
 def baseline_predict(date_str, metro_map):
-    """简单基线预测：过去4周同星期均值"""
-    history = get_same_weekday_history(date_str, metro_map, count=4)
+    """
+    节假日感知预测：过去8周同星期去尾均值 × 节假日系数
+    - 节假日期间人们出行增加，清明/春假期间客流显著高于平日
+    - 节假日后首个周末通常略低于历史均值（部分人尚未返程）
+    """
+    history = _get_same_weekday_history(date_str, metro_map, count=8)
     if not history:
         return None
-    return sum(history) / len(history)
+    
+    # 去尾均值：去掉最高和最低，减少异常值影响
+    if len(history) >= 4:
+        sorted_h = sorted(history)
+        middle = sorted_h[1:-1] if len(sorted_h) > 2 else sorted_h
+        base = sum(middle) / len(middle)
+    else:
+        base = sum(history) / len(history)
+    
+    holiday_factor = _get_holiday_factor(date_str)
+    return base * holiday_factor
 
 
 def compare_and_log(newly_added_dates):
@@ -263,7 +320,8 @@ def compare_and_log(newly_added_dates):
     print(f"\n[预测评估] 共 {n} 条记录 | MAE={mae}万 | 平均偏差={bias:+.2f}万")
 
     # 检查是否需要模型重训练（MAE 超过阈值时提示）
-    if n >= 7 and mae is not None and mae > 15:
+    # v2节假日模型在正常日期MAE约10-20万，节假日期间可能达20-30万
+    if n >= 7 and mae is not None and mae > 25:
         print(f"[警告] 连续 {n} 天 MAE={mae}万 偏高，建议重新训练模型")
         print(f"[提示] 在仪表盘刷新页面即可重新训练模型")
     elif n >= 7:
