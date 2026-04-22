@@ -4,7 +4,7 @@
     "system": "南京地铁",
     "data_source": "南京地铁官方微博",
     "last_updated": "2026-04-22",
-    "lines_count": 13,
+    "lines_count": 14,
     "lines": [
       {
         "id": "L1",
@@ -55,6 +55,12 @@
         "type": "suburban"
       },
       {
+        "id": "S2",
+        "name": "S2号线",
+        "color": "#C5A468",
+        "type": "suburban"
+      },
+      {
         "id": "S3",
         "name": "S3号线",
         "color": "#BA84AC",
@@ -85,7 +91,7 @@
         "type": "suburban"
       }
     ],
-    "fetched_at": "2026-04-22 09:10:18",
+    "fetched_at": "2026-04-22 14:30:00",
     "updated_at": "2026-03-23 10:12:44"
   },
   "daily_data": [
