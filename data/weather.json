@@ -6100,10 +6100,10 @@
   },
   {
     "date": "2026-04-23",
-    "temp_max": 15.2,
+    "temp_max": 13.7,
     "temp_min": 10.6,
     "weather": "雨",
-    "precipitation": 2.2,
+    "precipitation": 2.7,
     "weather_code": 61,
     "wind": "未知",
     "aqi": 0,
@@ -6115,8 +6115,8 @@
   },
   {
     "date": "2026-04-24",
-    "temp_max": 21.5,
-    "temp_min": 8.0,
+    "temp_max": 21.1,
+    "temp_min": 7.2,
     "weather": "雾",
     "precipitation": 0.0,
     "weather_code": 45,
