@@ -347,18 +347,26 @@ def main():
             # 预测对比
             compare_and_log(newly_added)
 
-            # Git 推送
+            # Git 推送（同时推送到 GitHub 和 Gitee）
             try:
                 commit_msg = f"Auto update metro data - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
 
                 subprocess.run(['git', 'add', '.'], cwd=REPO_DIR, check=True)
                 subprocess.run(['git', 'commit', '-m', commit_msg], cwd=REPO_DIR, check=True)
-                result = subprocess.run(['git', 'push'], cwd=REPO_DIR, capture_output=True, text=True)
-
-                if result.returncode == 0:
-                    print("Git 推送成功!")
+                
+                # 推送到 GitHub
+                result_origin = subprocess.run(['git', 'push', 'origin', 'main'], cwd=REPO_DIR, capture_output=True, text=True)
+                if result_origin.returncode == 0:
+                    print("GitHub 推送成功!")
                 else:
-                    print(f"Git 推送失败: {result.stderr}")
+                    print(f"GitHub 推送失败: {result_origin.stderr}")
+                
+                # 推送到 Gitee（Gitee Pages 用）
+                result_gitee = subprocess.run(['git', 'push', 'gitee', 'main'], cwd=REPO_DIR, capture_output=True, text=True)
+                if result_gitee.returncode == 0:
+                    print("Gitee 推送成功!")
+                else:
+                    print(f"Gitee 推送失败: {result_gitee.stderr}")
             except Exception as e:
                 print(f"Git 操作失败: {e}")
         else:
