@@ -50,6 +50,31 @@ python3 -m http.server 8080
 
 然后访问 http://localhost:8080
 
+### EdgeOne Pages 部署
+
+本项目是纯静态网站，已内置 EdgeOne Pages 配置：
+
+- 构建命令：`bash scripts/build-static.sh`
+- 输出目录：`./dist`
+- 入口文件：`dist/index.html`
+
+部署步骤：
+
+1. 将项目推送到 Git 仓库（例如 Gitee 或 GitHub）。
+2. 打开 EdgeOne Pages 控制台，选择“从 Git 仓库导入项目”。
+3. 选择该仓库，构建配置保持默认即可；根目录为 `./`，配置会从 `edgeone.json` 自动读取。
+4. 首次部署完成后，EdgeOne Pages 会生成一个公开访问域名。
+5. 后续更新 `data/metro_data.json`、`data/weather.json` 或页面文件后，提交并推送到仓库，Pages 会自动重新部署。
+
+也可以在本地先验证发布产物：
+
+```bash
+bash scripts/build-static.sh
+python3 -m http.server 8080 -d dist
+```
+
+然后访问 http://localhost:8080
+
 ---
 
 ## 📥 数据录入指南
