@@ -6310,10 +6310,10 @@
   },
   {
     "date": "2026-05-07",
-    "temp_max": 27.8,
+    "temp_max": 29.0,
     "temp_min": 17.5,
     "weather": "雨",
-    "precipitation": 0.5,
+    "precipitation": 0.7,
     "weather_code": 53,
     "wind": "未知",
     "aqi": 0,
@@ -6325,8 +6325,8 @@
   },
   {
     "date": "2026-05-08",
-    "temp_max": 24.7,
-    "temp_min": 14.0,
+    "temp_max": 24.6,
+    "temp_min": 14.2,
     "weather": "多云",
     "precipitation": 0.0,
     "weather_code": 3,
