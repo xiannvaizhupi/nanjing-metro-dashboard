@@ -6430,8 +6430,8 @@
   },
   {
     "date": "2026-05-15",
-    "temp_max": 28.5,
-    "temp_min": 20.0,
+    "temp_max": 27.9,
+    "temp_min": 20.4,
     "weather": "多云",
     "precipitation": 0.0,
     "weather_code": 2,
@@ -6445,8 +6445,8 @@
   },
   {
     "date": "2026-05-16",
-    "temp_max": 29.1,
-    "temp_min": 19.7,
+    "temp_max": 28.9,
+    "temp_min": 19.6,
     "weather": "多云",
     "precipitation": 0.0,
     "weather_code": 3,
