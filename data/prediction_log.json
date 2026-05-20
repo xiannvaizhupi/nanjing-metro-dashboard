@@ -528,12 +528,23 @@
       "weekday": 0,
       "is_weekend": false,
       "compared_at": "2026-05-19 09:10:06"
+    },
+    {
+      "date": "2026-05-19",
+      "actual": 306.72,
+      "predicted": 340.11,
+      "error": -33.39,
+      "abs_error": 33.39,
+      "pct_error": -9.82,
+      "weekday": 1,
+      "is_weekend": false,
+      "compared_at": "2026-05-20 09:10:06"
     }
   ],
   "stats": {
-    "total_comparisons": 48,
-    "mean_absolute_error": 29.34,
-    "mean_bias": 10.93,
-    "last_updated": "2026-05-19 09:10:06"
+    "total_comparisons": 49,
+    "mean_absolute_error": 29.42,
+    "mean_bias": 10.03,
+    "last_updated": "2026-05-20 09:10:06"
   }
 }
