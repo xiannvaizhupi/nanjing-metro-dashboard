@@ -6520,8 +6520,8 @@
   },
   {
     "date": "2026-05-21",
-    "temp_max": 26.1,
-    "temp_min": 19.9,
+    "temp_max": 26.6,
+    "temp_min": 19.4,
     "weather": "多云",
     "precipitation": 0.0,
     "weather_code": 3,
@@ -6529,6 +6529,21 @@
     "aqi": 0,
     "is_rainy": false,
     "is_heavy_rain": false,
+    "is_snow": false,
+    "is_holiday": false,
+    "is_holiday_eve": false
+  },
+  {
+    "date": "2026-05-22",
+    "temp_max": 27.9,
+    "temp_min": 17.9,
+    "weather": "雨",
+    "precipitation": 5.6,
+    "weather_code": 61,
+    "wind": "未知",
+    "aqi": 0,
+    "is_rainy": true,
+    "is_heavy_rain": true,
     "is_snow": false,
     "is_holiday": false,
     "is_holiday_eve": false
