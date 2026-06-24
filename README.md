@@ -123,6 +123,10 @@ python3 -m http.server 8080 -d dist
 python3 scripts/fetch_data.py
 ```
 
+项目已配置 GitHub Actions 定时任务：`.github/workflows/update-metro-data.yml` 会在北京时间每天 10:15 和 11:15 自动运行，抓取官网微博组件里更新的昨日客流数据，若 `data/metro_data.json` 或 `data/prediction_log.json` 有变化则自动提交并推送到 GitHub。也可以在 GitHub Actions 页面手动触发 `Update metro passenger flow`。
+
+在 CI 中脚本会通过 `METRO_SKIP_GIT=1` 跳过脚本内部的 Git 推送，改由工作流统一提交；本地直接运行脚本时仍保留原来的自动提交并推送到 `origin` 和 `gitee` 的行为。
+
 ### 天气数据
 
 天气数据由 `update_weather.sh` 维护，脚本会调用 Open-Meteo 接口更新南京未来两天天气，并写入节假日标记。

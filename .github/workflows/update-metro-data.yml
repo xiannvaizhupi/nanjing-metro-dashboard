@@ -1,0 +1,50 @@
+name: Update metro passenger flow
+
+on:
+  schedule:
+    # 南京时间 10:15 和 11:15 各尝试一次，兼容官网/微博组件延迟发布。
+    - cron: '15 2 * * *'
+    - cron: '15 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-metro-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate parser
+        run: |
+          python -m py_compile scripts/fetch_data.py
+          python scripts/test_fetch_data.py
+
+      - name: Fetch latest passenger flow
+        env:
+          METRO_SKIP_GIT: '1'
+        run: python scripts/fetch_data.py
+
+      - name: Commit and push updates
+        run: |
+          if git diff --quiet -- data/metro_data.json data/prediction_log.json; then
+            echo "No passenger flow updates to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/metro_data.json data/prediction_log.json
+          git commit -m "Auto update metro data - $(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M')"
+          git push

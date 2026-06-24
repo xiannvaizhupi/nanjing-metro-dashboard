@@ -8,6 +8,7 @@ import json
 import re
 import os
 import math
+from html import unescape
 from datetime import datetime, date, timedelta
 from urllib.request import urlopen
 from urllib.parse import quote
@@ -16,6 +17,23 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(SCRIPT_DIR)
 METRO_DATA_PATH = os.path.join(REPO_DIR, 'data', 'metro_data.json')
 PREDICTION_LOG_PATH = os.path.join(REPO_DIR, 'data', 'prediction_log.json')
+
+LINE_PATTERNS = [
+    (r'1号线\s*(\d+\.?\d*)', 'L1'),
+    (r'2号线\s*(\d+\.?\d*)', 'L2'),
+    (r'3号线\s*(\d+\.?\d*)', 'L3'),
+    (r'4号线\s*(\d+\.?\d*)', 'L4'),
+    (r'5号线\s*(\d+\.?\d*)', 'L5'),
+    (r'7号线\s*(\d+\.?\d*)', 'L7'),
+    (r'10号线\s*(\d+\.?\d*)', 'L10'),
+    (r'S1号线\s*(\d+\.?\d*)', 'S1'),
+    (r'S2号线\s*(\d+\.?\d*)', 'S2'),
+    (r'S3号线\s*(\d+\.?\d*)', 'S3'),
+    (r'S6号线\s*(\d+\.?\d*)', 'S6'),
+    (r'S7号线\s*(\d+\.?\d*)', 'S7'),
+    (r'S8号线\s*(\d+\.?\d*)', 'S8'),
+    (r'S9号线\s*(\d+\.?\d*)', 'S9'),
+]
 
 
 def fetch_weibo_data():
@@ -31,47 +49,61 @@ def fetch_weibo_data():
         return None
 
 
+def infer_entry_year(month, day, explicit_year=None, reference_date=None):
+    """根据微博日期推断年份，避免跨年后仍写死到旧年份。"""
+    if explicit_year:
+        year = int(explicit_year)
+        return 2000 + year if year < 100 else year
+
+    ref = reference_date or date.today()
+    candidates = []
+    for year in range(ref.year - 1, ref.year + 2):
+        try:
+            candidate = date(year, month, day)
+        except ValueError:
+            continue
+        candidates.append((abs((candidate - ref).days), year))
+
+    if not candidates:
+        raise ValueError(f"无法推断日期年份: {month}-{day}")
+
+    return min(candidates)[1]
+
+
 def parse_weibo_flow(html):
     """解析微博内容中的客流数据"""
     if not html:
         return []
 
     results = []
-    # 匹配 #昨日客流# 格式的数据
-    pattern = r'#昨日客流#[^#]*南京地铁(\d+)月(\d+)日客运量(\d+\.?\d*)[，,]([^#\n]+)（以上单位'
+    normalized = unescape(html)
+    normalized = re.sub(r'<[^>]+>', '', normalized)
+    normalized = re.sub(r'\s+', '', normalized)
 
-    for match in re.finditer(pattern, html):
-        month = int(match.group(1))
-        day = int(match.group(2))
-        total = float(match.group(3))
-        lines_str = match.group(4)
+    # 匹配 #昨日客流# 格式的数据。部分微博组件文本前面会带 26-6-23 这类短日期。
+    pattern = re.compile(
+        r'(?:(\d{2,4})[-/.年](\d{1,2})[-/.月](\d{1,2})[日号]?)?'
+        r'#昨日客流#.*?南京地铁(\d{1,2})月(\d{1,2})日客运量\s*(\d+\.?\d*)[，,]'
+        r'(.+?)(?:[（(]以上单位|#)',
+        re.S
+    )
 
-        year = 2026
+    for match in pattern.finditer(normalized):
+        explicit_year = match.group(1)
+        month = int(match.group(4))
+        day = int(match.group(5))
+        total = float(match.group(6))
+        lines_str = match.group(7)
+
+        year = infer_entry_year(month, day, explicit_year=explicit_year)
         date_str = f"{year}-{month:02d}-{day:02d}"
 
         # 解析各线路
         lines = {}
-        line_patterns = [
-            (r'1号线(\d+\.?\d*)', 'L1'),
-            (r'2号线(\d+\.?\d*)', 'L2'),
-            (r'3号线(\d+\.?\d*)', 'L3'),
-            (r'4号线(\d+\.?\d*)', 'L4'),
-            (r'5号线(\d+\.?\d*)', 'L5'),
-            (r'7号线(\d+\.?\d*)', 'L7'),
-            (r'10号线(\d+\.?\d*)', 'L10'),
-            (r'S1号线(\d+\.?\d*)', 'S1'),
-            (r'S2号线(\d+\.?\d*)', 'S2'),
-            (r'S3号线(\d+\.?\d*)', 'S3'),
-            (r'S6号线(\d+\.?\d*)', 'S6'),
-            (r'S7号线(\d+\.?\d*)', 'S7'),
-            (r'S8号线(\d+\.?\d*)', 'S8'),
-            (r'S9号线(\d+\.?\d*)', 'S9'),
-        ]
-
-        for pattern, line_id in line_patterns:
-            m = re.search(pattern, lines_str)
-            if m:
-                lines[line_id] = float(m.group(1))
+        for line_pattern, line_id in LINE_PATTERNS:
+            line_match = re.search(line_pattern, lines_str)
+            if line_match:
+                lines[line_id] = float(line_match.group(1))
 
         d = date(year, month, day)
         is_weekend = d.weekday() >= 5
@@ -346,6 +378,10 @@ def main():
 
             # 预测对比
             compare_and_log(newly_added)
+
+            if os.environ.get('METRO_SKIP_GIT') == '1':
+                print("已设置 METRO_SKIP_GIT=1，跳过脚本内 Git 提交/推送。")
+                return
 
             # Git 推送（同时推送到 GitHub 和 Gitee）
             try:
