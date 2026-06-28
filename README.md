@@ -112,7 +112,7 @@ python3 -m http.server 8080 -d dist
 
 ### 客流数据
 
-客流数据由 `scripts/fetch_data.py` 维护，脚本会从南京地铁官方微博组件解析 `#昨日客流#` 内容，更新：
+客流数据由 `scripts/fetch_data.py` 维护，脚本会优先从南京地铁官网首页解析昨日客流内容，官网根页和官方微博组件作为兜底来源，更新：
 
 - `data/metro_data.json`
 - `data/prediction_log.json`
@@ -123,7 +123,7 @@ python3 -m http.server 8080 -d dist
 python3 scripts/fetch_data.py
 ```
 
-项目已配置 GitHub Actions 定时任务：`.github/workflows/update-metro-data.yml` 会在北京时间每天 10:15 和 11:15 自动运行，抓取官网微博组件里更新的昨日客流数据，若 `data/metro_data.json` 或 `data/prediction_log.json` 有变化则自动提交并推送到 GitHub。也可以在 GitHub Actions 页面手动触发 `Update metro passenger flow`。
+项目已配置 GitHub Actions 定时任务：`.github/workflows/update-metro-data.yml` 会在北京时间每天 10:15 和 11:15 自动运行，抓取官网首页或兜底来源里更新的昨日客流数据，若 `data/metro_data.json` 或 `data/prediction_log.json` 有变化则自动提交并推送到 GitHub。也可以在 GitHub Actions 页面手动触发 `Update metro passenger flow`。
 
 在 CI 中脚本会通过 `METRO_SKIP_GIT=1` 跳过脚本内部的 Git 推送，改由工作流统一提交；本地直接运行脚本时仍保留原来的自动提交并推送到 `origin` 和 `gitee` 的行为。
 

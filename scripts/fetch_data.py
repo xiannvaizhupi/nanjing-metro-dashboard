@@ -1,52 +1,142 @@
 #!/usr/bin/env python3
 """
 南京地铁客流数据自动抓取脚本
-每日10:00执行，从南京地铁官网微博组件获取昨日客流数据
+从南京地铁官网首页优先获取昨日客流数据，微博组件作为兜底
 """
 
 import json
 import re
 import os
 import math
+import ssl
 from html import unescape
 from datetime import datetime, date, timedelta
-from urllib.request import urlopen
-from urllib.parse import quote
+from urllib.request import Request, urlopen
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(SCRIPT_DIR)
 METRO_DATA_PATH = os.path.join(REPO_DIR, 'data', 'metro_data.json')
 PREDICTION_LOG_PATH = os.path.join(REPO_DIR, 'data', 'prediction_log.json')
 
-LINE_PATTERNS = [
-    (r'1号线\s*(\d+\.?\d*)', 'L1'),
-    (r'2号线\s*(\d+\.?\d*)', 'L2'),
-    (r'3号线\s*(\d+\.?\d*)', 'L3'),
-    (r'4号线\s*(\d+\.?\d*)', 'L4'),
-    (r'5号线\s*(\d+\.?\d*)', 'L5'),
-    (r'7号线\s*(\d+\.?\d*)', 'L7'),
-    (r'10号线\s*(\d+\.?\d*)', 'L10'),
-    (r'S1号线\s*(\d+\.?\d*)', 'S1'),
-    (r'S2号线\s*(\d+\.?\d*)', 'S2'),
-    (r'S3号线\s*(\d+\.?\d*)', 'S3'),
-    (r'S6号线\s*(\d+\.?\d*)', 'S6'),
-    (r'S7号线\s*(\d+\.?\d*)', 'S7'),
-    (r'S8号线\s*(\d+\.?\d*)', 'S8'),
-    (r'S9号线\s*(\d+\.?\d*)', 'S9'),
+OFFICIAL_HOMEPAGE_URL = "https://www.njmetro.com.cn/njdtweb/gx/dtmain.jsp"
+OFFICIAL_ROOT_URL = "https://www.njmetro.com.cn/"
+WEIBO_WIDGET_URL = "https://widget.weibo.com/weiboshow/index.php?language=&width=0&height=430&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=2638276292&verifier=138e3b0a&dpc=1"
+
+FETCH_SOURCES = [
+    ("南京地铁官网首页", OFFICIAL_HOMEPAGE_URL),
+    ("南京地铁官网根页", OFFICIAL_ROOT_URL),
+    ("南京地铁官方微博组件", WEIBO_WIDGET_URL),
 ]
+
+HTTP_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/126.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+}
+
+LINE_PATTERNS = [
+    (r'(?<![A-Za-z])1号线[：:]?(\d+\.?\d*)', 'L1'),
+    (r'(?<![A-Za-z])2号线[：:]?(\d+\.?\d*)', 'L2'),
+    (r'(?<![A-Za-z])3号线[：:]?(\d+\.?\d*)', 'L3'),
+    (r'(?<![A-Za-z])4号线[：:]?(\d+\.?\d*)', 'L4'),
+    (r'(?<![A-Za-z])5号线[：:]?(\d+\.?\d*)', 'L5'),
+    (r'(?<![A-Za-z])7号线[：:]?(\d+\.?\d*)', 'L7'),
+    (r'(?<![A-Za-z])10号线[：:]?(\d+\.?\d*)', 'L10'),
+    (r'S1号线[：:]?(\d+\.?\d*)', 'S1'),
+    (r'S2号线[：:]?(\d+\.?\d*)', 'S2'),
+    (r'S3号线[：:]?(\d+\.?\d*)', 'S3'),
+    (r'S6号线[：:]?(\d+\.?\d*)', 'S6'),
+    (r'S7号线[：:]?(\d+\.?\d*)', 'S7'),
+    (r'S8号线[：:]?(\d+\.?\d*)', 'S8'),
+    (r'S9号线[：:]?(\d+\.?\d*)', 'S9'),
+]
+
+NEXT_ENTRY_PATTERN = (
+    r'(?:(?:\d{2,4})[-/.年](?:\d{1,2})[-/.月](?:\d{1,2})[日号]?)?'
+    r'(?:#?昨日客流#?.{0,80}?)?'
+    r'南京地铁(?:\d{2,4}年)?\d{1,2}月\d{1,2}日客运量'
+)
+
+FLOW_ENTRY_PATTERN = re.compile(
+    r'(?:(\d{2,4})[-/.年](\d{1,2})[-/.月](\d{1,2})[日号]?)?'
+    r'(?:#?昨日客流#?.{0,80}?)?'
+    r'南京地铁(?:(\d{2,4})年)?(?:(\d{1,2})月)?(\d{1,2})日客运量(?:为)?[：:]?(\d+\.?\d*)万?'
+    r'[，,；;。]?(.+?)(?:[（(]?以上单位[:：]?万?[）)]?|(?=' + NEXT_ENTRY_PATTERN + r')|$)',
+    re.S
+)
+
+
+def decode_response(response):
+    """按响应头和常见中文编码解码网页。"""
+    raw = response.read()
+    charset = response.headers.get_content_charset()
+    encodings = [charset, 'utf-8', 'gb18030', 'gbk']
+
+    for encoding in dict.fromkeys(e for e in encodings if e):
+        try:
+            return raw.decode(encoding)
+        except UnicodeDecodeError:
+            continue
+
+    return raw.decode('utf-8', errors='replace')
+
+
+def fetch_url(source_name, url):
+    """抓取指定来源页面。SSL 失败时自动降级到未验证模式（macOS Python 常见证书问题）。"""
+    try:
+        req = Request(url, headers=HTTP_HEADERS)
+        response = urlopen(req, timeout=30)
+        return decode_response(response)
+    except ssl.SSLError as e:
+        # 兜底：跳过证书验证（南京地铁官网 + 部分内网环境常见）
+        print(f"  [SSL] {source_name} 证书校验失败，降级到未验证模式: {e}")
+        try:
+            ctx = ssl._create_unverified_context()
+            req = Request(url, headers=HTTP_HEADERS)
+            response = urlopen(req, timeout=30, context=ctx)
+            return decode_response(response)
+        except Exception as e2:
+            print(f"获取{source_name}失败: {e2}")
+            return None
+    except Exception as e:
+        print(f"获取{source_name}失败: {e}")
+        return None
 
 
 def fetch_weibo_data():
-    """从南京地铁官网微博组件获取数据"""
-    url = "https://widget.weibo.com/weiboshow/index.php?language=&width=0&height=430&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=2638276292&verifier=138e3b0a&dpc=1"
+    """从南京地铁官方微博组件获取数据。保留给旧测试或手动调用。"""
+    return fetch_url("南京地铁官方微博组件", WEIBO_WIDGET_URL)
 
-    try:
-        response = urlopen(url, timeout=30)
-        html = response.read().decode('utf-8')
-        return html
-    except Exception as e:
-        print(f"获取微博数据失败: {e}")
-        return None
+
+def fetch_passenger_flow_entries():
+    """按优先级抓取并解析客流数据。任一来源出错不影响其他来源继续尝试。"""
+    for source_name, url in FETCH_SOURCES:
+        try:
+            html = fetch_url(source_name, url)
+        except Exception as e:
+            print(f"获取{source_name}异常: {e}")
+            continue
+
+        if not html:
+            continue
+
+        try:
+            entries = parse_passenger_flow(html, source_name=source_name)
+        except Exception as e:
+            print(f"{source_name} 解析异常: {e}")
+            continue
+
+        if entries:
+            print(f"使用数据源: {source_name}")
+            return entries, source_name
+
+        print(f"{source_name}未解析到客流数据，尝试下一个来源。")
+
+    return [], None
 
 
 def infer_entry_year(month, day, explicit_year=None, reference_date=None):
@@ -57,46 +147,68 @@ def infer_entry_year(month, day, explicit_year=None, reference_date=None):
 
     ref = reference_date or date.today()
     candidates = []
-    for year in range(ref.year - 1, ref.year + 2):
-        try:
-            candidate = date(year, month, day)
-        except ValueError:
-            continue
-        candidates.append((abs((candidate - ref).days), year))
+    # 当 month 为 None 时（如微博只写"27日客运量"），用 ref 的月份作为回退
+    months_to_try = [month] if month is not None else [ref.month, ref.month - 1 if ref.month > 1 else 12]
+    days_to_try = [day]
+
+    for m in months_to_try:
+        for d in days_to_try:
+            for year in range(ref.year - 1, ref.year + 2):
+                try:
+                    candidate = date(year, m, d)
+                except ValueError:
+                    continue
+                # 拒绝未来日期（> ref）
+                if candidate > ref:
+                    continue
+                candidates.append((abs((candidate - ref).days), year, m, d))
 
     if not candidates:
         raise ValueError(f"无法推断日期年份: {month}-{day}")
 
+    # 优先选离 ref 最近的；多条同距离时选月份最大的（更可能是同月）
+    candidates.sort(key=lambda x: (x[0], -x[2]))
     return min(candidates)[1]
 
 
-def parse_weibo_flow(html):
-    """解析微博内容中的客流数据"""
+def normalize_flow_text(html):
+    """把官网/微博 HTML 归一为便于正则提取的连续文本。"""
+    normalized = unescape(html)
+    normalized = re.sub(
+        r'\\u([0-9a-fA-F]{4})',
+        lambda match: chr(int(match.group(1), 16)),
+        normalized,
+    )
+    normalized = re.sub(r'<[^>]+>', '', normalized)
+    normalized = re.sub(r'[\u200b\ufeff\xa0]', '', normalized)
+    normalized = re.sub(r'\s+', '', normalized)
+    return normalized
+
+
+def parse_passenger_flow(html, source_name=''):
+    """解析官网首页或微博组件中的客流数据。"""
     if not html:
         return []
 
     results = []
-    normalized = unescape(html)
-    normalized = re.sub(r'<[^>]+>', '', normalized)
-    normalized = re.sub(r'\s+', '', normalized)
+    seen_dates = set()
+    normalized = normalize_flow_text(html)
 
-    # 匹配 #昨日客流# 格式的数据。部分微博组件文本前面会带 26-6-23 这类短日期。
-    pattern = re.compile(
-        r'(?:(\d{2,4})[-/.年](\d{1,2})[-/.月](\d{1,2})[日号]?)?'
-        r'#昨日客流#.*?南京地铁(\d{1,2})月(\d{1,2})日客运量\s*(\d+\.?\d*)[，,]'
-        r'(.+?)(?:[（(]以上单位|#)',
-        re.S
-    )
-
-    for match in pattern.finditer(normalized):
-        explicit_year = match.group(1)
-        month = int(match.group(4))
-        day = int(match.group(5))
-        total = float(match.group(6))
-        lines_str = match.group(7)
+    for match in FLOW_ENTRY_PATTERN.finditer(normalized):
+        explicit_year = match.group(1) or match.group(4)
+        month_raw = match.group(5)
+        month = int(month_raw) if month_raw else None
+        day = int(match.group(6))
+        total = float(match.group(7))
+        lines_str = match.group(8)
 
         year = infer_entry_year(month, day, explicit_year=explicit_year)
+        # month 可能为 None（微博里只写"27日客运量"），用当前月份兜底
+        if month is None:
+            month = datetime.now().month
         date_str = f"{year}-{month:02d}-{day:02d}"
+        if date_str in seen_dates:
+            continue
 
         # 解析各线路
         lines = {}
@@ -104,6 +216,10 @@ def parse_weibo_flow(html):
             line_match = re.search(line_pattern, lines_str)
             if line_match:
                 lines[line_id] = float(line_match.group(1))
+
+        if len(lines) < 8:
+            print(f"跳过疑似不完整数据: {date_str}，仅解析到 {len(lines)} 条线路")
+            continue
 
         d = date(year, month, day)
         is_weekend = d.weekday() >= 5
@@ -115,13 +231,20 @@ def parse_weibo_flow(html):
             'note': '',
             'lines': lines
         })
+        seen_dates.add(date_str)
 
-        print(f"解析: {date_str} - {total}万")
+        source_label = f"[{source_name}]" if source_name else ""
+        print(f"解析{source_label}: {date_str} - {total}万")
 
     return results
 
 
-def update_metro_data(new_entries):
+def parse_weibo_flow(html):
+    """兼容旧调用名：解析微博或官网客流文本。"""
+    return parse_passenger_flow(html, source_name='南京地铁官方微博组件')
+
+
+def update_metro_data(new_entries, source_name=None):
     """更新metro_data.json，返回是否有新数据被添加"""
     try:
         with open(METRO_DATA_PATH, 'r') as f:
@@ -154,6 +277,8 @@ def update_metro_data(new_entries):
         data['daily_data'].sort(key=lambda x: x['date'])
         data['metadata']['last_updated'] = datetime.now().strftime('%Y-%m-%d')
         data['metadata']['fetched_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        if source_name:
+            data['metadata']['data_source'] = source_name
 
         with open(METRO_DATA_PATH, 'w') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
@@ -161,7 +286,7 @@ def update_metro_data(new_entries):
         print(f"数据已保存到 metro_data.json")
         return newly_added_dates
     else:
-        print("官网尚未更新，暂无新数据")
+        print("数据源尚未更新，暂无新数据")
         return []
 
 
@@ -367,11 +492,10 @@ def main():
     print(f"=== 南京地铁客流数据抓取 ===")
     print(f"执行时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
-    html = fetch_weibo_data()
-    entries = parse_weibo_flow(html)
+    entries, source_name = fetch_passenger_flow_entries()
 
     if entries:
-        newly_added = update_metro_data(entries)
+        newly_added = update_metro_data(entries, source_name=source_name)
 
         if newly_added:
             print("\n有新数据，准备推送...")
@@ -406,9 +530,9 @@ def main():
             except Exception as e:
                 print(f"Git 操作失败: {e}")
         else:
-            print("无新数据，退出。10:00 兜底任务将再次尝试。")
+            print("无新数据，退出。")
     else:
-        print("未解析到客流数据，退出。10:00 兜底任务将再次尝试。")
+        print("未解析到客流数据，退出。可稍后手动重试或等待 GitHub Actions 云端任务。")
 
 
 if __name__ == '__main__':

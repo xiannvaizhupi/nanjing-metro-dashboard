@@ -3,7 +3,7 @@
 
 from datetime import date
 
-from fetch_data import infer_entry_year, parse_weibo_flow
+from fetch_data import infer_entry_year, parse_passenger_flow, parse_weibo_flow
 
 
 def assert_equal(actual, expected, label):
@@ -41,7 +41,27 @@ def test_infer_year_around_new_year():
     )
 
 
+def test_parse_official_homepage_text_without_hashtag():
+    html = """
+    <div class="notice">
+      南京地铁2026年6月27日客运量：359.88万，其中：
+      1号线：73.12，2号线：58.45，3号线：64.30，4号线：17.01，
+      5号线：43.22，7号线：29.80，10号线：18.70，S1号线：9.60，
+      S2号线：3.51，S3号线：9.75，S6号线：5.42，S7号线：1.33，
+      S8号线：11.31，S9号线：2.39（以上单位：万）
+    </div>
+    """
+    entries = parse_passenger_flow(html, source_name="南京地铁官网首页")
+
+    assert_equal(len(entries), 1, "official entry count")
+    assert_equal(entries[0]["date"], "2026-06-27", "official date")
+    assert_equal(entries[0]["total"], 359.88, "official total")
+    assert_equal(entries[0]["lines"]["L1"], 73.12, "official line 1")
+    assert_equal(entries[0]["lines"]["S9"], 2.39, "official line S9")
+
+
 if __name__ == "__main__":
     test_parse_with_explicit_short_year()
     test_infer_year_around_new_year()
+    test_parse_official_homepage_text_without_hashtag()
     print("fetch_data parser checks passed.")
