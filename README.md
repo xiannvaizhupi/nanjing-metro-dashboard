@@ -2,8 +2,6 @@
 
 一个纯静态的南京地铁客流数据看板，用于展示每日总客流、各线路客流、历史趋势，并结合天气、节假日和历史同期数据生成今日/明日客流预测。
 
-当前项目已支持 EdgeOne Pages 静态部署，也保留了 Vercel 配置。
-
 ## 功能概览
 
 - 首页仪表盘：总客流、今日预测、明日预测、趋势图、线路占比弹窗、预测因素弹窗。
@@ -11,16 +9,15 @@
 - 历史数据：完整历史表格、日期筛选、CSV 导出、动态线路表头。
 - 客流预测：基于历史同星期数据、节假日系数、天气和近期趋势进行前端预测。
 - 预测评估：通过 `data/prediction_log.json` 展示预测误差统计。
-- 静态部署：通过 `edgeone.json` 和 `scripts/build-static.sh` 输出可发布的 `dist/` 目录。
 
 ## 当前数据
 
 - 客流数据文件：`data/metro_data.json`
 - 天气数据文件：`data/weather.json`
 - 预测记录文件：`data/prediction_log.json`
-- 客流数据范围：`2025-01-01` 至 `2026-04-23`
-- 数据天数：478 天
-- 最近更新：`2026-04-24`
+- 客流数据范围：`2025-01-01` 至 `2026-07-07`
+- 数据天数：550 天
+- 最近更新：`2026-07-08`
 - 已配置线路：14 条
 
 已配置线路包括：
@@ -44,7 +41,7 @@
 
 ## 本地运行
 
-项目无需安装前端依赖，直接启动静态服务器即可。
+项目是纯静态站点，无需安装任何依赖，直接启动一个静态文件服务器即可：
 
 ```bash
 python3 -m http.server 8080
@@ -56,57 +53,32 @@ python3 -m http.server 8080
 http://localhost:8080
 ```
 
-## 构建发布目录
+或者使用任意其它静态服务器（例如 `npx serve`、VS Code Live Server 等）。
 
-EdgeOne Pages 部署时会运行：
-
-```bash
-bash scripts/build-static.sh
-```
-
-脚本会生成 `dist/`，只复制公开网站需要的文件：
-
-- `index.html`
-- `lines.html`
-- `history.html`
-- `css/`
-- `js/main.js`
-- `Nanjing_Metro_Logo.svg.png`
-- `data/metro_data.json`
-- `data/weather.json`
-- `data/prediction_log.json`
-
-本地预览发布产物：
+如果想本地预览一份仅含公开站点所需文件的精简副本（去除脚本与中间产物），可以先构建再起服务：
 
 ```bash
 bash scripts/build-static.sh
 python3 -m http.server 8080 -d dist
 ```
 
-## EdgeOne Pages 部署
+## 部署
 
-项目根目录已包含 `edgeone.json`：
+项目是纯静态站点，可以直接托管在任意静态网站服务上，例如：
 
-```text
-构建命令：bash scripts/build-static.sh
-输出目录：./dist
-```
+- **GitHub Pages**：把 `main` 分支（或 `dist/` 目录）作为发布源即可。
+- **Vercel** / **Netlify** / **Cloudflare Pages** 等：识别为静态站点后无需构建命令，直接发布。
+- 自有 Nginx / Apache：把仓库根目录或 `dist/` 挂到站点根目录。
 
-部署步骤：
+构建脚本 `scripts/build-static.sh` 会生成 `dist/`，只复制公开站点需要的文件：
 
-1. 将项目推送到 Git 仓库，例如 Gitee 或 GitHub。
-2. 打开 EdgeOne Pages 控制台，选择从 Git 仓库导入项目。
-3. 选择仓库和分支，根目录保持 `./`。
-4. 构建配置可保持默认，EdgeOne Pages 会读取 `edgeone.json`。
-5. 部署完成后，EdgeOne Pages 会生成公开访问域名。
-6. 后续提交并推送数据或页面更新后，Pages 会自动重新部署。
+- `index.html`、`lines.html`、`history.html`
+- `css/`
+- `js/main.js`
+- `Nanjing_Metro_Logo.svg.png`
+- `data/metro_data.json`、`data/weather.json`、`data/prediction_log.json`
 
-`edgeone.json` 还配置了：
-
-- HTML 和 JSON 使用 `no-cache`，便于数据更新及时生效。
-- CSS、JS、PNG 使用短期缓存。
-- JSON 响应带 `Content-Type: application/json; charset=utf-8`。
-- `/data/*.json` 允许跨域读取。
+如果你想用 Vercel 直接托管项目根目录，可以保留仓库里的 `vercel.json`，它把 `/data/*.json` 设置为 `Content-Type: application/json` 并允许跨域读取，便于前端 fetch。
 
 ## 数据更新
 
@@ -144,7 +116,7 @@ python3 scripts/fetch_data.py
 ```json
 {
   "metadata": {
-    "last_updated": "2026-04-24",
+    "last_updated": "2026-07-08",
     "lines": [
       {
         "id": "L1",
@@ -156,13 +128,13 @@ python3 scripts/fetch_data.py
   },
   "daily_data": [
     {
-      "date": "2026-04-23",
-      "total": 346.31,
+      "date": "2026-07-07",
+      "total": 351.14,
       "is_weekend": false,
       "note": "",
       "lines": {
-        "L1": 72.61,
-        "L2": 60.79
+        "L1": 75.20,
+        "L2": 63.10
       }
     }
   ],
@@ -189,13 +161,14 @@ nanjing-metro-dashboard/
 │   ├── metro_data.json        # 客流数据
 │   ├── weather.json           # 天气与节假日数据
 │   ├── prediction_log.json    # 预测记录与评估
-│   └── raw_data.txt           # 原始数据记录
+│   ├── raw_data.txt           # 原始抓取记录
+│   └── 天气数据.txt           # 天气原始数据
 ├── scripts/
-│   ├── build-static.sh        # EdgeOne Pages 构建脚本
-│   └── fetch_data.py          # 客流数据抓取与预测记录更新
+│   ├── build-static.sh        # 构建发布目录
+│   ├── fetch_data.py          # 客流数据抓取与预测记录更新
+│   └── test_fetch_data.py     # 解析器单元测试
 ├── update_weather.sh          # 天气数据更新脚本
-├── edgeone.json               # EdgeOne Pages 配置
-├── vercel.json                # Vercel 静态部署配置
+├── vercel.json                # Vercel 静态部署配置（可选）
 ├── LINE_COLORS.md             # 线路配色说明
 ├── LICENSE
 └── README.md
@@ -208,7 +181,6 @@ nanjing-metro-dashboard/
 - ECharts CDN
 - Python 标准库脚本
 - Open-Meteo 天气接口
-- EdgeOne Pages 静态托管
 
 ## 许可证
 
