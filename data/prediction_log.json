@@ -1,5 +1,5 @@
 {
-  "predictions": {},
+  "predictions": [],
   "comparison": [
     {
       "date": "2026-03-19",
@@ -966,17 +966,6 @@
       "abs_error": 5.77,
       "pct_error": 1.75,
       "weekday": 1,
-      "is_weekend": false,
-      "compared_at": "2026-07-01 09:10:10"
-    },
-    {
-      "date": "2026-07-27",
-      "actual": 351.83,
-      "predicted": 337.02,
-      "error": 14.81,
-      "abs_error": 14.81,
-      "pct_error": 4.4,
-      "weekday": 0,
       "is_weekend": false,
       "compared_at": "2026-07-01 09:10:10"
     },
