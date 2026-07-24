@@ -25,10 +25,11 @@ DEFAULT_WEATHER_DATA_PATH = REPO_DIR / "data" / "weather.json"
 DEFAULT_OUTPUT_PATH = REPO_DIR / "data" / "ml_predictions.json"
 
 MODEL_NAME = "ridge-regression"
-MODEL_VERSION = "1.1.0"
+MODEL_VERSION = "1.2.0"
 RIDGE_ALPHAS = (0.1, 1.0, 10.0, 50.0, 100.0, 300.0, 500.0, 1000.0)
 ENSEMBLE_BASELINE_WEIGHTS = (0.0, 0.1, 0.2, 0.25, 0.3, 0.4, 0.5)
 MIN_TRAINING_ROWS = 60
+SERVICE_DISRUPTION_MARKERS = ("停运", "运营中断")
 
 
 @dataclass
@@ -336,6 +337,9 @@ def build_training_rows(
     totals = {row["date"]: as_number(row["total"]) for row in sorted_data}
     rows: list[TrainingRow] = []
     for item in sorted_data:
+        note = str(item.get("note", ""))
+        if any(marker in note for marker in SERVICE_DISRUPTION_MARKERS):
+            continue
         target = parse_date(item["date"])
         lags = lag_features(target, totals)
         if lags is None:
@@ -526,6 +530,11 @@ def generate_prediction_file(
                 "baseline": "最近 4 个同星期客流均值",
             },
             "training_rows": len(rows),
+            "excluded_service_disruption_rows": sum(
+                1
+                for item in daily_data
+                if any(marker in str(item.get("note", "")) for marker in SERVICE_DISRUPTION_MARKERS)
+            ),
             "training_start_date": rows[0].date,
             "training_end_date": rows[-1].date,
             "feature_names": feature_names(),

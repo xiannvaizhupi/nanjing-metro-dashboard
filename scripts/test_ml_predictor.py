@@ -26,6 +26,7 @@ def build_fixture(root):
             "date": current.isoformat(),
             "total": round(total, 2),
             "is_weekend": current.weekday() >= 5,
+            "note": "停运线路：S1" if offset == 50 else "",
             "lines": {},
         })
         weather_data.append({
@@ -71,6 +72,10 @@ def test_prediction_file_generation():
         assert_true(payload["model"]["name"] == "ridge-regression", "model name should be recorded")
         assert_true("ensemble" in payload["model"], "ensemble configuration should be recorded")
         assert_true(payload["model"]["training_rows"] >= 90, "training rows should exclude only lag warm-up")
+        assert_true(
+            payload["model"]["excluded_service_disruption_rows"] == 1,
+            "service disruption targets should be excluded",
+        )
         assert_true(payload["model"]["validation"]["rows"] >= 28, "temporal validation should run")
         assert_true(len(payload["forecasts"]) == 2, "two forecasts should be generated")
         assert_true(payload["forecasts"][0]["date"] == expected_start, "forecast should start after latest actual")

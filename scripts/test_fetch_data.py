@@ -35,6 +35,13 @@ JULY_BACKFILL_TEXT = (
     "S8号线7.81，S9号线1.72（以上单位: 万）"
 )
 
+JULY_12_SUSPENSION_TEXT = (
+    "#昨日客流#南京地铁7月12日客运量68.82，其中1号线12.07，2号线12.8，"
+    "3号线15.42，4号线4.44，5号线10.62，7号线8.59，10号线2.81，"
+    "S1号线停运，S2号线停运，S3号线2.06，S6号线停运，S7号线停运，"
+    "S8号线停运，S9号线停运（以上单位: 万）"
+)
+
 
 def assert_equal(actual, expected, label):
     if actual != expected:
@@ -110,6 +117,19 @@ def test_incomplete_line_data_is_rejected():
     assert_equal(entries, [], "incomplete line data should be rejected")
 
 
+def test_suspended_lines_complete_the_entry():
+    entries = parse_passenger_flow(JULY_12_SUSPENSION_TEXT, source_name="人工核验补录")
+    assert_equal(len(entries), 1, "suspension entry count")
+    assert_equal(entries[0]["date"], "2026-07-12", "suspension date")
+    assert_equal(len(entries[0]["lines"]), 14, "suspension line count")
+    assert_equal(entries[0]["lines"]["S1"], 0.0, "suspended line value")
+    assert_equal(
+        entries[0]["note"],
+        "停运线路：S1、S2、S6、S7、S8、S9",
+        "suspension note",
+    )
+
+
 def test_large_total_line_difference_is_rejected():
     html = (
         "南京地铁2026年7月12日客运量300万，其中："
@@ -179,6 +199,7 @@ if __name__ == "__main__":
     test_wrapped_ssl_verification_error_is_detected()
     test_parse_official_homepage_text_without_hashtag()
     test_incomplete_line_data_is_rejected()
+    test_suspended_lines_complete_the_entry()
     test_large_total_line_difference_is_rejected()
     test_parse_backfill_text_with_mixed_formats()
     test_unparseable_sources_are_not_reported_as_successful()

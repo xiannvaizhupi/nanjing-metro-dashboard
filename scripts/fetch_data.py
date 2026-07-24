@@ -55,7 +55,25 @@ LINE_PATTERNS = [
     (r'S9号线[：:]?(\d+\.?\d*)', 'S9'),
 ]
 
-# 当前公告正常会覆盖 12 至 14 条线路；低于 10 条通常是页面内容截断。
+# 停运线路仍属于完整公告，将其客流记为 0 并保留状态说明。
+SUSPENDED_LINE_PATTERNS = [
+    (r'(?<![A-Za-z])1号线[：:]?(?:全天)?停运', 'L1'),
+    (r'(?<![A-Za-z])2号线[：:]?(?:全天)?停运', 'L2'),
+    (r'(?<![A-Za-z])3号线[：:]?(?:全天)?停运', 'L3'),
+    (r'(?<![A-Za-z])4号线[：:]?(?:全天)?停运', 'L4'),
+    (r'(?<![A-Za-z])5号线[：:]?(?:全天)?停运', 'L5'),
+    (r'(?<![A-Za-z])7号线[：:]?(?:全天)?停运', 'L7'),
+    (r'(?<![A-Za-z])10号线[：:]?(?:全天)?停运', 'L10'),
+    (r'S1号线[：:]?(?:全天)?停运', 'S1'),
+    (r'S2号线[：:]?(?:全天)?停运', 'S2'),
+    (r'S3号线[：:]?(?:全天)?停运', 'S3'),
+    (r'S6号线[：:]?(?:全天)?停运', 'S6'),
+    (r'S7号线[：:]?(?:全天)?停运', 'S7'),
+    (r'S8号线[：:]?(?:全天)?停运', 'S8'),
+    (r'S9号线[：:]?(?:全天)?停运', 'S9'),
+]
+
+# 当前公告正常会覆盖 12 至 14 条线路状态；低于 10 条通常是页面内容截断。
 MINIMUM_COMPLETE_LINE_COUNT = 10
 MAXIMUM_TOTAL_LINE_DIFFERENCE = 5.0
 
@@ -299,6 +317,12 @@ def parse_passenger_flow(html, source_name=''):
             if line_match:
                 lines[line_id] = float(line_match.group(1))
 
+        suspended_lines = []
+        for line_pattern, line_id in SUSPENDED_LINE_PATTERNS:
+            if line_id not in lines and re.search(line_pattern, lines_str):
+                lines[line_id] = 0.0
+                suspended_lines.append(line_id)
+
         if len(lines) < MINIMUM_COMPLETE_LINE_COUNT:
             print(f"跳过疑似不完整数据: {date_str}，仅解析到 {len(lines)} 条线路")
             continue
@@ -323,7 +347,7 @@ def parse_passenger_flow(html, source_name=''):
             'date': date_str,
             'total': total,
             'is_weekend': is_weekend,
-            'note': '',
+            'note': f"停运线路：{'、'.join(suspended_lines)}" if suspended_lines else '',
             'lines': lines
         })
         seen_dates.add(date_str)
