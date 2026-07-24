@@ -1,7 +1,10 @@
 name: Update metro passenger flow
 
 on:
-  # 停止每日自动执行，避免抓取失败产生邮件通知；需要时可在 Actions 页面手动运行。
+  schedule:
+    # GitHub 使用 UTC；对应北京时间每天 09:30 和 11:30。
+    - cron: '30 1 * * *'
+    - cron: '30 3 * * *'
   workflow_dispatch:
 
 permissions:
@@ -14,9 +17,14 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TZ: Asia/Shanghai
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -32,7 +40,40 @@ jobs:
       - name: Fetch latest passenger flow
         env:
           METRO_SKIP_GIT: '1'
-        run: python scripts/fetch_data.py
+          METRO_REQUIRE_YESTERDAY: '1'
+        run: |
+          set +e
+          last_code=0
+          for attempt in 1 2 3; do
+            echo "Passenger-flow fetch attempt ${attempt}/3"
+            python scripts/fetch_data.py
+            code=$?
+
+            if [ "$code" -eq 0 ]; then
+              exit 0
+            fi
+
+            case "$code" in
+              2|3)
+                last_code=$code
+                if [ "$attempt" -lt 3 ]; then
+                  echo "Transient or pending state (exit ${code}); retrying in 60 seconds."
+                  sleep 60
+                fi
+                ;;
+              *)
+                echo "::error::Fetcher stopped on a real data or program failure (exit ${code})."
+                exit "$code"
+                ;;
+            esac
+          done
+
+          if [ "$last_code" -eq 2 ]; then
+            echo "::warning::All data sources are temporarily unavailable; a later schedule will retry."
+          else
+            echo "::notice::Yesterday's data has not been published yet; a later schedule will retry."
+          fi
+          exit 0
 
       - name: Commit and push updates
         run: |
@@ -45,4 +86,14 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/metro_data.json data/prediction_log.json data/ml_predictions.json
           git commit -m "Auto update metro data - $(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M')"
-          git push
+          git push origin HEAD:main
+
+      - name: Sync current main to Gitee
+        env:
+          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+        run: |
+          if [ -z "$GITEE_TOKEN" ]; then
+            echo "::notice::GITEE_TOKEN is not configured; GitHub was updated and Gitee sync was skipped."
+            exit 0
+          fi
+          git push "https://myles_zhu:${GITEE_TOKEN}@gitee.com/myles_zhu/nanjing-metro-data.git" HEAD:main

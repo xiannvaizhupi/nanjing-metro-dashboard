@@ -97,7 +97,9 @@ python3 -m http.server 8080 -d dist
 python3 scripts/fetch_data.py
 ```
 
-`.github/workflows/update-metro-data.yml` 已停止定时执行，避免失败邮件；目前只允许在 GitHub Actions 页面手动触发 `Update metro passenger flow`。本地运行脚本时，只有检测到新数据或预测需要刷新才会提交，并同步推送到 GitHub 和 Gitee；所有来源均访问失败时会返回错误状态，方便明确区分“没有新数据”和“抓取失败”。
+`.github/workflows/update-metro-data.yml` 会在北京时间每天 09:30 和 11:30 自动执行，也可在 GitHub Actions 页面手动触发 `Update metro passenger flow`。每次任务最多重试三次：官网尚未发布或临时网络故障只记录提示并等待下一轮，不会产生失败邮件；解析器、数据完整性、预测文件或发布过程真正异常时才会失败。仅在数据发生变化时提交并推送 GitHub。
+
+如需让 GitHub Actions 同步更新 Gitee，请在 GitHub 仓库的 Actions secrets 中配置 `GITEE_TOKEN`。未配置时任务仍会正常更新 GitHub，并明确记录跳过 Gitee；本地直接运行脚本时仍会使用本机凭据同步 `origin` 和 `gitee`。
 
 在 CI 中脚本会通过 `METRO_SKIP_GIT=1` 跳过脚本内部的 Git 推送，改由工作流统一提交；本地直接运行脚本时仍保留原来的自动提交并推送到 `origin` 和 `gitee` 的行为。
 

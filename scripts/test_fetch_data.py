@@ -2,6 +2,7 @@
 """Lightweight checks for the Nanjing Metro passenger-flow fetcher."""
 
 import json
+import os
 import ssl
 import tempfile
 from datetime import date
@@ -154,14 +155,106 @@ def test_unparseable_sources_are_not_reported_as_successful():
     original_fetch_url = fetch_data.fetch_url
     try:
         fetch_data.fetch_url = lambda *args, **kwargs: "<html>unexpected response</html>"
-        entries, source_name, successful_sources = fetch_data.fetch_passenger_flow_entries(
+        entries, source_name, successful_sources, reached_sources = fetch_data.fetch_passenger_flow_entries(
             reference_date=date(2026, 7, 24)
         )
         assert_equal(entries, [], "unparseable entries")
         assert_equal(source_name, None, "unparseable source")
         assert_equal(successful_sources, [], "unparseable sources should fail")
+        assert_equal(
+            reached_sources,
+            ["南京地铁官网客流接口", "南京地铁官方微博组件"],
+            "unparseable sources should remain distinguishable from network failures",
+        )
     finally:
         fetch_data.fetch_url = original_fetch_url
+
+
+def test_required_data_date_from_environment():
+    original_expected = os.environ.get("METRO_EXPECT_DATE")
+    original_yesterday = os.environ.get("METRO_REQUIRE_YESTERDAY")
+    try:
+        os.environ["METRO_EXPECT_DATE"] = "2026-07-24"
+        os.environ["METRO_REQUIRE_YESTERDAY"] = "1"
+        assert_equal(
+            fetch_data.required_data_date(reference_date=date(2026, 7, 25)),
+            date(2026, 7, 24),
+            "explicit expected date",
+        )
+        del os.environ["METRO_EXPECT_DATE"]
+        assert_equal(
+            fetch_data.required_data_date(reference_date=date(2026, 7, 25)),
+            date(2026, 7, 24),
+            "required yesterday",
+        )
+    finally:
+        if original_expected is None:
+            os.environ.pop("METRO_EXPECT_DATE", None)
+        else:
+            os.environ["METRO_EXPECT_DATE"] = original_expected
+        if original_yesterday is None:
+            os.environ.pop("METRO_REQUIRE_YESTERDAY", None)
+        else:
+            os.environ["METRO_REQUIRE_YESTERDAY"] = original_yesterday
+
+
+def test_main_distinguishes_network_and_parse_failures():
+    original_fetch_entries = fetch_data.fetch_passenger_flow_entries
+    try:
+        fetch_data.fetch_passenger_flow_entries = lambda: ([], None, [], [])
+        assert_equal(
+            fetch_data.main(),
+            fetch_data.EXIT_SOURCE_UNAVAILABLE,
+            "network failure exit code",
+        )
+        fetch_data.fetch_passenger_flow_entries = lambda: (
+            [],
+            None,
+            [],
+            ["南京地铁官网客流接口"],
+        )
+        assert_equal(
+            fetch_data.main(),
+            fetch_data.EXIT_DATA_INVALID,
+            "parse failure exit code",
+        )
+        fetch_data.fetch_passenger_flow_entries = lambda: (
+            [],
+            None,
+            ["南京地铁官网客流接口"],
+            ["南京地铁官网客流接口", "南京地铁官方微博组件"],
+        )
+        assert_equal(
+            fetch_data.main(),
+            fetch_data.EXIT_DATA_INVALID,
+            "widget parser regression exit code",
+        )
+    finally:
+        fetch_data.fetch_passenger_flow_entries = original_fetch_entries
+
+
+def test_dataset_validation_accepts_suspension_and_rejects_duplicates():
+    entry = parse_passenger_flow(JULY_12_SUSPENSION_TEXT, source_name="人工核验补录")[0]
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        metro_path = Path(temporary_directory) / "metro_data.json"
+        metro_path.write_text(
+            json.dumps({"metadata": {}, "daily_data": [entry]}, ensure_ascii=False),
+            encoding="utf-8",
+        )
+        assert_equal(
+            fetch_data.validate_metro_dataset(metro_path, reference_date=date(2026, 7, 24)),
+            True,
+            "valid suspension dataset",
+        )
+        metro_path.write_text(
+            json.dumps({"metadata": {}, "daily_data": [entry, entry]}, ensure_ascii=False),
+            encoding="utf-8",
+        )
+        assert_equal(
+            fetch_data.validate_metro_dataset(metro_path, reference_date=date(2026, 7, 24)),
+            False,
+            "duplicate dataset",
+        )
 
 
 def test_corrected_entry_triggers_follow_up_processing():
@@ -203,5 +296,8 @@ if __name__ == "__main__":
     test_large_total_line_difference_is_rejected()
     test_parse_backfill_text_with_mixed_formats()
     test_unparseable_sources_are_not_reported_as_successful()
+    test_required_data_date_from_environment()
+    test_main_distinguishes_network_and_parse_failures()
+    test_dataset_validation_accepts_suspension_and_rejects_duplicates()
     test_corrected_entry_triggers_follow_up_processing()
     print("fetch_data parser checks passed.")

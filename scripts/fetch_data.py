@@ -11,6 +11,7 @@ import math
 import ssl
 import sys
 import subprocess
+import tempfile
 from html import unescape
 from datetime import datetime, date, timedelta
 from urllib.parse import urlencode
@@ -22,6 +23,11 @@ METRO_DATA_PATH = os.path.join(REPO_DIR, 'data', 'metro_data.json')
 PREDICTION_LOG_PATH = os.path.join(REPO_DIR, 'data', 'prediction_log.json')
 ML_PREDICTIONS_PATH = os.path.join(REPO_DIR, 'data', 'ml_predictions.json')
 ML_PREDICTOR_PATH = os.path.join(SCRIPT_DIR, 'ml_predictor.py')
+
+EXIT_SUCCESS = 0
+EXIT_SOURCE_UNAVAILABLE = 2
+EXIT_DATA_PENDING = 3
+EXIT_DATA_INVALID = 4
 
 OFFICIAL_HOMEPAGE_URL = "https://www.njmetro.com.cn/njdtweb/gx/dtmain.jsp"
 OFFICIAL_FLOW_API_URL = "https://www.njmetro.com.cn/njdtweb/portal/get-lineIntro.do"
@@ -189,14 +195,18 @@ def fetch_passenger_flow_entries(reference_date=None):
     ref = reference_date or date.today()
     expected_date = ref - timedelta(days=1)
     successful_sources = []
+    reached_sources = []
 
-    official_total, _official_reached = fetch_official_total()
+    official_total, official_reached = fetch_official_total()
+    if official_reached:
+        reached_sources.append('南京地铁官网客流接口')
     if official_total is not None:
         successful_sources.append('南京地铁官网客流接口')
 
     detailed_entries = []
     widget_html = fetch_url("南京地铁官网嵌入的官方微博组件", WEIBO_WIDGET_URL)
     if widget_html is not None:
+        reached_sources.append('南京地铁官方微博组件')
         try:
             detailed_entries = parse_passenger_flow(widget_html, source_name='南京地铁官方微博组件')
         except Exception as error:
@@ -234,9 +244,9 @@ def fetch_passenger_flow_entries(reference_date=None):
             else '南京地铁官方微博组件'
         )
         print(f"使用数据源: {source_name}")
-        return detailed_entries, source_name, successful_sources
+        return detailed_entries, source_name, successful_sources, reached_sources
 
-    return [], None, successful_sources
+    return [], None, successful_sources, reached_sources
 
 
 def infer_entry_year(month, day, explicit_year=None, reference_date=None):
@@ -363,6 +373,25 @@ def parse_weibo_flow(html):
     return parse_passenger_flow(html, source_name='南京地铁官方微博组件')
 
 
+def write_json_atomic(path, payload):
+    """先写临时文件再替换，避免任务中断留下半截 JSON。"""
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            'w',
+            encoding='utf-8',
+            dir=os.path.dirname(path),
+            delete=False,
+        ) as handle:
+            json.dump(payload, handle, ensure_ascii=False, indent=2)
+            handle.write('\n')
+            temporary_path = handle.name
+        os.replace(temporary_path, path)
+    finally:
+        if temporary_path and os.path.exists(temporary_path):
+            os.unlink(temporary_path)
+
+
 def update_metro_data(new_entries, source_name=None):
     """更新metro_data.json，返回是否有新数据被添加"""
     try:
@@ -405,8 +434,7 @@ def update_metro_data(new_entries, source_name=None):
         if source_name:
             data['metadata']['data_source'] = source_name
 
-        with open(METRO_DATA_PATH, 'w') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+        write_json_atomic(METRO_DATA_PATH, data)
 
         print(f"数据已保存到 metro_data.json")
         return updated_dates
@@ -424,6 +452,95 @@ def load_metro_data():
     except Exception as e:
         print(f"加载 metro_data.json 失败: {e}")
         return {}
+
+
+def validate_metro_dataset(path=METRO_DATA_PATH, reference_date=None):
+    """发布前验证日期、总量、线路完整性和线路合计。"""
+    errors = []
+    try:
+        with open(path, 'r', encoding='utf-8') as handle:
+            payload = json.load(handle)
+    except Exception as error:
+        print(f"[数据校验失败] 无法读取 {path}: {error}")
+        return False
+
+    rows = payload.get('daily_data') if isinstance(payload, dict) else None
+    if not isinstance(rows, list) or not rows:
+        print("[数据校验失败] daily_data 为空或格式错误")
+        return False
+
+    dates = []
+    seen_dates = set()
+    today = reference_date or date.today()
+    for index, item in enumerate(rows):
+        if not isinstance(item, dict):
+            errors.append(f"第 {index + 1} 条记录不是对象")
+            continue
+
+        date_string = item.get('date')
+        try:
+            item_date = datetime.strptime(date_string, '%Y-%m-%d').date()
+        except (TypeError, ValueError):
+            errors.append(f"第 {index + 1} 条日期无效: {date_string!r}")
+            continue
+
+        dates.append(date_string)
+        if date_string in seen_dates:
+            errors.append(f"日期重复: {date_string}")
+        seen_dates.add(date_string)
+        if item_date > today:
+            errors.append(f"存在未来日期: {date_string}")
+
+        try:
+            total = float(item.get('total'))
+        except (TypeError, ValueError):
+            errors.append(f"{date_string} 总客流不是数字")
+            continue
+        if not 0 < total < 1000:
+            errors.append(f"{date_string} 总客流超出合理范围: {total}")
+
+        lines = item.get('lines')
+        if not isinstance(lines, dict):
+            errors.append(f"{date_string} 线路数据格式错误")
+            continue
+        pending_details = '线路明细待补' in str(item.get('note', ''))
+        if not lines and pending_details:
+            continue
+        if len(lines) < MINIMUM_COMPLETE_LINE_COUNT:
+            errors.append(f"{date_string} 仅有 {len(lines)} 条线路状态")
+            continue
+        try:
+            line_total = sum(float(value) for value in lines.values())
+        except (TypeError, ValueError):
+            errors.append(f"{date_string} 包含非数字线路客流")
+            continue
+        difference = round(total - line_total, 2)
+        if abs(difference) > MAXIMUM_TOTAL_LINE_DIFFERENCE:
+            errors.append(f"{date_string} 总量与线路合计相差 {difference}万")
+
+    if dates != sorted(dates):
+        errors.append("daily_data 未按日期升序排列")
+
+    if errors:
+        for error in errors[:20]:
+            print(f"[数据校验失败] {error}")
+        if len(errors) > 20:
+            print(f"[数据校验失败] 另有 {len(errors) - 20} 个错误未显示")
+        return False
+
+    print(f"[数据校验] {len(rows)} 条记录通过，最新日期 {dates[-1]}")
+    return True
+
+
+def required_data_date(reference_date=None):
+    """读取 CI 要求的数据日期；本地默认不强制昨日必须发布。"""
+    explicit_date = os.environ.get('METRO_EXPECT_DATE')
+    if explicit_date:
+        return datetime.strptime(explicit_date, '%Y-%m-%d').date()
+    require_yesterday = os.environ.get('METRO_REQUIRE_YESTERDAY', '').lower()
+    if require_yesterday in {'1', 'true', 'yes'}:
+        return (reference_date or date.today()) - timedelta(days=1)
+    return None
 
 
 def load_prediction_log():
@@ -453,8 +570,7 @@ def load_prediction_log():
 
 def save_prediction_log(log):
     """保存 prediction_log.json"""
-    with open(PREDICTION_LOG_PATH, 'w') as f:
-        json.dump(log, f, ensure_ascii=False, indent=2)
+    write_json_atomic(PREDICTION_LOG_PATH, log)
 
 
 def load_ml_forecasts():
@@ -504,6 +620,49 @@ def ml_predictions_need_refresh():
     except (FileNotFoundError, json.JSONDecodeError):
         return True
     return payload.get('forecast_base_date') != latest_date
+
+
+def validate_ml_predictions(path=ML_PREDICTIONS_PATH):
+    """确认预测基准日与最新实际数据一致，且预测值有效。"""
+    metro_map = load_metro_data()
+    if not metro_map:
+        print("[预测校验失败] 无法读取客流数据")
+        return False
+    try:
+        with open(path, 'r', encoding='utf-8') as handle:
+            payload = json.load(handle)
+    except Exception as error:
+        print(f"[预测校验失败] 无法读取 {path}: {error}")
+        return False
+
+    latest_date = max(metro_map)
+    if payload.get('forecast_base_date') != latest_date:
+        print(
+            f"[预测校验失败] 基准日 {payload.get('forecast_base_date')} "
+            f"与最新数据 {latest_date} 不一致"
+        )
+        return False
+
+    forecasts = payload.get('forecasts')
+    if not isinstance(forecasts, list) or not forecasts:
+        print("[预测校验失败] forecasts 为空或格式错误")
+        return False
+    for forecast in forecasts:
+        try:
+            forecast_date = datetime.strptime(forecast['date'], '%Y-%m-%d').date()
+            predicted_total = float(forecast['predicted_total'])
+        except (KeyError, TypeError, ValueError) as error:
+            print(f"[预测校验失败] 预测记录格式错误: {error}")
+            return False
+        if forecast_date <= datetime.strptime(latest_date, '%Y-%m-%d').date():
+            print(f"[预测校验失败] 预测日期未晚于基准日: {forecast['date']}")
+            return False
+        if not 0 < predicted_total < 1000:
+            print(f"[预测校验失败] 预测值超出合理范围: {predicted_total}")
+            return False
+
+    print(f"[预测校验] 基准日 {latest_date}，共 {len(forecasts)} 条预测")
+    return True
 
 
 def date_str_to_weekday(date_str):
@@ -718,11 +877,21 @@ def commit_and_push_updates():
 def main():
     print(f"=== 南京地铁客流数据抓取 ===")
     print(f"执行时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    expected_date = required_data_date()
+    if expected_date:
+        print(f"本次期望数据日期: {expected_date.isoformat()}")
 
-    entries, source_name, successful_sources = fetch_passenger_flow_entries()
+    entries, source_name, successful_sources, reached_sources = fetch_passenger_flow_entries()
+    widget_source = '南京地铁官方微博组件'
+    if widget_source in reached_sources and widget_source not in successful_sources:
+        print("官方微博组件已连接但未解析到任何完整客流记录，疑似页面格式变化。")
+        return EXIT_DATA_INVALID
     if not successful_sources:
-        print("所有客流数据源均访问失败或无法解析。")
-        return 1
+        if reached_sources:
+            print(f"数据源已连接但内容无法解析: {', '.join(reached_sources)}")
+            return EXIT_DATA_INVALID
+        print("所有客流数据源均暂时无法访问。")
+        return EXIT_SOURCE_UNAVAILABLE
 
     updated_dates = update_metro_data(entries, source_name=source_name) if entries else []
     if updated_dates:
@@ -731,20 +900,39 @@ def main():
     else:
         print("官网已访问，当前没有新的客流明细。")
 
+    if not validate_metro_dataset():
+        return EXIT_DATA_INVALID
+
     prediction_refreshed = False
     if updated_dates or ml_predictions_need_refresh():
-        regenerate_ml_predictions()
+        try:
+            regenerate_ml_predictions()
+        except RuntimeError as error:
+            print(error)
+            return EXIT_DATA_INVALID
         prediction_refreshed = True
+
+    if not validate_ml_predictions():
+        return EXIT_DATA_INVALID
+
+    expected_pending = bool(
+        expected_date
+        and expected_date.isoformat() not in load_metro_data()
+    )
+    if expected_pending:
+        print(f"官网尚未发布 {expected_date.isoformat()} 客流，等待下一次重试。")
 
     if not updated_dates and not prediction_refreshed:
         print("数据和预测均为最新，无需发布。")
-        return 0
+        return EXIT_DATA_PENDING if expected_pending else EXIT_SUCCESS
 
     if os.environ.get('METRO_SKIP_GIT') == '1':
         print("已设置 METRO_SKIP_GIT=1，跳过脚本内 Git 提交/推送。")
-        return 0
+        return EXIT_DATA_PENDING if expected_pending else EXIT_SUCCESS
 
-    return 0 if commit_and_push_updates() else 1
+    if not commit_and_push_updates():
+        return 1
+    return EXIT_DATA_PENDING if expected_pending else EXIT_SUCCESS
 
 
 if __name__ == '__main__':
