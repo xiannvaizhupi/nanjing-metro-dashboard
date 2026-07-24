@@ -21,5 +21,6 @@ cp "$root_dir/js/main.js" "$dist_dir/js/"
 cp "$root_dir/data/metro_data.json" "$dist_dir/data/"
 cp "$root_dir/data/weather.json" "$dist_dir/data/"
 cp "$root_dir/data/prediction_log.json" "$dist_dir/data/"
+cp "$root_dir/data/ml_predictions.json" "$dist_dir/data/"
 
 printf 'Static site built at %s\n' "$dist_dir"

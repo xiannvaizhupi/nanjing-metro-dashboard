@@ -9,24 +9,24 @@ import re
 import os
 import math
 import ssl
+import sys
+import subprocess
 from html import unescape
 from datetime import datetime, date, timedelta
+from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(SCRIPT_DIR)
 METRO_DATA_PATH = os.path.join(REPO_DIR, 'data', 'metro_data.json')
 PREDICTION_LOG_PATH = os.path.join(REPO_DIR, 'data', 'prediction_log.json')
+ML_PREDICTIONS_PATH = os.path.join(REPO_DIR, 'data', 'ml_predictions.json')
+ML_PREDICTOR_PATH = os.path.join(SCRIPT_DIR, 'ml_predictor.py')
 
 OFFICIAL_HOMEPAGE_URL = "https://www.njmetro.com.cn/njdtweb/gx/dtmain.jsp"
-OFFICIAL_ROOT_URL = "https://www.njmetro.com.cn/"
+OFFICIAL_FLOW_API_URL = "https://www.njmetro.com.cn/njdtweb/portal/get-lineIntro.do"
+OFFICIAL_FLOW_ROW_ID = "8a80800766e1aa290166e7e5c60d0003"
 WEIBO_WIDGET_URL = "https://widget.weibo.com/weiboshow/index.php?language=&width=0&height=430&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=2638276292&verifier=138e3b0a&dpc=1"
-
-FETCH_SOURCES = [
-    ("南京地铁官网首页", OFFICIAL_HOMEPAGE_URL),
-    ("南京地铁官网根页", OFFICIAL_ROOT_URL),
-    ("南京地铁官方微博组件", WEIBO_WIDGET_URL),
-]
 
 HTTP_HEADERS = {
     "User-Agent": (
@@ -54,6 +54,10 @@ LINE_PATTERNS = [
     (r'S8号线[：:]?(\d+\.?\d*)', 'S8'),
     (r'S9号线[：:]?(\d+\.?\d*)', 'S9'),
 ]
+
+# 当前公告正常会覆盖 12 至 14 条线路；低于 10 条通常是页面内容截断。
+MINIMUM_COMPLETE_LINE_COUNT = 10
+MAXIMUM_TOTAL_LINE_DIFFERENCE = 5.0
 
 NEXT_ENTRY_PATTERN = (
     r'(?:(?:\d{2,4})[-/.年](?:\d{1,2})[-/.月](?:\d{1,2})[日号]?)?'
@@ -85,26 +89,38 @@ def decode_response(response):
     return raw.decode('utf-8', errors='replace')
 
 
-def fetch_url(source_name, url):
-    """抓取指定来源页面。SSL 失败时自动降级到未验证模式（macOS Python 常见证书问题）。"""
-    try:
-        req = Request(url, headers=HTTP_HEADERS)
-        response = urlopen(req, timeout=30)
+def is_ssl_verification_error(error):
+    """识别直接或经 URLError 包装的证书校验错误。"""
+    reason = getattr(error, 'reason', None)
+    return (
+        isinstance(error, ssl.SSLError)
+        or isinstance(reason, ssl.SSLError)
+        or 'CERTIFICATE_VERIFY_FAILED' in str(error)
+    )
+
+
+def fetch_url(source_name, url, form_data=None):
+    """抓取指定来源；南京地铁旧证书失败时自动使用未验证连接重试。"""
+    payload = urlencode(form_data).encode('utf-8') if form_data else None
+
+    def request(context=None):
+        req = Request(url, data=payload, headers=HTTP_HEADERS)
+        response = urlopen(req, timeout=30, context=context)
         return decode_response(response)
-    except ssl.SSLError as e:
-        # 兜底：跳过证书验证（南京地铁官网 + 部分内网环境常见）
-        print(f"  [SSL] {source_name} 证书校验失败，降级到未验证模式: {e}")
-        try:
-            ctx = ssl._create_unverified_context()
-            req = Request(url, headers=HTTP_HEADERS)
-            response = urlopen(req, timeout=30, context=ctx)
-            return decode_response(response)
-        except Exception as e2:
-            print(f"获取{source_name}失败: {e2}")
+
+    try:
+        return request()
+    except Exception as error:
+        if not is_ssl_verification_error(error):
+            print(f"获取{source_name}失败: {error}")
             return None
-    except Exception as e:
-        print(f"获取{source_name}失败: {e}")
-        return None
+
+        print(f"  [SSL] {source_name} 证书校验失败，使用兼容模式重试: {error}")
+        try:
+            return request(ssl._create_unverified_context())
+        except Exception as retry_error:
+            print(f"获取{source_name}失败: {retry_error}")
+            return None
 
 
 def fetch_weibo_data():
@@ -112,31 +128,97 @@ def fetch_weibo_data():
     return fetch_url("南京地铁官方微博组件", WEIBO_WIDGET_URL)
 
 
-def fetch_passenger_flow_entries():
-    """按优先级抓取并解析客流数据。任一来源出错不影响其他来源继续尝试。"""
-    for source_name, url in FETCH_SOURCES:
+def parse_official_total(response_text):
+    """解析官网首页 AJAX 接口返回的昨日总客流。"""
+    payload = json.loads(response_text)
+    value = float(payload['articleTitle'])
+    if not 0 < value < 1000:
+        raise ValueError(f"官网客流数值超出合理范围: {value}")
+    return value
+
+
+def fetch_official_total():
+    """调用官网首页 JavaScript 实际使用的 POST 接口。"""
+    response_text = fetch_url(
+        "南京地铁官网客流接口",
+        OFFICIAL_FLOW_API_URL,
+        form_data={'rowId': OFFICIAL_FLOW_ROW_ID},
+    )
+    if response_text is None:
+        return None, False
+    try:
+        total = parse_official_total(response_text)
+    except Exception as error:
+        print(f"南京地铁官网客流接口解析失败: {error}")
+        return None, True
+    print(f"官网首页昨日客流: {total}万")
+    return total, True
+
+
+def build_official_total_entry(total, target_date):
+    """明细暂不可用时，仍使用官网总量维持总客流连续更新。"""
+    return {
+        'date': target_date.isoformat(),
+        'total': total,
+        'is_weekend': target_date.weekday() >= 5,
+        'note': '官网总量；线路明细待补',
+        'lines': {},
+    }
+
+
+def fetch_passenger_flow_entries(reference_date=None):
+    """组合官网总量与官网首页嵌入的官方微博线路明细。"""
+    ref = reference_date or date.today()
+    expected_date = ref - timedelta(days=1)
+    successful_sources = []
+
+    official_total, _official_reached = fetch_official_total()
+    if official_total is not None:
+        successful_sources.append('南京地铁官网客流接口')
+
+    detailed_entries = []
+    widget_html = fetch_url("南京地铁官网嵌入的官方微博组件", WEIBO_WIDGET_URL)
+    if widget_html is not None:
         try:
-            html = fetch_url(source_name, url)
-        except Exception as e:
-            print(f"获取{source_name}异常: {e}")
-            continue
+            detailed_entries = parse_passenger_flow(widget_html, source_name='南京地铁官方微博组件')
+        except Exception as error:
+            print(f"南京地铁官方微博组件解析异常: {error}")
+        if detailed_entries:
+            successful_sources.append('南京地铁官方微博组件')
 
-        if not html:
-            continue
+    if official_total is not None:
+        expected_key = expected_date.isoformat()
+        expected_entry = next((item for item in detailed_entries if item['date'] == expected_key), None)
+        if expected_entry:
+            if abs(expected_entry['total'] - official_total) > 0.01:
+                print(
+                    f"[校验] 官网总量 {official_total} 与微博明细总量 "
+                    f"{expected_entry['total']} 不一致，以官网总量为准。"
+                )
+                expected_entry['total'] = official_total
+        else:
+            matching_detail = any(abs(item['total'] - official_total) <= 0.01 for item in detailed_entries)
+            metro_map = load_metro_data()
+            latest_existing = max(metro_map.values(), key=lambda item: item['date']) if metro_map else None
+            matching_existing = bool(
+                latest_existing
+                and abs(float(latest_existing.get('total', 0)) - official_total) <= 0.01
+            )
+            if not matching_detail and not matching_existing:
+                print(f"微博明细尚未发布，使用官网总量更新 {expected_key}。")
+                detailed_entries.append(build_official_total_entry(official_total, expected_date))
 
-        try:
-            entries = parse_passenger_flow(html, source_name=source_name)
-        except Exception as e:
-            print(f"{source_name} 解析异常: {e}")
-            continue
+    if detailed_entries:
+        detailed_entries.sort(key=lambda item: item['date'])
+        source_name = (
+            '南京地铁官网首页（官方微博线路明细）'
+            if official_total is not None
+            else '南京地铁官方微博组件'
+        )
+        print(f"使用数据源: {source_name}")
+        return detailed_entries, source_name, successful_sources
 
-        if entries:
-            print(f"使用数据源: {source_name}")
-            return entries, source_name
-
-        print(f"{source_name}未解析到客流数据，尝试下一个来源。")
-
-    return [], None
+    return [], None, successful_sources
 
 
 def infer_entry_year(month, day, explicit_year=None, reference_date=None):
@@ -158,8 +240,8 @@ def infer_entry_year(month, day, explicit_year=None, reference_date=None):
                     candidate = date(year, m, d)
                 except ValueError:
                     continue
-                # 拒绝未来日期（> ref）
-                if candidate > ref:
+                # 官网/微博可能在前一天晚间提前给出次日日期，允许一周内的近未来日期。
+                if candidate > ref + timedelta(days=7):
                     continue
                 candidates.append((abs((candidate - ref).days), year, m, d))
 
@@ -217,9 +299,22 @@ def parse_passenger_flow(html, source_name=''):
             if line_match:
                 lines[line_id] = float(line_match.group(1))
 
-        if len(lines) < 8:
+        if len(lines) < MINIMUM_COMPLETE_LINE_COUNT:
             print(f"跳过疑似不完整数据: {date_str}，仅解析到 {len(lines)} 条线路")
             continue
+
+        line_total_difference = round(total - sum(lines.values()), 2)
+        if abs(line_total_difference) > MAXIMUM_TOTAL_LINE_DIFFERENCE:
+            print(
+                f"跳过总量校验失败数据: {date_str}，官网总量与线路合计相差 "
+                f"{line_total_difference}万"
+            )
+            continue
+        if abs(line_total_difference) > 0.5:
+            print(
+                f"[校验] {date_str} 官网总量与线路合计相差 "
+                f"{line_total_difference}万，保留官方原始值。"
+            )
 
         d = date(year, month, day)
         is_weekend = d.weekday() >= 5
@@ -255,23 +350,29 @@ def update_metro_data(new_entries, source_name=None):
 
     existing_dates = {item['date'] for item in data['daily_data']}
     has_new = False
-    newly_added_dates = []
+    updated_dates = []
 
     for entry in new_entries:
         entry_date = entry['date']
         if entry_date in existing_dates:
             for i, item in enumerate(data['daily_data']):
                 if item['date'] == entry_date:
-                    if item['total'] != entry['total']:
+                    has_total_change = item['total'] != entry['total']
+                    has_better_details = len(entry.get('lines', {})) > len(item.get('lines', {}))
+                    if has_total_change or has_better_details:
                         data['daily_data'][i] = entry
-                        print(f"数据有变，更新: {entry_date} ({item['total']} → {entry['total']})")
+                        if has_total_change:
+                            print(f"数据有变，更新: {entry_date} ({item['total']} → {entry['total']})")
+                        else:
+                            print(f"线路明细已补齐: {entry_date}")
                         has_new = True
+                        updated_dates.append(entry_date)
                     break
         else:
             data['daily_data'].append(entry)
             print(f"添加新数据: {entry_date} - {entry['total']}万")
             has_new = True
-            newly_added_dates.append(entry_date)
+            updated_dates.append(entry_date)
 
     if has_new:
         data['daily_data'].sort(key=lambda x: x['date'])
@@ -284,7 +385,7 @@ def update_metro_data(new_entries, source_name=None):
             json.dump(data, f, ensure_ascii=False, indent=2)
 
         print(f"数据已保存到 metro_data.json")
-        return newly_added_dates
+        return updated_dates
     else:
         print("数据源尚未更新，暂无新数据")
         return []
@@ -305,24 +406,80 @@ def load_prediction_log():
     """加载 prediction_log.json"""
     try:
         with open(PREDICTION_LOG_PATH, 'r') as f:
-            return json.load(f)
+            log = json.load(f)
     except FileNotFoundError:
-        return {
-            'predictions': {},
-            'comparison': [],
-            'stats': {
-                'total_comparisons': 0,
-                'mean_absolute_error': None,
-                'mean_bias': None,
-                'last_updated': None
-            }
-        }
+        log = {}
+
+    if not isinstance(log, dict):
+        log = {}
+
+    # 旧版文件将 predictions 初始化为数组；统一迁移为以日期为键的字典。
+    if not isinstance(log.get('predictions'), dict):
+        log['predictions'] = {}
+    if not isinstance(log.get('comparison'), list):
+        log['comparison'] = []
+    if not isinstance(log.get('stats'), dict):
+        log['stats'] = {}
+    log['stats'].setdefault('total_comparisons', 0)
+    log['stats'].setdefault('mean_absolute_error', None)
+    log['stats'].setdefault('mean_bias', None)
+    log['stats'].setdefault('last_updated', None)
+    return log
 
 
 def save_prediction_log(log):
     """保存 prediction_log.json"""
     with open(PREDICTION_LOG_PATH, 'w') as f:
         json.dump(log, f, ensure_ascii=False, indent=2)
+
+
+def load_ml_forecasts():
+    """读取独立机器学习模块上一轮写入的预测结果。"""
+    try:
+        with open(ML_PREDICTIONS_PATH, 'r') as f:
+            payload = json.load(f)
+    except FileNotFoundError:
+        return {}
+    except Exception as e:
+        print(f"读取机器学习预测失败: {e}")
+        return {}
+
+    forecasts = payload.get('forecasts', []) if isinstance(payload, dict) else []
+    return {
+        item['date']: item
+        for item in forecasts
+        if isinstance(item, dict) and item.get('date') and item.get('predicted_total') is not None
+    }
+
+
+def regenerate_ml_predictions():
+    """训练独立模型并发布最新两天预测；失败时阻止发布不完整的数据。"""
+    result = subprocess.run(
+        [sys.executable, ML_PREDICTOR_PATH],
+        cwd=REPO_DIR,
+        capture_output=True,
+        text=True,
+    )
+    if result.stdout:
+        print(result.stdout.strip())
+    if result.returncode != 0:
+        if result.stderr:
+            print(result.stderr.strip())
+        raise RuntimeError('机器学习预测模块执行失败，已停止发布此次数据更新')
+
+
+def ml_predictions_need_refresh():
+    """判断预测基准日是否落后于最新实际客流。"""
+    metro_map = load_metro_data()
+    if not metro_map:
+        return False
+    latest_date = max(metro_map)
+    try:
+        with open(ML_PREDICTIONS_PATH, 'r') as f:
+            payload = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return True
+    return payload.get('forecast_base_date') != latest_date
 
 
 def date_str_to_weekday(date_str):
@@ -422,6 +579,7 @@ def compare_and_log(newly_added_dates):
 
     metro_map = load_metro_data()
     log = load_prediction_log()
+    ml_forecasts = load_ml_forecasts()
 
     for date_str in sorted(newly_added_dates):
         actual = metro_map.get(date_str)
@@ -429,10 +587,23 @@ def compare_and_log(newly_added_dates):
             continue
         actual_total = actual['total']
 
-        # 获取预测值（优先用记录的预测，否则用基线）
+        # 获取预测值：优先用持久化的机器学习预测，缺失时回退到旧基线。
         predicted = None
+        prediction_source = 'baseline-v2'
         if date_str in log['predictions']:
             predicted = log['predictions'][date_str].get('predicted_total')
+            prediction_source = log['predictions'][date_str].get('model', prediction_source)
+        elif date_str in ml_forecasts:
+            forecast = ml_forecasts[date_str]
+            predicted = forecast.get('predicted_total')
+            prediction_source = 'ridge-regression-v1'
+            log['predictions'][date_str] = {
+                'predicted_total': predicted,
+                'lower_bound': forecast.get('lower_bound'),
+                'upper_bound': forecast.get('upper_bound'),
+                'model': prediction_source,
+                'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            }
         else:
             predicted = baseline_predict(date_str, metro_map)
 
@@ -453,9 +624,12 @@ def compare_and_log(newly_added_dates):
             'pct_error': round(pct_error, 2),
             'weekday': date_str_to_weekday(date_str),
             'is_weekend': actual.get('is_weekend', False),
+            'model': prediction_source,
             'compared_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
 
+        # 若官网修正同一天的数据，用新值覆盖旧评估，避免统计重复。
+        log['comparison'] = [item for item in log['comparison'] if item.get('date') != date_str]
         log['comparison'].append(entry)
 
         # 更新统计
@@ -486,54 +660,68 @@ def compare_and_log(newly_added_dates):
         print(f"[预测评估] 模型误差正常，无需特殊处理")
 
 
-def main():
-    import subprocess
+def commit_and_push_updates():
+    """提交本地更新并同步 GitHub、Gitee。"""
+    try:
+        commit_msg = f"Auto update metro data - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        subprocess.run([
+            'git', 'add',
+            METRO_DATA_PATH,
+            PREDICTION_LOG_PATH,
+            ML_PREDICTIONS_PATH,
+        ], cwd=REPO_DIR, check=True)
+        subprocess.run(['git', 'commit', '-m', commit_msg], cwd=REPO_DIR, check=True)
+    except Exception as error:
+        print(f"Git 提交失败: {error}")
+        return False
 
+    push_succeeded = True
+    for remote, label in [('origin', 'GitHub'), ('gitee', 'Gitee')]:
+        result = subprocess.run(
+            ['git', 'push', remote, 'main'],
+            cwd=REPO_DIR,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode == 0:
+            print(f"{label} 推送成功!")
+        else:
+            push_succeeded = False
+            print(f"{label} 推送失败: {result.stderr.strip()}")
+    return push_succeeded
+
+
+def main():
     print(f"=== 南京地铁客流数据抓取 ===")
     print(f"执行时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
-    entries, source_name = fetch_passenger_flow_entries()
+    entries, source_name, successful_sources = fetch_passenger_flow_entries()
+    if not successful_sources:
+        print("所有客流数据源均访问失败或无法解析。")
+        return 1
 
-    if entries:
-        newly_added = update_metro_data(entries, source_name=source_name)
-
-        if newly_added:
-            print("\n有新数据，准备推送...")
-
-            # 预测对比
-            compare_and_log(newly_added)
-
-            if os.environ.get('METRO_SKIP_GIT') == '1':
-                print("已设置 METRO_SKIP_GIT=1，跳过脚本内 Git 提交/推送。")
-                return
-
-            # Git 推送（同时推送到 GitHub 和 Gitee）
-            try:
-                commit_msg = f"Auto update metro data - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
-
-                subprocess.run(['git', 'add', '.'], cwd=REPO_DIR, check=True)
-                subprocess.run(['git', 'commit', '-m', commit_msg], cwd=REPO_DIR, check=True)
-                
-                # 推送到 GitHub
-                result_origin = subprocess.run(['git', 'push', 'origin', 'main'], cwd=REPO_DIR, capture_output=True, text=True)
-                if result_origin.returncode == 0:
-                    print("GitHub 推送成功!")
-                else:
-                    print(f"GitHub 推送失败: {result_origin.stderr}")
-                
-                # 推送到 Gitee（Gitee Pages 用）
-                result_gitee = subprocess.run(['git', 'push', 'gitee', 'main'], cwd=REPO_DIR, capture_output=True, text=True)
-                if result_gitee.returncode == 0:
-                    print("Gitee 推送成功!")
-                else:
-                    print(f"Gitee 推送失败: {result_gitee.stderr}")
-            except Exception as e:
-                print(f"Git 操作失败: {e}")
-        else:
-            print("无新数据，退出。")
+    updated_dates = update_metro_data(entries, source_name=source_name) if entries else []
+    if updated_dates:
+        print("\n有新数据，更新预测与评估...")
+        compare_and_log(updated_dates)
     else:
-        print("未解析到客流数据，退出。可稍后手动重试或等待 GitHub Actions 云端任务。")
+        print("官网已访问，当前没有新的客流明细。")
+
+    prediction_refreshed = False
+    if updated_dates or ml_predictions_need_refresh():
+        regenerate_ml_predictions()
+        prediction_refreshed = True
+
+    if not updated_dates and not prediction_refreshed:
+        print("数据和预测均为最新，无需发布。")
+        return 0
+
+    if os.environ.get('METRO_SKIP_GIT') == '1':
+        print("已设置 METRO_SKIP_GIT=1，跳过脚本内 Git 提交/推送。")
+        return 0
+
+    return 0 if commit_and_push_updates() else 1
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())

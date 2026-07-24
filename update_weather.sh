@@ -131,3 +131,6 @@ with open('data/weather.json', 'w', encoding='utf-8') as f:
 print(f"已更新天气数据: {dates}")
 print(f"添加节假日字段完成")
 PYEOF
+
+# 天气预报写入后同步重新训练并更新公开预测数据。
+python3 scripts/ml_predictor.py

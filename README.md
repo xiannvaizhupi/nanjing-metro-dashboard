@@ -7,17 +7,18 @@
 - 首页仪表盘：总客流、今日预测、明日预测、趋势图、线路占比弹窗、预测因素弹窗。
 - 线路详情：按线路查看历史趋势、峰值、均值和线路对比。
 - 历史数据：完整历史表格、日期筛选、CSV 导出、动态线路表头。
-- 客流预测：基于历史同星期数据、节假日系数、天气和近期趋势进行前端预测。
-- 预测评估：通过 `data/prediction_log.json` 展示预测误差统计。
+- 客流预测：独立岭回归模型根据星期、年内季节性、节假日、天气和滞后客流生成未来两天预测；旧规则仅在预测文件缺失时兜底。
+- 预测评估：模型使用时间顺序留出集验证，并通过 `data/prediction_log.json` 持续记录到数后的预测误差。
 
 ## 当前数据
 
 - 客流数据文件：`data/metro_data.json`
 - 天气数据文件：`data/weather.json`
+- 机器学习预测文件：`data/ml_predictions.json`
 - 预测记录文件：`data/prediction_log.json`
-- 客流数据范围：`2025-01-01` 至 `2026-07-07`
-- 数据天数：550 天
-- 最近更新：`2026-07-08`
+- 客流数据范围：`2025-01-01` 至 `2026-07-23`
+- 有效数据天数：565 天（`2026-07-12` 的旧版截断记录已移除，待取得完整官方数据后补录）
+- 最近更新：`2026-07-24`
 - 已配置线路：14 条
 
 已配置线路包括：
@@ -76,7 +77,7 @@ python3 -m http.server 8080 -d dist
 - `css/`
 - `js/main.js`
 - `Nanjing_Metro_Logo.svg.png`
-- `data/metro_data.json`、`data/weather.json`、`data/prediction_log.json`
+- `data/metro_data.json`、`data/weather.json`、`data/ml_predictions.json`、`data/prediction_log.json`
 
 如果你想用 Vercel 直接托管项目根目录，可以保留仓库里的 `vercel.json`，它把 `/data/*.json` 设置为 `Content-Type: application/json` 并允许跨域读取，便于前端 fetch。
 
@@ -84,10 +85,11 @@ python3 -m http.server 8080 -d dist
 
 ### 客流数据
 
-客流数据由 `scripts/fetch_data.py` 维护，脚本会优先从南京地铁官网首页解析昨日客流内容，官网根页和官方微博组件作为兜底来源，更新：
+客流数据由 `scripts/fetch_data.py` 维护。官网首页的客流数字由 JavaScript 动态加载，脚本会直接调用首页使用的官方 POST 接口获取昨日总量，再从首页嵌入的南京地铁官方微博组件获取各线路明细并交叉校验。若微博明细暂未发布，脚本先保存官网总量，后续自动补齐线路明细。脚本会更新：
 
 - `data/metro_data.json`
 - `data/prediction_log.json`
+- `data/ml_predictions.json`
 
 运行方式：
 
@@ -95,9 +97,25 @@ python3 -m http.server 8080 -d dist
 python3 scripts/fetch_data.py
 ```
 
-项目已配置 GitHub Actions 定时任务：`.github/workflows/update-metro-data.yml` 会在北京时间每天 10:15 和 11:15 自动运行，抓取官网首页或兜底来源里更新的昨日客流数据，若 `data/metro_data.json` 或 `data/prediction_log.json` 有变化则自动提交并推送到 GitHub。也可以在 GitHub Actions 页面手动触发 `Update metro passenger flow`。
+`.github/workflows/update-metro-data.yml` 已停止定时执行，避免失败邮件；目前只允许在 GitHub Actions 页面手动触发 `Update metro passenger flow`。本地运行脚本时，只有检测到新数据或预测需要刷新才会提交，并同步推送到 GitHub 和 Gitee；所有来源均访问失败时会返回错误状态，方便明确区分“没有新数据”和“抓取失败”。
 
 在 CI 中脚本会通过 `METRO_SKIP_GIT=1` 跳过脚本内部的 Git 推送，改由工作流统一提交；本地直接运行脚本时仍保留原来的自动提交并推送到 `origin` 和 `gitee` 的行为。
+
+### 机器学习预测
+
+`scripts/ml_predictor.py` 是独立的数据预测模块，不依赖第三方机器学习包。它通过时间顺序验证选择岭回归参数和融合权重，结合星期、季节性、节假日、天气、短期同星期基线、去年同星期、前一日、前七日和近七日均值特征，输出模型参数、验证指标、预测区间和未来两天的预测值。
+
+```bash
+python3 scripts/ml_predictor.py
+```
+
+也可以指定预测天数或起始日期：
+
+```bash
+python3 scripts/ml_predictor.py --forecast-days 7 --start-date 2026-07-15
+```
+
+客流或天气更新完成后会自动重新生成 `data/ml_predictions.json`。首页优先读取该文件；若文件不存在、加载失败或当前日期不在输出范围内，才使用旧规则引擎临时预测。
 
 ### 天气数据
 
@@ -160,13 +178,16 @@ nanjing-metro-dashboard/
 ├── data/
 │   ├── metro_data.json        # 客流数据
 │   ├── weather.json           # 天气与节假日数据
+│   ├── ml_predictions.json    # 岭回归模型参数、验证指标与未来预测
 │   ├── prediction_log.json    # 预测记录与评估
 │   ├── raw_data.txt           # 原始抓取记录
 │   └── 天气数据.txt           # 天气原始数据
 ├── scripts/
 │   ├── build-static.sh        # 构建发布目录
 │   ├── fetch_data.py          # 客流数据抓取与预测记录更新
-│   └── test_fetch_data.py     # 解析器单元测试
+│   ├── ml_predictor.py        # 独立机器学习预测模块
+│   ├── test_fetch_data.py     # 解析器单元测试
+│   └── test_ml_predictor.py   # 机器学习模块单元测试
 ├── update_weather.sh          # 天气数据更新脚本
 ├── vercel.json                # Vercel 静态部署配置（可选）
 ├── LINE_COLORS.md             # 线路配色说明

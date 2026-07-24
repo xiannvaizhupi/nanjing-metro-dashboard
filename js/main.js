@@ -3,6 +3,7 @@ let metroData = null;
 let linesInfo = null;
 let weatherData = null;
 let weatherMap = null;
+let mlPredictionData = null;
 let regressionModel = null;
 let holidaySet = null;
 let holidayEveSet = null;
@@ -58,11 +59,11 @@ function showPredictionFactors(type) {
     if (type === 'today') {
         dateStr = formatLocalDate(new Date());
         title.textContent = '今日预测因素';
-        result = predictForDate(dateStr, totalsByDate);
+        result = getPredictionResult(dateStr, totalsByDate);
     } else {
         dateStr = addDays(formatLocalDate(new Date()), 1);
         title.textContent = '明日预测因素';
-        result = predictForDate(dateStr, totalsByDate);
+        result = getPredictionResult(dateStr, totalsByDate);
     }
     
     if (!result) {
@@ -76,6 +77,17 @@ function showPredictionFactors(type) {
         let html = '<div style="margin-bottom: 16px;">';
         html += `<p><strong>预测日期：</strong>${dateStr}</p>`;
         html += `<p><strong>预测客流：</strong><span style="font-weight: 700; color: #007AFF;">${result.value.toFixed(1)}万</span></p>`;
+        if (result.source === 'machine_learning') {
+            const forecast = result.forecast;
+            const validation = result.model && result.model.validation;
+            if (Number.isFinite(Number(forecast.lower_bound)) && Number.isFinite(Number(forecast.upper_bound))) {
+                html += `<p><strong>预测区间：</strong>${Number(forecast.lower_bound).toFixed(1)}万 - ${Number(forecast.upper_bound).toFixed(1)}万</p>`;
+            }
+            html += `<p><strong>预测模型：</strong>岭回归 ${result.model && result.model.version ? `v${result.model.version}` : ''}</p>`;
+            if (validation && Number.isFinite(Number(validation.mae))) {
+                html += `<p><strong>验证 MAE：</strong>${Number(validation.mae).toFixed(1)}万</p>`;
+            }
+        }
         html += '</div>';
         
         html += '<div style="background: #f5f5f7; border-radius: 10px; padding: 16px;">';
@@ -678,16 +690,39 @@ function predictForDate(dateStr, totalsByDate) {
     return { value: Math.max(value, 0), weatherSource: weather ? weather.source : 'unknown' };
 }
 
+function getMachineLearningPrediction(dateStr) {
+    if (!mlPredictionData || !Array.isArray(mlPredictionData.forecasts)) return null;
+    const forecast = mlPredictionData.forecasts.find(item => item && item.date === dateStr);
+    const value = forecast ? Number(forecast.predicted_total) : NaN;
+    if (!Number.isFinite(value)) return null;
+    return {
+        value,
+        source: 'machine_learning',
+        forecast,
+        model: mlPredictionData.model || null
+    };
+}
+
+function getPredictionResult(dateStr, totalsByDate) {
+    const machineLearningResult = getMachineLearningPrediction(dateStr);
+    if (machineLearningResult) return machineLearningResult;
+
+    const ruleResult = predictForDate(dateStr, totalsByDate);
+    return ruleResult ? { ...ruleResult, source: 'rule_engine' } : null;
+}
+
 // DOM 加载完成后初始化
 document.addEventListener('DOMContentLoaded', async function() {
     try {
-        const [metroResp, weatherResp, predResp] = await Promise.all([
+        const [metroResp, weatherResp, predResp, mlResp] = await Promise.all([
             fetch('data/metro_data.json'),
             fetch('data/weather.json'),
-            fetch('data/prediction_log.json').then(r => r.ok ? r.json() : null).catch(() => null)
+            fetch('data/prediction_log.json').then(r => r.ok ? r.json() : null).catch(() => null),
+            fetch('data/ml_predictions.json').then(r => r.ok ? r.json() : null).catch(() => null)
         ]);
         const data = await metroResp.json();
         weatherData = await weatherResp.json();
+        mlPredictionData = mlResp;
 
         metroData = data.daily_data;
         linesInfo = data.metadata.lines;
@@ -695,7 +730,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const holidaySets = buildHolidaySets(metroData, weatherMap);
         holidaySet = holidaySets.holidaySet;
         holidayEveSet = holidaySets.holidayEveSet;
-        // 预测模型已改为规则引擎，无需训练
+        // 机器学习预测由数据更新流程提前训练并作为静态数据加载。
 
         // 显示预测评估统计
         if (predResp && predResp.stats) {
@@ -827,18 +862,17 @@ function updateRangeStats() {
 
 function updatePredictions() {
     if (!metroData || metroData.length === 0) return;
-    // 规则引擎模型无需加载，直接可用
     const totalsByDate = new Map(metroData.map(item => [item.date, item.total]));
 
     const todayStr = formatLocalDate(new Date());
     const tomorrowStr = addDays(todayStr, 1);
     const hasActualToday = totalsByDate.has(todayStr);
 
-    const todayResult = predictForDate(todayStr, totalsByDate);
+    const todayResult = getPredictionResult(todayStr, totalsByDate);
     if (todayResult && !hasActualToday) {
         totalsByDate.set(todayStr, todayResult.value);
     }
-    const tomorrowResult = predictForDate(tomorrowStr, totalsByDate);
+    const tomorrowResult = getPredictionResult(tomorrowStr, totalsByDate);
 
     const todayEl = document.getElementById('predictedTotal');
     const todayNoteEl = document.getElementById('predictedNote');
@@ -846,7 +880,9 @@ function updatePredictions() {
         todayEl.textContent = todayResult ? todayResult.value.toFixed(1) + '万' : '--';
     }
     if (todayNoteEl) {
-        const note = hasActualToday ? '今日已有实际数据' : (todayResult ? `预测 · ${todayStr}` : '数据不足');
+        const note = hasActualToday
+            ? '今日已有实际数据'
+            : (todayResult ? `${todayResult.source === 'machine_learning' ? '机器学习预测' : '规则预测'} · ${todayStr}` : '数据不足');
         todayNoteEl.textContent = note;
     }
 
@@ -856,7 +892,9 @@ function updatePredictions() {
         tomorrowEl.textContent = tomorrowResult ? tomorrowResult.value.toFixed(1) + '万' : '--';
     }
     if (tomorrowNoteEl) {
-        tomorrowNoteEl.textContent = tomorrowResult ? `预测 · ${tomorrowStr}` : '数据不足';
+        tomorrowNoteEl.textContent = tomorrowResult
+            ? `${tomorrowResult.source === 'machine_learning' ? '机器学习预测' : '规则预测'} · ${tomorrowStr}`
+            : '数据不足';
     }
 
     // 更新预测变化率

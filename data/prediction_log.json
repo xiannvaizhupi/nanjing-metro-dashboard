@@ -1,5 +1,20 @@
 {
-  "predictions": [],
+  "predictions": {
+    "2026-07-15": {
+      "predicted_total": 355.08,
+      "lower_bound": 321.3,
+      "upper_bound": 388.86,
+      "model": "ridge-regression-v1",
+      "generated_at": "2026-07-24 14:40:37"
+    },
+    "2026-07-16": {
+      "predicted_total": 358.64,
+      "lower_bound": 324.86,
+      "upper_bound": 392.42,
+      "model": "ridge-regression-v1",
+      "generated_at": "2026-07-24 14:40:37"
+    }
+  },
   "comparison": [
     {
       "date": "2026-03-19",
@@ -1091,17 +1106,6 @@
       "compared_at": "2026-07-14 19:34:56"
     },
     {
-      "date": "2026-07-12",
-      "actual": 68.82,
-      "predicted": 301.16,
-      "error": -232.34,
-      "abs_error": 232.34,
-      "pct_error": -77.15,
-      "weekday": 6,
-      "is_weekend": true,
-      "compared_at": "2026-07-14 19:34:56"
-    },
-    {
       "date": "2026-07-13",
       "actual": 258.65,
       "predicted": 341.54,
@@ -1122,12 +1126,120 @@
       "weekday": 1,
       "is_weekend": false,
       "compared_at": "2026-07-15 20:17:01"
+    },
+    {
+      "date": "2026-07-20",
+      "actual": 329.46,
+      "predicted": 337.06,
+      "error": -7.6,
+      "abs_error": 7.6,
+      "pct_error": -2.25,
+      "weekday": 0,
+      "is_weekend": false,
+      "model": "baseline-v2",
+      "compared_at": "2026-07-24 14:20:12"
+    },
+    {
+      "date": "2026-07-21",
+      "actual": 353.03,
+      "predicted": 335.01,
+      "error": 18.02,
+      "abs_error": 18.02,
+      "pct_error": 5.38,
+      "weekday": 1,
+      "is_weekend": false,
+      "model": "baseline-v2",
+      "compared_at": "2026-07-24 14:20:12"
+    },
+    {
+      "date": "2026-07-22",
+      "actual": 346.38,
+      "predicted": 344.25,
+      "error": 2.13,
+      "abs_error": 2.13,
+      "pct_error": 0.62,
+      "weekday": 2,
+      "is_weekend": false,
+      "model": "baseline-v2",
+      "compared_at": "2026-07-24 14:20:12"
+    },
+    {
+      "date": "2026-07-23",
+      "actual": 337.91,
+      "predicted": 344.13,
+      "error": -6.22,
+      "abs_error": 6.22,
+      "pct_error": -1.81,
+      "weekday": 3,
+      "is_weekend": false,
+      "model": "baseline-v2",
+      "compared_at": "2026-07-24 14:20:12"
+    },
+    {
+      "date": "2026-07-15",
+      "actual": 347.99,
+      "predicted": 355.08,
+      "error": -7.09,
+      "abs_error": 7.09,
+      "pct_error": -2.0,
+      "weekday": 2,
+      "is_weekend": false,
+      "model": "ridge-regression-v1",
+      "compared_at": "2026-07-24 14:40:37"
+    },
+    {
+      "date": "2026-07-16",
+      "actual": 343.01,
+      "predicted": 358.64,
+      "error": -15.63,
+      "abs_error": 15.63,
+      "pct_error": -4.36,
+      "weekday": 3,
+      "is_weekend": false,
+      "model": "ridge-regression-v1",
+      "compared_at": "2026-07-24 14:40:37"
+    },
+    {
+      "date": "2026-07-17",
+      "actual": 362.28,
+      "predicted": 370.68,
+      "error": -8.4,
+      "abs_error": 8.4,
+      "pct_error": -2.26,
+      "weekday": 4,
+      "is_weekend": false,
+      "model": "baseline-v2",
+      "compared_at": "2026-07-24 14:40:37"
+    },
+    {
+      "date": "2026-07-18",
+      "actual": 311.47,
+      "predicted": 341.51,
+      "error": -30.04,
+      "abs_error": 30.04,
+      "pct_error": -8.8,
+      "weekday": 5,
+      "is_weekend": true,
+      "model": "baseline-v2",
+      "compared_at": "2026-07-24 14:40:37"
+    },
+    {
+      "date": "2026-07-19",
+      "actual": 254.21,
+      "predicted": 293.31,
+      "error": -39.1,
+      "abs_error": 39.1,
+      "pct_error": -13.33,
+      "weekday": 6,
+      "is_weekend": true,
+      "model": "baseline-v2",
+      "compared_at": "2026-07-24 14:40:37"
     }
   ],
   "stats": {
-    "total_comparisons": 102,
-    "mean_absolute_error": 28.68,
-    "mean_bias": -2.48,
-    "last_updated": "2026-07-15 20:17:01"
+    "total_comparisons": 110,
+    "mean_absolute_error": 25.7,
+    "mean_bias": -1.04,
+    "last_updated": "2026-07-24 14:40:37"
   }
 }
