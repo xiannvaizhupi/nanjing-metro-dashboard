@@ -1264,13 +1264,13 @@
       "weekday": 4,
       "is_weekend": false,
       "model": "ridge-regression-v1",
-      "compared_at": "2026-07-25 16:15:02"
+      "compared_at": "2026-07-25 16:28:10"
     }
   ],
   "stats": {
     "total_comparisons": 112,
     "mean_absolute_error": 27.4,
     "mean_bias": -3.01,
-    "last_updated": "2026-07-25 16:15:02"
+    "last_updated": "2026-07-25 16:28:10"
   }
 }

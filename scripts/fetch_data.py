@@ -86,13 +86,13 @@ MAXIMUM_TOTAL_LINE_DIFFERENCE = 5.0
 NEXT_ENTRY_PATTERN = (
     r'(?:(?:\d{2,4})[-/.年](?:\d{1,2})[-/.月](?:\d{1,2})[日号]?)?'
     r'(?:#?昨日客流#?.{0,80}?)?'
-    r'南京地铁(?:\d{2,4}年)?\d{1,2}月\d{1,2}日客运量'
+    r'南京地铁(?:\d{2,4}年)?\d{1,2}月\d{1,2}日(?:线网)?客运量'
 )
 
 FLOW_ENTRY_PATTERN = re.compile(
     r'(?:(\d{2,4})[-/.年](\d{1,2})[-/.月](\d{1,2})[日号]?)?'
     r'(?:#?昨日客流#?.{0,80}?)?'
-    r'南京地铁(?:(\d{2,4})年)?(?:(\d{1,2})月)?(\d{1,2})日客运量(?:为)?[：:]?(\d+\.?\d*)万?'
+    r'南京地铁(?:(\d{2,4})年)?(?:(\d{1,2})月)?(\d{1,2})日(?:线网)?客运量(?:为)?[：:]?(\d+\.?\d*)万?'
     r'[，,；;。]?(.+?)(?:[（(]?以上单位[:：]?万?[）)]?|(?=' + NEXT_ENTRY_PATTERN + r')|$)',
     re.S
 )
@@ -123,12 +123,21 @@ def is_ssl_verification_error(error):
     )
 
 
-def fetch_url(source_name, url, form_data=None):
+def cache_busted_url(url, nonce=None):
+    """为容易返回旧页面的组件请求追加防缓存参数。"""
+    separator = '&' if '?' in url else '?'
+    value = nonce if nonce is not None else int(datetime.now().timestamp() * 1000)
+    return f"{url}{separator}_={value}"
+
+
+def fetch_url(source_name, url, form_data=None, extra_headers=None):
     """抓取指定来源；南京地铁旧证书失败时自动使用未验证连接重试。"""
     payload = urlencode(form_data).encode('utf-8') if form_data else None
+    request_headers = dict(HTTP_HEADERS)
+    request_headers.update(extra_headers or {})
 
     def request(context=None):
-        req = Request(url, data=payload, headers=HTTP_HEADERS)
+        req = Request(url, data=payload, headers=request_headers)
         response = urlopen(req, timeout=30, context=context)
         return decode_response(response)
 
@@ -149,7 +158,15 @@ def fetch_url(source_name, url, form_data=None):
 
 def fetch_weibo_data():
     """从南京地铁官方微博组件获取数据。保留给旧测试或手动调用。"""
-    return fetch_url("南京地铁官方微博组件", WEIBO_WIDGET_URL)
+    return fetch_url(
+        "南京地铁官方微博组件",
+        cache_busted_url(WEIBO_WIDGET_URL),
+        extra_headers={
+            'Referer': OFFICIAL_HOMEPAGE_URL,
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache',
+        },
+    )
 
 
 def parse_official_total(response_text):
@@ -204,7 +221,15 @@ def fetch_passenger_flow_entries(reference_date=None):
         successful_sources.append('南京地铁官网客流接口')
 
     detailed_entries = []
-    widget_html = fetch_url("南京地铁官网嵌入的官方微博组件", WEIBO_WIDGET_URL)
+    widget_html = fetch_url(
+        "南京地铁官网嵌入的官方微博组件",
+        cache_busted_url(WEIBO_WIDGET_URL),
+        extra_headers={
+            'Referer': OFFICIAL_HOMEPAGE_URL,
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache',
+        },
+    )
     if widget_html is not None:
         reached_sources.append('南京地铁官方微博组件')
         try:
@@ -220,10 +245,9 @@ def fetch_passenger_flow_entries(reference_date=None):
         if expected_entry:
             if abs(expected_entry['total'] - official_total) > 0.01:
                 print(
-                    f"[校验] 官网总量 {official_total} 与微博明细总量 "
-                    f"{expected_entry['total']} 不一致，以官网总量为准。"
+                    f"[校验] 无日期的官网总量 {official_total} 与日期明确的线路公告总量 "
+                    f"{expected_entry['total']} 不一致，以线路公告为准。"
                 )
-                expected_entry['total'] = official_total
         else:
             matching_detail = any(abs(item['total'] - official_total) <= 0.01 for item in detailed_entries)
             metro_map = load_metro_data()

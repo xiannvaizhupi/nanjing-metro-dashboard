@@ -43,6 +43,13 @@ JULY_12_SUSPENSION_TEXT = (
     "S8号线停运，S9号线停运（以上单位: 万）"
 )
 
+JULY_24_NETWORK_FLOW_TEXT = (
+    "南京地铁7月24日线网客运量371.37，其中：1号线79.34，2号线67.97，"
+    "3号线67.73，4号线17.81，5号线42.39，7号线31.10，10号线21.61，"
+    "S1号线10.30，S2号线4.07，S3号线10.29，S6号线5.20，S7号线1.44，"
+    "S8号线10.29，S9号线1.83（以上单位：万）"
+)
+
 
 def assert_equal(actual, expected, label):
     if actual != expected:
@@ -149,6 +156,37 @@ def test_parse_backfill_text_with_mixed_formats():
         "2026-07-15", "2026-07-16", "2026-07-17", "2026-07-18", "2026-07-19"
     ], "backfill dates")
     assert_equal(entries[-1]["lines"]["S9"], 1.72, "backfill final line")
+
+
+def test_parse_network_flow_wording():
+    entries = parse_passenger_flow(JULY_24_NETWORK_FLOW_TEXT, source_name="南京地铁官网首页")
+    assert_equal(len(entries), 1, "network flow entry count")
+    assert_equal(entries[0]["date"], "2026-07-24", "network flow date")
+    assert_equal(entries[0]["total"], 371.37, "network flow total")
+    assert_equal(len(entries[0]["lines"]), 14, "network flow line count")
+    assert_equal(entries[0]["lines"]["L1"], 79.34, "network flow line 1")
+    assert_equal(entries[0]["lines"]["S9"], 1.83, "network flow line S9")
+
+
+def test_dated_detail_wins_over_stale_undated_total():
+    original_fetch_total = fetch_data.fetch_official_total
+    original_fetch_url = fetch_data.fetch_url
+    try:
+        fetch_data.fetch_official_total = lambda: (337.91, True)
+        fetch_data.fetch_url = lambda *args, **kwargs: JULY_24_NETWORK_FLOW_TEXT
+        entries, _, _, _ = fetch_data.fetch_passenger_flow_entries(
+            reference_date=date(2026, 7, 25)
+        )
+        july_24 = next(item for item in entries if item["date"] == "2026-07-24")
+        assert_equal(july_24["total"], 371.37, "dated detail should retain its total")
+    finally:
+        fetch_data.fetch_official_total = original_fetch_total
+        fetch_data.fetch_url = original_fetch_url
+
+
+def test_widget_url_bypasses_cache():
+    url = fetch_data.cache_busted_url(fetch_data.WEIBO_WIDGET_URL, nonce=12345)
+    assert_equal(url.endswith("&_=12345"), True, "widget cache buster")
 
 
 def test_unparseable_sources_are_not_reported_as_successful():
@@ -295,6 +333,9 @@ if __name__ == "__main__":
     test_suspended_lines_complete_the_entry()
     test_large_total_line_difference_is_rejected()
     test_parse_backfill_text_with_mixed_formats()
+    test_parse_network_flow_wording()
+    test_dated_detail_wins_over_stale_undated_total()
+    test_widget_url_bypasses_cache()
     test_unparseable_sources_are_not_reported_as_successful()
     test_required_data_date_from_environment()
     test_main_distinguishes_network_and_parse_failures()
