@@ -323,6 +323,53 @@ def test_corrected_entry_triggers_follow_up_processing():
         fetch_data.METRO_DATA_PATH = original_path
 
 
+def test_hierarchical_prediction_validation():
+    original_path = fetch_data.METRO_DATA_PATH
+    try:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            metro_path = root / "metro_data.json"
+            prediction_path = root / "ml_predictions.json"
+            metro_path.write_text(json.dumps({
+                "daily_data": [{
+                    "date": "2026-07-24",
+                    "total": 30.0,
+                    "is_weekend": False,
+                    "note": "",
+                    "lines": {"L1": 10.0, "L2": 20.0},
+                }],
+            }), encoding="utf-8")
+            prediction = {
+                "schema_version": 2,
+                "forecast_base_date": "2026-07-24",
+                "line_models": {"L1": {}, "L2": {}},
+                "forecasts": [{
+                    "date": "2026-07-25",
+                    "predicted_total": 30.0,
+                    "line_forecasts": {
+                        "L1": {"predicted_flow": 10.0, "lower_bound": 9.0, "upper_bound": 11.0},
+                        "L2": {"predicted_flow": 20.0, "lower_bound": 18.0, "upper_bound": 22.0},
+                    },
+                }],
+            }
+            prediction_path.write_text(json.dumps(prediction), encoding="utf-8")
+            fetch_data.METRO_DATA_PATH = str(metro_path)
+            assert_equal(
+                fetch_data.validate_ml_predictions(prediction_path),
+                True,
+                "valid hierarchical prediction",
+            )
+            prediction["forecasts"][0]["line_forecasts"]["L2"]["predicted_flow"] = 19.0
+            prediction_path.write_text(json.dumps(prediction), encoding="utf-8")
+            assert_equal(
+                fetch_data.validate_ml_predictions(prediction_path),
+                False,
+                "line forecasts must reconcile to total",
+            )
+    finally:
+        fetch_data.METRO_DATA_PATH = original_path
+
+
 if __name__ == "__main__":
     test_parse_with_explicit_short_year()
     test_infer_year_around_new_year()
@@ -341,4 +388,5 @@ if __name__ == "__main__":
     test_main_distinguishes_network_and_parse_failures()
     test_dataset_validation_accepts_suspension_and_rejects_duplicates()
     test_corrected_entry_triggers_follow_up_processing()
+    test_hierarchical_prediction_validation()
     print("fetch_data parser checks passed.")

@@ -35,7 +35,7 @@
     <!-- Hero -->
     <section class="hero" style="padding: 120px 24px 40px;">
         <h1 class="hero-title" style="font-size: clamp(32px, 6vw, 56px);">线路详情</h1>
-        <p class="hero-subtitle">查看各条线路的客流趋势与统计</p>
+        <p class="hero-subtitle">查看各条线路的客流趋势、统计与独立预测</p>
     </section>
 
     <!-- Line Selector -->
@@ -55,6 +55,20 @@
     <section class="data-section">
         <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);" id="lineStats">
             <!-- Dynamic content -->
+        </div>
+    </section>
+
+    <!-- Line Forecast -->
+    <section class="data-section" id="linePredictionSection">
+        <div class="data-card" style="opacity: 1;">
+            <div class="data-card-title">
+                <span>独立线路预测</span>
+                <span class="data-card-badge" id="lineModelBadge">时间序列选模</span>
+            </div>
+            <div class="stats-grid" id="lineForecastCards" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+                <div class="text-center text-gray-500">正在加载预测...</div>
+            </div>
+            <p id="lineModelSummary" style="margin-top: 18px; color: #6e6e73; font-size: 14px;"></p>
         </div>
     </section>
 
@@ -106,6 +120,7 @@
     <script>
         let metroData = null;
         let linesInfo = null;
+        let mlPredictionData = null;
         let currentLineId = 'L1';
         let lineTrendChart = null;
         let currentLineTrendRange = 'all';
@@ -138,13 +153,20 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', async function() {
             try {
-                const response = await fetch('data/metro_data.json');
+                const [response, predictionResponse] = await Promise.all([
+                    fetch('data/metro_data.json'),
+                    fetch('data/ml_predictions.json').catch(() => null),
+                ]);
                 const data = await response.json();
                 metroData = data.daily_data;
                 linesInfo = data.metadata.lines;
+                mlPredictionData = predictionResponse && predictionResponse.ok
+                    ? await predictionResponse.json()
+                    : null;
                 
                 initLineSelector();
                 updateLineStats();
+                updateLinePredictions();
                 initLineTrendChart();
             } catch (error) {
                 console.error('加载数据失败:', error);
@@ -192,9 +214,11 @@
             const statsSection = document.getElementById('lineStats');
             const chartCard = document.querySelector('.charts-section .chart-card');
             const chartContainer = document.getElementById('lineTrendChart');
+            const predictionSection = document.getElementById('linePredictionSection');
             
             if (currentLineId === ALL_LINES_ID) {
                 statsSection.style.display = 'none';
+                predictionSection.style.display = 'none';
                 if (chartCard) {
                     chartCard.style.paddingTop = '32px';
                 }
@@ -209,6 +233,7 @@
                 }
             } else {
                 statsSection.style.display = 'grid';
+                predictionSection.style.display = 'block';
                 if (chartCard) {
                     chartCard.style.paddingTop = '0';
                     chartCard.style.height = '';
@@ -247,6 +272,7 @@
             updateStatsVisibility();
             if (currentLineId !== ALL_LINES_ID) {
                 updateLineStats();
+                updateLinePredictions();
             }
             updateLineTrendChart();
         }
@@ -292,6 +318,49 @@
                     <div class="stat-note">万人次/日</div>
                 </div>
             `;
+        }
+
+        function lineStrategyLabel(strategy) {
+            if (strategy === 'ridge-regression') return '独立岭回归';
+            if (strategy === 'same-weekday-mean-4') return '同星期均值';
+            if (strategy === 'recency-weighted-same-weekday-4') return '近期同星期加权';
+            if (strategy && strategy.includes('recency-weighted')) return '岭回归 + 近期同星期加权';
+            if (strategy && strategy.includes('same-weekday')) return '岭回归 + 同星期均值';
+            return '独立时间序列模型';
+        }
+
+        function updateLinePredictions() {
+            if (currentLineId === ALL_LINES_ID) return;
+            const cards = document.getElementById('lineForecastCards');
+            const summary = document.getElementById('lineModelSummary');
+            const badge = document.getElementById('lineModelBadge');
+            const model = mlPredictionData && mlPredictionData.line_models
+                ? mlPredictionData.line_models[currentLineId]
+                : null;
+            const forecasts = mlPredictionData && Array.isArray(mlPredictionData.forecasts)
+                ? mlPredictionData.forecasts
+                    .map(item => ({ ...item, line: item.line_forecasts && item.line_forecasts[currentLineId] }))
+                    .filter(item => item.line)
+                : [];
+
+            if (!model || forecasts.length === 0) {
+                cards.innerHTML = '<div class="text-center text-gray-500">暂无该线路预测</div>';
+                summary.textContent = '';
+                badge.textContent = '暂无模型';
+                return;
+            }
+
+            badge.textContent = lineStrategyLabel(model.strategy);
+            cards.innerHTML = forecasts.map((forecast, index) => `
+                <div class="stat-card" style="animation-delay: ${0.1 + index * 0.1}s; opacity: 1;">
+                    <div class="stat-label">${forecast.date} 预测</div>
+                    <div class="stat-value">${Number(forecast.line.predicted_flow).toFixed(1)}</div>
+                    <div class="stat-note">万人次 · 区间 ${Number(forecast.line.lower_bound).toFixed(1)}–${Number(forecast.line.upper_bound).toFixed(1)}</div>
+                </div>
+            `).join('');
+            const windowLabel = model.training_window_days ? `近 ${model.training_window_days} 天` : '全部历史';
+            const validation = model.validation || {};
+            summary.textContent = `策略：${lineStrategyLabel(model.strategy)} · 训练范围：${windowLabel} · 有效样本：${model.training_rows} 天 · 时间验证 MAE：${Number(validation.mae).toFixed(2)} 万`;
         }
 
         function initLineTrendChart() {

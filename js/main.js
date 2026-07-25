@@ -83,7 +83,10 @@ function showPredictionFactors(type) {
             if (Number.isFinite(Number(forecast.lower_bound)) && Number.isFinite(Number(forecast.upper_bound))) {
                 html += `<p><strong>预测区间：</strong>${Number(forecast.lower_bound).toFixed(1)}万 - ${Number(forecast.upper_bound).toFixed(1)}万</p>`;
             }
-            html += `<p><strong>预测模型：</strong>岭回归 ${result.model && result.model.version ? `v${result.model.version}` : ''}</p>`;
+            const modelLabel = result.model && result.model.algorithm
+                ? result.model.algorithm
+                : '自适应时间序列模型';
+            html += `<p><strong>预测模型：</strong>${modelLabel} ${result.model && result.model.version ? `v${result.model.version}` : ''}</p>`;
             if (validation && Number.isFinite(Number(validation.mae))) {
                 html += `<p><strong>验证 MAE：</strong>${Number(validation.mae).toFixed(1)}万</p>`;
             }

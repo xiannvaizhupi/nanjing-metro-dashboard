@@ -671,6 +671,16 @@ def validate_ml_predictions(path=ML_PREDICTIONS_PATH):
     if not isinstance(forecasts, list) or not forecasts:
         print("[预测校验失败] forecasts 为空或格式错误")
         return False
+    line_models = payload.get('line_models', {})
+    try:
+        requires_line_forecasts = int(payload.get('schema_version', 1)) >= 2
+    except (TypeError, ValueError):
+        print("[预测校验失败] schema_version 格式错误")
+        return False
+    if requires_line_forecasts and (not isinstance(line_models, dict) or not line_models):
+        print("[预测校验失败] schema v2 缺少线路模型")
+        return False
+
     for forecast in forecasts:
         try:
             forecast_date = datetime.strptime(forecast['date'], '%Y-%m-%d').date()
@@ -684,8 +694,36 @@ def validate_ml_predictions(path=ML_PREDICTIONS_PATH):
         if not 0 < predicted_total < 1000:
             print(f"[预测校验失败] 预测值超出合理范围: {predicted_total}")
             return False
+        if requires_line_forecasts:
+            line_forecasts = forecast.get('line_forecasts')
+            if not isinstance(line_forecasts, dict) or set(line_forecasts) != set(line_models):
+                print(f"[预测校验失败] {forecast['date']} 线路预测与线路模型不匹配")
+                return False
+            try:
+                line_values = [float(item['predicted_flow']) for item in line_forecasts.values()]
+                valid_intervals = all(
+                    float(item['lower_bound']) <= float(item['predicted_flow']) <= float(item['upper_bound'])
+                    for item in line_forecasts.values()
+                )
+            except (KeyError, TypeError, ValueError):
+                print(f"[预测校验失败] {forecast['date']} 线路预测格式错误")
+                return False
+            if any(value < 0 or value >= 500 for value in line_values):
+                print(f"[预测校验失败] {forecast['date']} 存在线路预测值超出合理范围")
+                return False
+            if not valid_intervals:
+                print(f"[预测校验失败] {forecast['date']} 存在线路预测区间不包含预测值")
+                return False
+            line_sum = round(sum(line_values), 2)
+            if abs(line_sum - round(predicted_total, 2)) > 0.01:
+                print(
+                    f"[预测校验失败] {forecast['date']} 线路合计 {line_sum} "
+                    f"与线网预测 {predicted_total} 不一致"
+                )
+                return False
 
-    print(f"[预测校验] 基准日 {latest_date}，共 {len(forecasts)} 条预测")
+    line_summary = f"，{len(line_models)} 条线路独立模型" if requires_line_forecasts else ""
+    print(f"[预测校验] 基准日 {latest_date}，共 {len(forecasts)} 条预测{line_summary}")
     return True
 
 

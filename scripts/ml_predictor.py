@@ -24,10 +24,14 @@ DEFAULT_METRO_DATA_PATH = REPO_DIR / "data" / "metro_data.json"
 DEFAULT_WEATHER_DATA_PATH = REPO_DIR / "data" / "weather.json"
 DEFAULT_OUTPUT_PATH = REPO_DIR / "data" / "ml_predictions.json"
 
-MODEL_NAME = "ridge-regression"
-MODEL_VERSION = "1.2.0"
+MODEL_NAME = "adaptive-time-series-ensemble"
+MODEL_VERSION = "2.0.0"
 RIDGE_ALPHAS = (0.1, 1.0, 10.0, 50.0, 100.0, 300.0, 500.0, 1000.0)
-ENSEMBLE_BASELINE_WEIGHTS = (0.0, 0.1, 0.2, 0.25, 0.3, 0.4, 0.5)
+ENSEMBLE_BASELINE_WEIGHTS = tuple(index / 10 for index in range(11))
+TRAINING_WINDOWS = (180, 365, None)
+MEAN_WEEKDAY_BASELINE = "same-weekday-mean-4"
+WEIGHTED_WEEKDAY_BASELINE = "recency-weighted-same-weekday-4"
+BASELINE_NAMES = (MEAN_WEEKDAY_BASELINE, WEIGHTED_WEEKDAY_BASELINE)
 MIN_TRAINING_ROWS = 60
 SERVICE_DISRUPTION_MARKERS = ("停运", "运营中断")
 
@@ -38,6 +42,17 @@ class TrainingRow:
     features: list[float]
     target: float
     seasonal_baseline: float
+    weighted_seasonal_baseline: float
+
+
+@dataclass
+class ModelSelection:
+    alpha: float | None
+    baseline_weight: float
+    baseline_name: str
+    training_window_days: int | None
+    strategy: str
+    validation: dict[str, Any]
 
 
 class RidgeRegressor:
@@ -306,6 +321,19 @@ def seasonal_signals(target: date, totals: dict[str, float], fallback: float) ->
     return recent_four, recent_eight, year_ago_value, has_year_ago
 
 
+def weighted_weekday_baseline(target: date, totals: dict[str, float], fallback: float) -> float:
+    """Weight the most recent same-weekday observations more heavily."""
+    weighted_values: list[tuple[float, float]] = []
+    for weeks_back, weight in enumerate((0.4, 0.3, 0.2, 0.1), start=1):
+        value = totals.get(format_date(target - timedelta(days=7 * weeks_back)))
+        if value is not None:
+            weighted_values.append((value, weight))
+    if not weighted_values:
+        return fallback
+    weight_sum = sum(weight for _, weight in weighted_values)
+    return sum(value * weight for value, weight in weighted_values) / weight_sum
+
+
 def build_features(
     target: date,
     weather: dict[str, float],
@@ -331,14 +359,26 @@ def build_features(
 
 
 def build_training_rows(
-    daily_data: Iterable[dict[str, Any]], weather_map: dict[str, dict[str, Any]]
+    daily_data: Iterable[dict[str, Any]],
+    weather_map: dict[str, dict[str, Any]],
+    line_id: str | None = None,
 ) -> list[TrainingRow]:
     sorted_data = sorted(daily_data, key=lambda row: row["date"])
-    totals = {row["date"]: as_number(row["total"]) for row in sorted_data}
+    if line_id is None:
+        series_data = [row for row in sorted_data if row.get("total") is not None]
+        totals = {row["date"]: as_number(row["total"]) for row in series_data}
+    else:
+        series_data = [row for row in sorted_data if line_id in row.get("lines", {})]
+        totals = {row["date"]: as_number(row["lines"][line_id]) for row in series_data}
+
     rows: list[TrainingRow] = []
-    for item in sorted_data:
+    for item in series_data:
         note = str(item.get("note", ""))
-        if any(marker in note for marker in SERVICE_DISRUPTION_MARKERS):
+        target_value = as_number(item["total"] if line_id is None else item["lines"][line_id])
+        has_disruption = any(marker in note for marker in SERVICE_DISRUPTION_MARKERS)
+        if line_id is None and has_disruption:
+            continue
+        if line_id is not None and (target_value <= 0 or (has_disruption and line_id in note)):
             continue
         target = parse_date(item["date"])
         lags = lag_features(target, totals)
@@ -349,8 +389,9 @@ def build_training_rows(
         rows.append(TrainingRow(
             item["date"],
             build_features(target, weather, lags, seasonal),
-            as_number(item["total"]),
+            target_value,
             seasonal[0],
+            weighted_weekday_baseline(target, totals, seasonal[0]),
         ))
     return rows
 
@@ -375,9 +416,64 @@ def quantile(values: list[float], probability: float) -> float:
     return sorted_values[lower] + (position - lower) * (sorted_values[upper] - sorted_values[lower])
 
 
-def select_alpha(rows: list[TrainingRow]) -> tuple[float, float, dict[str, Any]]:
-    if len(rows) < MIN_TRAINING_ROWS:
-        raise ValueError(f"有效训练样本只有 {len(rows)} 条，至少需要 {MIN_TRAINING_ROWS} 条")
+def rows_in_window(
+    rows: list[TrainingRow], window_days: int | None, end_date: date
+) -> list[TrainingRow]:
+    if window_days is None:
+        return rows
+    cutoff = end_date - timedelta(days=window_days)
+    return [row for row in rows if parse_date(row.date) >= cutoff]
+
+
+def strategy_name(baseline_name: str, baseline_weight: float) -> str:
+    if baseline_weight == 0:
+        return "ridge-regression"
+    if baseline_weight == 1:
+        return baseline_name
+    return f"ridge-{baseline_name}-ensemble"
+
+
+def validation_metrics(
+    validation_rows: list[TrainingRow],
+    predictions: list[float],
+    folds: int,
+    candidate_count: int,
+) -> dict[str, Any]:
+    actual = [row.target for row in validation_rows]
+    residuals = [actual_value - predicted for actual_value, predicted in zip(actual, predictions)]
+    percentage_errors = [
+        abs(actual_value - predicted) / actual_value * 100
+        for actual_value, predicted in zip(actual, predictions)
+        if actual_value > 0
+    ]
+    return {
+        "rows": len(validation_rows),
+        "start_date": validation_rows[0].date,
+        "end_date": validation_rows[-1].date,
+        "folds": folds,
+        "candidate_count": candidate_count,
+        "mae": round(mean_absolute_error(actual, predictions), 2),
+        "rmse": round(root_mean_squared_error(actual, predictions), 2),
+        "mape": round(mean(percentage_errors), 2) if percentage_errors else None,
+        "interval_radius": round(quantile([abs(value) for value in residuals], 0.9), 2),
+    }
+
+
+def select_strategy(rows: list[TrainingRow]) -> ModelSelection:
+    """Select each series' window, ridge penalty, and seasonal blending independently."""
+    if len(rows) < MIN_TRAINING_ROWS + 14:
+        validation_rows = rows[-min(14, len(rows)):]
+        if not validation_rows:
+            raise ValueError("没有可用的线路训练样本")
+        predictions = [row.weighted_seasonal_baseline for row in validation_rows]
+        return ModelSelection(
+            alpha=None,
+            baseline_weight=1.0,
+            baseline_name=WEIGHTED_WEEKDAY_BASELINE,
+            training_window_days=None,
+            strategy=WEIGHTED_WEEKDAY_BASELINE,
+            validation=validation_metrics(validation_rows, predictions, 1, 1),
+        )
 
     validation_size = min(28, max(14, len(rows) // 8))
     fold_count = min(3, max(1, (len(rows) - MIN_TRAINING_ROWS) // validation_size))
@@ -387,93 +483,250 @@ def select_alpha(rows: list[TrainingRow]) -> tuple[float, float, dict[str, Any]]
 
     validation_folds = [
         (rows[:start_index], rows[start_index:start_index + validation_size])
-        for start_index in range(len(rows) - fold_count * validation_size, len(rows), validation_size)
+        for start_index in range(first_validation_index, len(rows), validation_size)
     ]
-
-    scored: list[tuple[float, float, float, list[float]]] = []
-    for alpha in RIDGE_ALPHAS:
-        for baseline_weight in ENSEMBLE_BASELINE_WEIGHTS:
-            actual: list[float] = []
-            predictions: list[float] = []
-            for train_rows, validation_rows in validation_folds:
-                model = RidgeRegressor(alpha).fit(train_rows)
-                ridge_predictions = [model.predict(row.features) for row in validation_rows]
-                actual.extend(row.target for row in validation_rows)
-                predictions.extend(
-                    (1 - baseline_weight) * ridge_prediction + baseline_weight * row.seasonal_baseline
-                    for ridge_prediction, row in zip(ridge_predictions, validation_rows)
-                )
-            scored.append((mean_absolute_error(actual, predictions), alpha, baseline_weight, predictions))
-
-    validation_mae, alpha, baseline_weight, predictions = min(scored, key=lambda item: item[0])
     validation_rows = [row for _, fold in validation_folds for row in fold]
-    actual = [row.target for row in validation_rows]
-    residuals = [actual_value - predicted_value for actual_value, predicted_value in zip(actual, predictions)]
-    nonzero_actual = [
-        abs(actual_value - predicted_value) / actual_value * 100
-        for actual_value, predicted_value in zip(actual, predictions)
-        if actual_value > 0
-    ]
-    metrics = {
-        "rows": len(validation_rows),
-        "start_date": validation_rows[0].date,
-        "end_date": validation_rows[-1].date,
-        "folds": fold_count,
-        "mae": round(validation_mae, 2),
-        "rmse": round(root_mean_squared_error(actual, predictions), 2),
-        "mape": round(sum(nonzero_actual) / len(nonzero_actual), 2) if nonzero_actual else None,
-        "interval_radius": round(quantile([abs(value) for value in residuals], 0.9), 2),
-    }
-    return alpha, baseline_weight, metrics
+    scored: list[dict[str, Any]] = []
+
+    for window_days in TRAINING_WINDOWS:
+        for alpha in RIDGE_ALPHAS:
+            actual: list[float] = []
+            ridge_predictions: list[float] = []
+            mean_baselines: list[float] = []
+            weighted_baselines: list[float] = []
+            valid_candidate = True
+            for preceding_rows, fold_rows in validation_folds:
+                train_rows = rows_in_window(preceding_rows, window_days, parse_date(fold_rows[0].date))
+                if len(train_rows) < MIN_TRAINING_ROWS:
+                    valid_candidate = False
+                    break
+                model = RidgeRegressor(alpha).fit(train_rows)
+                actual.extend(row.target for row in fold_rows)
+                ridge_predictions.extend(model.predict(row.features) for row in fold_rows)
+                mean_baselines.extend(row.seasonal_baseline for row in fold_rows)
+                weighted_baselines.extend(row.weighted_seasonal_baseline for row in fold_rows)
+            if not valid_candidate:
+                continue
+
+            for baseline_name in BASELINE_NAMES:
+                baselines = (
+                    weighted_baselines
+                    if baseline_name == WEIGHTED_WEEKDAY_BASELINE
+                    else mean_baselines
+                )
+                for baseline_weight in ENSEMBLE_BASELINE_WEIGHTS:
+                    if baseline_weight == 0 and baseline_name != MEAN_WEEKDAY_BASELINE:
+                        continue
+                    predictions = [
+                        (1 - baseline_weight) * ridge_prediction + baseline_weight * baseline
+                        for ridge_prediction, baseline in zip(ridge_predictions, baselines)
+                    ]
+                    scored.append({
+                        "mae": mean_absolute_error(actual, predictions),
+                        "alpha": alpha,
+                        "baseline_weight": baseline_weight,
+                        "baseline_name": baseline_name,
+                        "window_days": window_days,
+                        "predictions": predictions,
+                    })
+
+    if not scored:
+        raise ValueError("没有模型配置满足最小训练样本要求")
+    best = min(scored, key=lambda candidate: candidate["mae"])
+    return ModelSelection(
+        alpha=best["alpha"],
+        baseline_weight=best["baseline_weight"],
+        baseline_name=best["baseline_name"],
+        training_window_days=best["window_days"],
+        strategy=strategy_name(best["baseline_name"], best["baseline_weight"]),
+        validation=validation_metrics(
+            validation_rows,
+            best["predictions"],
+            fold_count,
+            len(scored),
+        ),
+    )
 
 
-def forecast(
-    model: RidgeRegressor,
-    totals: dict[str, float],
+def select_alpha(rows: list[TrainingRow]) -> tuple[float, float, dict[str, Any]]:
+    """Backward-compatible selector for callers that only need ridge settings."""
+    selection = select_strategy(rows)
+    if selection.alpha is None:
+        raise ValueError("训练样本不足，当前策略不包含岭回归")
+    return selection.alpha, selection.baseline_weight, selection.validation
+
+
+def train_series_model(rows: list[TrainingRow]) -> tuple[RidgeRegressor | None, ModelSelection, list[TrainingRow]]:
+    selection = select_strategy(rows)
+    final_rows = rows_in_window(
+        rows,
+        selection.training_window_days,
+        parse_date(rows[-1].date) + timedelta(days=1),
+    )
+    model = None
+    if selection.baseline_weight < 1:
+        if selection.alpha is None:
+            raise ValueError("岭回归策略缺少 alpha")
+        model = RidgeRegressor(selection.alpha).fit(final_rows)
+    return model, selection, final_rows
+
+
+def selected_baseline(
+    selection: ModelSelection,
+    target: date,
+    values: dict[str, float],
+    seasonal: tuple[float, float, float, float],
+) -> float:
+    if selection.baseline_name == WEIGHTED_WEEKDAY_BASELINE:
+        return weighted_weekday_baseline(target, values, seasonal[0])
+    return seasonal[0]
+
+
+def predict_series_day(
+    model: RidgeRegressor | None,
+    selection: ModelSelection,
+    values: dict[str, float],
     weather_map: dict[str, dict[str, Any]],
-    start: date,
-    days: int,
-    interval_radius: float,
-    baseline_weight: float,
-) -> list[dict[str, Any]]:
-    results: list[dict[str, Any]] = []
-    recursive_totals = totals.copy()
-    for offset in range(days):
-        target = start + timedelta(days=offset)
-        lags = lag_features(target, recursive_totals)
-        if lags is None:
-            raise ValueError(f"{format_date(target)} 缺少构建预测所需的滞后客流数据")
-        weather, weather_source = resolve_weather(target, weather_map)
-        seasonal = seasonal_signals(target, recursive_totals, lags[1])
-        ridge_prediction = model.predict(build_features(target, weather, lags, seasonal))
-        prediction = max(0.0, (1 - baseline_weight) * ridge_prediction + baseline_weight * seasonal[0])
-        target_key = format_date(target)
-        recursive_totals[target_key] = prediction
-        results.append({
-            "date": target_key,
-            "predicted_total": round(prediction, 2),
-            "lower_bound": round(max(0.0, prediction - interval_radius), 2),
-            "upper_bound": round(prediction + interval_radius, 2),
-            "model_components": {
-                "ridge_prediction": round(ridge_prediction, 2),
-                "same_weekday_baseline": round(seasonal[0], 2),
-            },
-            "inputs": {
-                "weekday": weekday_label(target),
-                "is_weekend": target.weekday() >= 5,
-                "is_holiday": bool(weather["is_holiday"]),
-                "is_holiday_eve": bool(weather["is_holiday_eve"]),
-                "temperature_mean": round(weather["temp_mean"], 1),
-                "precipitation": round(weather["precipitation"], 1),
-                "is_rainy": bool(weather["is_rainy"]),
-                "is_heavy_rain": bool(weather["is_heavy_rain"]),
-                "lag_1": round(lags[0], 2),
-                "lag_7": round(lags[1], 2),
-                "rolling_7": round(lags[2], 2),
-                "weather_source": weather_source,
-            },
-        })
-    return results
+    target: date,
+) -> dict[str, Any]:
+    lags = lag_features(target, values)
+    if lags is None:
+        raise ValueError(f"{format_date(target)} 缺少构建预测所需的滞后客流数据")
+    weather, weather_source = resolve_weather(target, weather_map)
+    seasonal = seasonal_signals(target, values, lags[1])
+    baseline = selected_baseline(selection, target, values, seasonal)
+    ridge_prediction = model.predict(build_features(target, weather, lags, seasonal)) if model else None
+    ridge_component = ridge_prediction if ridge_prediction is not None else baseline
+    prediction = max(
+        0.0,
+        (1 - selection.baseline_weight) * ridge_component
+        + selection.baseline_weight * baseline,
+    )
+    radius = selection.validation["interval_radius"]
+    return {
+        "prediction": prediction,
+        "lower_bound": max(0.0, prediction - radius),
+        "upper_bound": prediction + radius,
+        "components": {
+            "ridge_prediction": ridge_prediction,
+            "selected_weekday_baseline": baseline,
+            "baseline_name": selection.baseline_name,
+        },
+        "inputs": {
+            "weekday": weekday_label(target),
+            "is_weekend": target.weekday() >= 5,
+            "is_holiday": bool(weather["is_holiday"]),
+            "is_holiday_eve": bool(weather["is_holiday_eve"]),
+            "temperature_mean": round(weather["temp_mean"], 1),
+            "precipitation": round(weather["precipitation"], 1),
+            "is_rainy": bool(weather["is_rainy"]),
+            "is_heavy_rain": bool(weather["is_heavy_rain"]),
+            "lag_1": round(lags[0], 2),
+            "lag_7": round(lags[1], 2),
+            "rolling_7": round(lags[2], 2),
+            "weather_source": weather_source,
+        },
+    }
+
+
+def reconcile_line_predictions(
+    total_prediction: float,
+    raw_predictions: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, float]]:
+    raw_sum = sum(result["prediction"] for result in raw_predictions.values())
+    if raw_sum <= 0:
+        raise ValueError("线路预测合计无效，无法执行线网校准")
+    factor = total_prediction / raw_sum
+    reconciled: dict[str, dict[str, float]] = {}
+    for line_id, result in raw_predictions.items():
+        predicted = round(result["prediction"] * factor, 2)
+        reconciled[line_id] = {
+            "predicted_flow": predicted,
+            "raw_prediction": round(result["prediction"], 2),
+            "lower_bound": round(max(0.0, result["lower_bound"] * factor), 2),
+            "upper_bound": round(result["upper_bound"] * factor, 2),
+            "reconciliation_factor": round(factor, 6),
+        }
+
+    rounded_total = round(total_prediction, 2)
+    rounding_gap = round(rounded_total - sum(item["predicted_flow"] for item in reconciled.values()), 2)
+    if rounding_gap:
+        adjustment_line = max(reconciled, key=lambda line_id: reconciled[line_id]["predicted_flow"])
+        reconciled[adjustment_line]["predicted_flow"] = round(
+            reconciled[adjustment_line]["predicted_flow"] + rounding_gap,
+            2,
+        )
+    for item in reconciled.values():
+        item["lower_bound"] = min(item["lower_bound"], item["predicted_flow"])
+        item["upper_bound"] = max(item["upper_bound"], item["predicted_flow"])
+    return reconciled
+
+
+def load_line_catalog(path: Path, daily_data: list[dict[str, Any]]) -> list[dict[str, str]]:
+    payload = load_json(path)
+    configured = payload.get("metadata", {}).get("lines", []) if isinstance(payload, dict) else []
+    catalog = [
+        {"id": item["id"], "name": item.get("name", item["id"])}
+        for item in configured
+        if isinstance(item, dict) and isinstance(item.get("id"), str)
+    ]
+    known_ids = {item["id"] for item in catalog}
+    observed_ids = {
+        line_id
+        for row in daily_data
+        for line_id in row.get("lines", {})
+        if isinstance(line_id, str)
+    }
+    catalog.extend({"id": line_id, "name": line_id} for line_id in sorted(observed_ids - known_ids))
+    return catalog
+
+
+def algorithm_description(selection: ModelSelection) -> str:
+    if selection.strategy == "ridge-regression":
+        return "带正则化的多特征岭回归"
+    if selection.baseline_weight == 1:
+        return "近期同星期客流季节基线"
+    return "多特征岭回归与近期同星期季节基线融合"
+
+
+def model_metadata(
+    model: RidgeRegressor | None,
+    selection: ModelSelection,
+    training_rows: list[TrainingRow],
+    excluded_rows: int,
+) -> dict[str, Any]:
+    baseline_label = (
+        "最近 4 个同星期加权均值"
+        if selection.baseline_name == WEIGHTED_WEEKDAY_BASELINE
+        else "最近 4 个同星期算术均值"
+    )
+    return {
+        "strategy": selection.strategy,
+        "algorithm": algorithm_description(selection),
+        "alpha": selection.alpha,
+        "training_window_days": selection.training_window_days,
+        "ensemble": {
+            "ridge_weight": round(1 - selection.baseline_weight, 2),
+            "same_weekday_baseline_weight": round(selection.baseline_weight, 2),
+            "baseline": baseline_label,
+        },
+        "training_rows": len(training_rows),
+        "excluded_service_disruption_rows": excluded_rows,
+        "training_start_date": training_rows[0].date,
+        "training_end_date": training_rows[-1].date,
+        "feature_names": feature_names(),
+        "feature_means": [round(value, 8) for value in model.means] if model else [],
+        "feature_scales": [round(value, 8) for value in model.scales] if model else [],
+        "weights": [round(value, 8) for value in model.weights] if model else [],
+        "validation": selection.validation,
+    }
+
+
+def rounded_components(components: dict[str, Any]) -> dict[str, Any]:
+    return {
+        key: round(value, 2) if isinstance(value, (int, float)) else value
+        for key, value in components.items()
+    }
 
 
 def write_json(path: Path, payload: dict[str, Any]) -> None:
@@ -497,52 +750,122 @@ def generate_prediction_file(
 
     daily_data = load_daily_data(metro_data_path)
     weather_map = load_weather_data(weather_data_path)
-    rows = build_training_rows(daily_data, weather_map)
-    alpha, baseline_weight, validation = select_alpha(rows)
-    model = RidgeRegressor(alpha).fit(rows)
+    total_rows = build_training_rows(daily_data, weather_map)
+    total_model, total_selection, total_training_rows = train_series_model(total_rows)
 
     latest_actual = parse_date(daily_data[-1]["date"])
     start = parse_date(start_date) if start_date else latest_actual + timedelta(days=1)
     if start <= latest_actual:
         raise ValueError("预测起始日期必须晚于最新实际客流日期")
 
-    totals = {row["date"]: as_number(row["total"]) for row in daily_data}
-    forecasts = forecast(
-        model,
-        totals,
-        weather_map,
-        start,
-        forecast_days,
-        validation["interval_radius"],
-        baseline_weight,
+    line_catalog = load_line_catalog(metro_data_path, daily_data)
+    if not line_catalog:
+        raise ValueError("客流数据中没有可预测的线路")
+
+    line_models: dict[str, dict[str, Any]] = {}
+    line_bundles: dict[str, tuple[RidgeRegressor | None, ModelSelection]] = {}
+    recursive_lines: dict[str, dict[str, float]] = {}
+    for line in line_catalog:
+        line_id = line["id"]
+        observed = [row for row in daily_data if line_id in row.get("lines", {})]
+        if len(observed) < 7:
+            raise ValueError(f"{line['name']} 只有 {len(observed)} 条数据，无法建立独立预测")
+        line_rows = build_training_rows(daily_data, weather_map, line_id=line_id)
+        line_model, line_selection, line_training_rows = train_series_model(line_rows)
+        excluded_rows = sum(
+            1
+            for item in observed
+            if as_number(item["lines"][line_id]) <= 0
+            or (
+                any(marker in str(item.get("note", "")) for marker in SERVICE_DISRUPTION_MARKERS)
+                and line_id in str(item.get("note", ""))
+            )
+        )
+        line_models[line_id] = {
+            "line_name": line["name"],
+            **model_metadata(line_model, line_selection, line_training_rows, excluded_rows),
+        }
+        line_bundles[line_id] = (line_model, line_selection)
+        recursive_lines[line_id] = {
+            item["date"]: as_number(item["lines"][line_id])
+            for item in observed
+        }
+
+    recursive_totals = {row["date"]: as_number(row["total"]) for row in daily_data}
+    forecasts: list[dict[str, Any]] = []
+    for offset in range(forecast_days):
+        target = start + timedelta(days=offset)
+        target_key = format_date(target)
+        total_result = predict_series_day(
+            total_model,
+            total_selection,
+            recursive_totals,
+            weather_map,
+            target,
+        )
+        raw_line_results = {
+            line_id: predict_series_day(
+                line_bundles[line_id][0],
+                line_bundles[line_id][1],
+                recursive_lines[line_id],
+                weather_map,
+                target,
+            )
+            for line_id in line_bundles
+        }
+        total_prediction = round(total_result["prediction"], 2)
+        reconciled = reconcile_line_predictions(total_prediction, raw_line_results)
+        line_forecasts: dict[str, dict[str, Any]] = {}
+        for line in line_catalog:
+            line_id = line["id"]
+            values = reconciled[line_id]
+            line_forecasts[line_id] = {
+                "line_name": line["name"],
+                **values,
+                "model_strategy": line_bundles[line_id][1].strategy,
+            }
+            recursive_lines[line_id][target_key] = values["predicted_flow"]
+        recursive_totals[target_key] = total_prediction
+        forecasts.append({
+            "date": target_key,
+            "predicted_total": total_prediction,
+            "lower_bound": round(total_result["lower_bound"], 2),
+            "upper_bound": round(total_result["upper_bound"], 2),
+            "model_components": rounded_components(total_result["components"]),
+            "inputs": total_result["inputs"],
+            "line_forecasts": line_forecasts,
+            "line_forecast_sum": round(
+                sum(item["predicted_flow"] for item in line_forecasts.values()),
+                2,
+            ),
+        })
+
+    total_excluded_rows = sum(
+        1
+        for item in daily_data
+        if any(marker in str(item.get("note", "")) for marker in SERVICE_DISRUPTION_MARKERS)
     )
     payload = {
-        "schema_version": 1,
+        "schema_version": 2,
         "generated_at": datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S%z"),
         "model": {
             "name": MODEL_NAME,
             "version": MODEL_VERSION,
-            "algorithm": "时间顺序验证的岭回归与同星期季节基线融合",
-            "alpha": alpha,
-            "ensemble": {
-                "ridge_weight": round(1 - baseline_weight, 2),
-                "same_weekday_baseline_weight": round(baseline_weight, 2),
-                "baseline": "最近 4 个同星期客流均值",
-            },
-            "training_rows": len(rows),
-            "excluded_service_disruption_rows": sum(
-                1
-                for item in daily_data
-                if any(marker in str(item.get("note", "")) for marker in SERVICE_DISRUPTION_MARKERS)
+            **model_metadata(
+                total_model,
+                total_selection,
+                total_training_rows,
+                total_excluded_rows,
             ),
-            "training_start_date": rows[0].date,
-            "training_end_date": rows[-1].date,
-            "feature_names": feature_names(),
-            "feature_means": [round(value, 8) for value in model.means],
-            "feature_scales": [round(value, 8) for value in model.scales],
-            "weights": [round(value, 8) for value in model.weights],
-            "validation": validation,
         },
+        "line_modeling": {
+            "method": "各线路独立时间验证选模，预测后按线网总量进行分层校准",
+            "candidate_training_windows_days": [180, 365, "all"],
+            "candidate_baselines": list(BASELINE_NAMES),
+            "minimum_training_rows": MIN_TRAINING_ROWS,
+            "line_count": len(line_models),
+        },
+        "line_models": line_models,
         "forecast_base_date": format_date(latest_actual),
         "forecasts": forecasts,
     }
@@ -551,7 +874,7 @@ def generate_prediction_file(
 
 
 def parse_arguments() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="训练南京地铁客流岭回归模型并生成预测数据")
+    parser = argparse.ArgumentParser(description="训练南京地铁线网及各线路独立客流模型并生成预测数据")
     parser.add_argument("--metro-data", type=Path, default=DEFAULT_METRO_DATA_PATH)
     parser.add_argument("--weather-data", type=Path, default=DEFAULT_WEATHER_DATA_PATH)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_PATH)
@@ -580,6 +903,7 @@ def main() -> int:
         "机器学习预测已生成: "
         f"训练样本={payload['model']['training_rows']}，"
         f"验证 MAE={validation['mae']}万，"
+        f"线路模型={len(payload['line_models'])}个，"
         f"预测={forecasts[0]['date']} 至 {forecasts[-1]['date']}"
     )
     return 0
