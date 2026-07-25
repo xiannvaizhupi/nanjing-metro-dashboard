@@ -97,7 +97,7 @@ python3 -m http.server 8080 -d dist
 python3 scripts/fetch_data.py
 ```
 
-`.github/workflows/update-metro-data.yml` 会在北京时间每天 09:30 和 11:30 自动执行，也可在 GitHub Actions 页面手动触发 `Update metro passenger flow`。每次任务最多重试三次：官网尚未发布或临时网络故障只记录提示并等待下一轮，不会产生失败邮件；解析器、数据完整性、预测文件或发布过程真正异常时才会失败。仅在数据发生变化时提交并推送 GitHub。
+`.github/workflows/update-metro-data.yml` 会在北京时间每天 09:30 至 21:30 每两小时自动检查一次，也可在 GitHub Actions 页面手动触发 `Update metro passenger flow`。官网尚未发布时任务会立即正常结束并等待下一轮；临时网络故障最多重试三次。上述情况不会产生失败邮件，只有解析器、数据完整性、预测文件或发布过程真正异常时才会失败。仅在数据发生变化时提交并推送 GitHub。
 
 如需让 GitHub Actions 同步更新 Gitee，请在 GitHub 仓库的 Actions secrets 中配置 `GITEE_TOKEN`。未配置时任务仍会正常更新 GitHub，并明确记录跳过 Gitee；本地直接运行脚本时仍会使用本机凭据同步 `origin` 和 `gitee`。
 
