@@ -12,6 +12,7 @@ import ssl
 import sys
 import subprocess
 import tempfile
+import time
 from html import unescape
 from datetime import datetime, date, timedelta
 from urllib.parse import urlencode
@@ -28,6 +29,8 @@ EXIT_SUCCESS = 0
 EXIT_SOURCE_UNAVAILABLE = 2
 EXIT_DATA_PENDING = 3
 EXIT_DATA_INVALID = 4
+
+PUSH_RETRY_DELAYS = (5, 15)
 
 OFFICIAL_HOMEPAGE_URL = "https://www.njmetro.com.cn/njdtweb/gx/dtmain.jsp"
 OFFICIAL_FLOW_API_URL = "https://www.njmetro.com.cn/njdtweb/portal/get-lineIntro.do"
@@ -905,6 +908,54 @@ def compare_and_log(newly_added_dates):
         print(f"[预测评估] 模型误差正常，无需特殊处理")
 
 
+def is_transient_push_error(message):
+    """判断 Git 推送失败是否属于值得重试的网络故障。"""
+    normalized = message.lower()
+    transient_markers = (
+        'timed out',
+        'operation timeout',
+        'failed to connect',
+        'could not resolve host',
+        'connection reset',
+        'recv failure',
+        'remote end hung up',
+        'http/2 stream',
+        'tls connection',
+    )
+    return any(marker in normalized for marker in transient_markers)
+
+
+def push_remote(remote, label, retry_delays=PUSH_RETRY_DELAYS):
+    """推送单个远端；瞬时网络错误会有限重试。"""
+    max_attempts = len(retry_delays) + 1
+    for attempt in range(1, max_attempts + 1):
+        result = subprocess.run(
+            ['git', 'push', remote, 'main'],
+            cwd=REPO_DIR,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode == 0:
+            suffix = f"（第 {attempt} 次尝试）" if attempt > 1 else ""
+            print(f"{label} 推送成功!{suffix}")
+            return True
+
+        error_message = (result.stderr or result.stdout).strip()
+        can_retry = attempt < max_attempts and is_transient_push_error(error_message)
+        if not can_retry:
+            print(f"{label} 推送失败: {error_message}")
+            return False
+
+        delay = retry_delays[attempt - 1]
+        print(
+            f"{label} 推送第 {attempt}/{max_attempts} 次失败，"
+            f"{delay} 秒后重试: {error_message}"
+        )
+        time.sleep(delay)
+
+    return False
+
+
 def commit_and_push_updates():
     """提交本地更新并同步 GitHub、Gitee。"""
     try:
@@ -922,17 +973,8 @@ def commit_and_push_updates():
 
     push_succeeded = True
     for remote, label in [('origin', 'GitHub'), ('gitee', 'Gitee')]:
-        result = subprocess.run(
-            ['git', 'push', remote, 'main'],
-            cwd=REPO_DIR,
-            capture_output=True,
-            text=True,
-        )
-        if result.returncode == 0:
-            print(f"{label} 推送成功!")
-        else:
+        if not push_remote(remote, label):
             push_succeeded = False
-            print(f"{label} 推送失败: {result.stderr.strip()}")
     return push_succeeded
 
 

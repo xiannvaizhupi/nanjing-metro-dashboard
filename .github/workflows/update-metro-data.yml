@@ -2,14 +2,9 @@ name: Update metro passenger flow
 
 on:
   schedule:
-    # GitHub 使用 UTC；对应北京时间 09:30 至 21:30 每两小时检查一次。
-    - cron: '30 1 * * *'
-    - cron: '30 3 * * *'
-    - cron: '30 5 * * *'
-    - cron: '30 7 * * *'
-    - cron: '30 9 * * *'
-    - cron: '30 11 * * *'
-    - cron: '30 13 * * *'
+    # GitHub 使用 UTC；北京时间 09:47 至 21:47 每小时错峰检查一次。
+    # 避开常见整点/半点高峰，并用后续运行兜底 GitHub 可能延迟或丢弃的定时事件。
+    - cron: '47 1-13 * * *'
   workflow_dispatch:
 
 permissions:
@@ -91,7 +86,17 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/metro_data.json data/prediction_log.json data/ml_predictions.json
           git commit -m "Auto update metro data - $(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M')"
-          git push origin HEAD:main
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              echo "GitHub push attempt ${attempt}/3 failed; retrying in 15 seconds."
+              sleep 15
+            fi
+          done
+          echo "::error::GitHub push failed after 3 attempts."
+          exit 1
 
       - name: Sync current main to Gitee
         env:

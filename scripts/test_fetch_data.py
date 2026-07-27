@@ -236,6 +236,61 @@ def test_required_data_date_from_environment():
             os.environ["METRO_REQUIRE_YESTERDAY"] = original_yesterday
 
 
+def test_transient_push_error_detection():
+    assert_equal(
+        fetch_data.is_transient_push_error(
+            "fatal: unable to access repository: Recv failure: Operation timed out"
+        ),
+        True,
+        "GitHub timeout should be retried",
+    )
+    assert_equal(
+        fetch_data.is_transient_push_error(
+            "remote: Invalid username or password. fatal: Authentication failed"
+        ),
+        False,
+        "authentication failure should not be retried",
+    )
+
+
+def test_push_remote_retries_transient_failure():
+    original_run = fetch_data.subprocess.run
+    original_sleep = fetch_data.time.sleep
+    attempts = []
+    sleeps = []
+    responses = [
+        fetch_data.subprocess.CompletedProcess(
+            args=[],
+            returncode=1,
+            stdout="",
+            stderr="fatal: Recv failure: Operation timed out",
+        ),
+        fetch_data.subprocess.CompletedProcess(
+            args=[],
+            returncode=0,
+            stdout="",
+            stderr="",
+        ),
+    ]
+    try:
+        def fake_run(*args, **kwargs):
+            attempts.append((args, kwargs))
+            return responses[len(attempts) - 1]
+
+        fetch_data.subprocess.run = fake_run
+        fetch_data.time.sleep = sleeps.append
+        assert_equal(
+            fetch_data.push_remote("origin", "GitHub", retry_delays=(5, 15)),
+            True,
+            "transient push should recover",
+        )
+        assert_equal(len(attempts), 2, "push attempt count")
+        assert_equal(sleeps, [5], "push retry delay")
+    finally:
+        fetch_data.subprocess.run = original_run
+        fetch_data.time.sleep = original_sleep
+
+
 def test_main_distinguishes_network_and_parse_failures():
     original_fetch_entries = fetch_data.fetch_passenger_flow_entries
     try:
@@ -385,6 +440,8 @@ if __name__ == "__main__":
     test_widget_url_bypasses_cache()
     test_unparseable_sources_are_not_reported_as_successful()
     test_required_data_date_from_environment()
+    test_transient_push_error_detection()
+    test_push_remote_retries_transient_failure()
     test_main_distinguishes_network_and_parse_failures()
     test_dataset_validation_accepts_suspension_and_rejects_duplicates()
     test_corrected_entry_triggers_follow_up_processing()
