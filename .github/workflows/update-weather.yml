@@ -1,0 +1,82 @@
+name: Update Nanjing weather
+
+on:
+  schedule:
+    # GitHub 使用 UTC；对应北京时间每天 08:17，避开常见整点高峰。
+    - cron: '17 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  # Serialize with update-metro-data.yml because both jobs rewrite predictions.
+  group: nanjing-metro-data-write
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TZ: Asia/Shanghai
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate weather updater
+        run: |
+          python -m py_compile scripts/update_weather.py scripts/ml_predictor.py
+          python scripts/test_update_weather.py
+          python scripts/test_ml_predictor.py
+
+      - name: Update weather and forecasts
+        run: |
+          set +e
+          python scripts/update_weather.py
+          code=$?
+          if [ "$code" -eq 2 ]; then
+            echo "::warning::Open-Meteo is temporarily unavailable; tomorrow's run will retry."
+            exit 0
+          fi
+          exit "$code"
+
+      - name: Commit and push updates
+        run: |
+          if git diff --quiet -- data/weather.json data/ml_predictions.json; then
+            echo "No weather or prediction updates to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/weather.json data/ml_predictions.json
+          git commit -m "Auto update weather - $(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M')"
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              echo "GitHub push attempt ${attempt}/3 failed; retrying in 15 seconds."
+              sleep 15
+            fi
+          done
+          echo "::error::GitHub push failed after 3 attempts."
+          exit 1
+
+      - name: Sync current main to Gitee
+        env:
+          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+        run: |
+          if [ -z "$GITEE_TOKEN" ]; then
+            echo "::notice::GITEE_TOKEN is not configured; Gitee sync was skipped."
+            exit 0
+          fi
+          git push "https://myles_zhu:${GITEE_TOKEN}@gitee.com/myles_zhu/nanjing-metro-data.git" HEAD:main

@@ -11,7 +11,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: update-metro-data
+  # Weather and passenger-flow jobs both write prediction data. Serialize them.
+  group: nanjing-metro-data-write
   cancel-in-progress: false
 
 jobs:

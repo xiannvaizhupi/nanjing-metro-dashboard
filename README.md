@@ -2,6 +2,8 @@
 
 一个纯静态的南京地铁客流数据看板，用于展示每日总客流、各线路客流、历史趋势，并结合天气、节假日和历史同期数据生成今日/明日客流预测。
 
+完整的数据链路、存储结构、机器学习算法、当前模型参数和风险分析见 [项目技术报告](docs/project-technical-report.md)。
+
 ## 功能概览
 
 - 首页仪表盘：总客流、今日预测、明日预测、趋势图、线路占比弹窗、预测因素弹窗。
@@ -16,9 +18,9 @@
 - 天气数据文件：`data/weather.json`
 - 机器学习预测文件：`data/ml_predictions.json`
 - 预测记录文件：`data/prediction_log.json`
-- 客流数据范围：`2025-01-01` 至 `2026-07-24`
-- 有效数据天数：567 天
-- 最近更新：`2026-07-25`
+- 客流数据范围：`2025-01-01` 至 `2026-07-28`
+- 有效数据天数：571 天
+- 最近更新：`2026-07-29`
 - 已配置线路：14 条
 
 已配置线路包括：
@@ -97,7 +99,7 @@ python3 -m http.server 8080 -d dist
 python3 scripts/fetch_data.py
 ```
 
-`.github/workflows/update-metro-data.yml` 会在北京时间每天 09:30 至 21:30 每两小时自动检查一次，也可在 GitHub Actions 页面手动触发 `Update metro passenger flow`。官网尚未发布时任务会立即正常结束并等待下一轮；临时网络故障最多重试三次。上述情况不会产生失败邮件，只有解析器、数据完整性、预测文件或发布过程真正异常时才会失败。仅在数据发生变化时提交并推送 GitHub。
+`.github/workflows/update-metro-data.yml` 会在北京时间每天 09:47 至 21:47 每小时错峰检查一次，也可在 GitHub Actions 页面手动触发 `Update metro passenger flow`。官网尚未发布时任务会立即正常结束并等待下一轮；临时网络故障最多重试三次。上述情况不会产生失败邮件，只有解析器、数据完整性、预测文件或发布过程真正异常时才会失败。仅在数据发生变化时提交并推送 GitHub。
 
 如需让 GitHub Actions 同步更新 Gitee，请在 GitHub 仓库的 Actions secrets 中配置 `GITEE_TOKEN`。未配置时任务仍会正常更新 GitHub，并明确记录跳过 Gitee；本地直接运行脚本时仍会使用本机凭据同步 `origin` 和 `gitee`。
 
@@ -125,12 +127,15 @@ python3 scripts/ml_predictor.py --forecast-days 7 --start-date 2026-07-15
 
 ### 天气数据
 
-天气数据由 `update_weather.sh` 维护，脚本会调用 Open-Meteo 接口更新南京未来两天天气，并写入节假日标记。
+天气数据由独立模块 `scripts/update_weather.py` 维护，根目录的 `update_weather.sh` 是便捷入口。模块只使用 Python 标准库，通过 HTTPS 调用 Open-Meteo，默认回补最近 14 天并维护未来 7 天天气，修正天气类型和国务院公布的 2025—2026 年节假日标记，再重新训练机器学习预测。
+
+`.github/workflows/update-weather.yml` 会在北京时间每天 08:17 自动更新天气；它与客流工作流共用写入并发锁，避免两个任务同时改写 `data/ml_predictions.json`。Open-Meteo 暂时不可用时任务记录警告并等待次日重试，数据格式或模型校验失败时才会报错。
 
 运行方式：
 
 ```bash
 ./update_weather.sh
+# 等价于：python3 scripts/update_weather.py
 ```
 
 ## 数据格式
@@ -192,9 +197,11 @@ nanjing-metro-dashboard/
 │   ├── build-static.sh        # 构建发布目录
 │   ├── fetch_data.py          # 客流数据抓取与预测记录更新
 │   ├── ml_predictor.py        # 独立机器学习预测模块
+│   ├── update_weather.py      # 独立天气更新与预测重训模块
 │   ├── test_fetch_data.py     # 解析器单元测试
-│   └── test_ml_predictor.py   # 机器学习模块单元测试
-├── update_weather.sh          # 天气数据更新脚本
+│   ├── test_ml_predictor.py   # 机器学习模块单元测试
+│   └── test_update_weather.py # 天气更新模块单元测试
+├── update_weather.sh          # 可移植天气更新入口
 ├── vercel.json                # Vercel 静态部署配置（可选）
 ├── LINE_COLORS.md             # 线路配色说明
 ├── LICENSE
