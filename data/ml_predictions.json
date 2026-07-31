@@ -781,7 +781,7 @@
     },
     "L7": {
       "line_name": "7号线",
-      "strategy": "ridge-recency-weighted-same-weekday-4-ensemble",
+      "strategy": "ridge-same-weekday-mean-4-ensemble",
       "algorithm": "多特征岭回归与近期同星期季节基线融合",
       "alpha": 1.0,
       "training_window_days": null,
@@ -1037,7 +1037,7 @@
       "line_name": "S1号线",
       "strategy": "ridge-same-weekday-mean-4-ensemble",
       "algorithm": "多特征岭回归与近期同星期季节基线融合",
-      "alpha": 500.0,
+      "alpha": 300.0,
       "training_window_days": 365,
       "ensemble": {
         "ridge_weight": 0.9,
@@ -1545,7 +1545,7 @@
       "line_name": "S7号线",
       "strategy": "ridge-same-weekday-mean-4-ensemble",
       "algorithm": "多特征岭回归与近期同星期季节基线融合",
-      "alpha": 300.0,
+      "alpha": 500.0,
       "training_window_days": 365,
       "ensemble": {
         "ridge_weight": 0.9,
