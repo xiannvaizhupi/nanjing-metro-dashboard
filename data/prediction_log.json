@@ -50,11 +50,11 @@
       "generated_at": "2026-07-29 12:48:35"
     },
     "2026-07-29": {
-      "predicted_total": 354.47,
-      "lower_bound": 328.42,
-      "upper_bound": 380.52,
+      "predicted_total": 345.32,
+      "lower_bound": 311.46,
+      "upper_bound": 379.18,
       "model": "ridge-regression-v1",
-      "generated_at": "2026-07-31 12:38:57"
+      "generated_at": "2026-07-30 12:40:45"
     },
     "2026-07-30": {
       "predicted_total": 345.21,
@@ -1359,14 +1359,14 @@
     {
       "date": "2026-07-29",
       "actual": 346.57,
-      "predicted": 354.47,
-      "error": -7.9,
-      "abs_error": 7.9,
-      "pct_error": -2.23,
+      "predicted": 345.32,
+      "error": 1.25,
+      "abs_error": 1.25,
+      "pct_error": 0.36,
       "weekday": 2,
       "is_weekend": false,
       "model": "ridge-regression-v1",
-      "compared_at": "2026-07-31 12:38:57"
+      "compared_at": "2026-07-30 12:40:45"
     },
     {
       "date": "2026-07-30",
@@ -1383,8 +1383,8 @@
   ],
   "stats": {
     "total_comparisons": 118,
-    "mean_absolute_error": 26.61,
-    "mean_bias": -2.5,
+    "mean_absolute_error": 26.56,
+    "mean_bias": -2.42,
     "last_updated": "2026-07-31 12:38:57"
   }
 }
