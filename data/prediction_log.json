@@ -209,6 +209,13 @@
       "upper_bound": 386.69,
       "model": "ridge-regression-v1",
       "generated_at": "2026-08-21 10:49:10"
+    },
+    "2026-08-21": {
+      "predicted_total": 375.65,
+      "lower_bound": 347.95,
+      "upper_bound": 403.35,
+      "model": "ridge-regression-v1",
+      "generated_at": "2026-08-22 10:40:56"
     }
   },
   "comparison": [
@@ -1778,12 +1785,24 @@
       "is_weekend": false,
       "model": "ridge-regression-v1",
       "compared_at": "2026-08-21 10:49:10"
+    },
+    {
+      "date": "2026-08-21",
+      "actual": 386.58,
+      "predicted": 375.65,
+      "error": 10.93,
+      "abs_error": 10.93,
+      "pct_error": 2.91,
+      "weekday": 4,
+      "is_weekend": false,
+      "model": "ridge-regression-v1",
+      "compared_at": "2026-08-22 10:40:56"
     }
   ],
   "stats": {
-    "total_comparisons": 139,
-    "mean_absolute_error": 24.86,
-    "mean_bias": -1.24,
-    "last_updated": "2026-08-21 10:49:10"
+    "total_comparisons": 140,
+    "mean_absolute_error": 24.76,
+    "mean_bias": -1.15,
+    "last_updated": "2026-08-22 10:40:56"
   }
 }
