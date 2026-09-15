@@ -10,7 +10,7 @@ from pathlib import Path
 from urllib.error import URLError
 
 import fetch_data
-from fetch_data import infer_entry_year, parse_passenger_flow, parse_weibo_flow
+from fetch_data import infer_entry_date, infer_entry_year, parse_passenger_flow, parse_weibo_flow
 
 
 JULY_BACKFILL_TEXT = (
@@ -50,6 +50,13 @@ JULY_24_NETWORK_FLOW_TEXT = (
     "S8号线10.29，S9号线1.83（以上单位：万）"
 )
 
+SEPTEMBER_12_OPERATION_TEXT = (
+    "#昨日客流#【南京地铁运营】12日线网客运量341.97，其中："
+    "1号线74.95，2号线64.00，3号线58.38，4号线16.33，5号线39.77，"
+    "7号线25.27，10号线18.72，S1号线10.76，S2号线4.79，S3号线8.69，"
+    "S6号线5.42，S7号线1.43，S8号线9.97，S9号线3.50（单位：万）"
+)
+
 
 def assert_equal(actual, expected, label):
     if actual != expected:
@@ -78,6 +85,14 @@ def test_infer_year_around_new_year():
         infer_entry_year(12, 31, reference_date=date(2027, 1, 1)),
         2026,
         "Dec 31 should resolve to previous year after New Year",
+    )
+
+
+def test_infer_date_without_month_around_month_boundary():
+    assert_equal(
+        infer_entry_date(None, 30, reference_date=date(2026, 10, 1)),
+        date(2026, 9, 30),
+        "date-only announcement should resolve to previous month",
     )
     assert_equal(
         infer_entry_year(1, 1, reference_date=date(2026, 12, 31)),
@@ -166,6 +181,15 @@ def test_parse_network_flow_wording():
     assert_equal(len(entries[0]["lines"]), 14, "network flow line count")
     assert_equal(entries[0]["lines"]["L1"], 79.34, "network flow line 1")
     assert_equal(entries[0]["lines"]["S9"], 1.83, "network flow line S9")
+
+
+def test_parse_bracketed_operation_prefix_without_month():
+    entries = parse_passenger_flow(SEPTEMBER_12_OPERATION_TEXT, source_name="人工核验补录")
+    assert_equal(len(entries), 1, "operation-prefix entry count")
+    assert_equal(entries[0]["date"], "2026-09-12", "operation-prefix date")
+    assert_equal(entries[0]["total"], 341.97, "operation-prefix total")
+    assert_equal(len(entries[0]["lines"]), 14, "operation-prefix line count")
+    assert_equal(entries[0]["lines"]["S9"], 3.5, "operation-prefix S9")
 
 
 def test_dated_detail_wins_over_stale_undated_total():
@@ -428,6 +452,7 @@ def test_hierarchical_prediction_validation():
 if __name__ == "__main__":
     test_parse_with_explicit_short_year()
     test_infer_year_around_new_year()
+    test_infer_date_without_month_around_month_boundary()
     test_official_homepage_api_response()
     test_wrapped_ssl_verification_error_is_detected()
     test_parse_official_homepage_text_without_hashtag()
@@ -436,6 +461,7 @@ if __name__ == "__main__":
     test_large_total_line_difference_is_rejected()
     test_parse_backfill_text_with_mixed_formats()
     test_parse_network_flow_wording()
+    test_parse_bracketed_operation_prefix_without_month()
     test_dated_detail_wins_over_stale_undated_total()
     test_widget_url_bypasses_cache()
     test_unparseable_sources_are_not_reported_as_successful()

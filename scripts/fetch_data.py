@@ -85,17 +85,20 @@ SUSPENDED_LINE_PATTERNS = [
 # 当前公告正常会覆盖 12 至 14 条线路状态；低于 10 条通常是页面内容截断。
 MINIMUM_COMPLETE_LINE_COUNT = 10
 MAXIMUM_TOTAL_LINE_DIFFERENCE = 5.0
+ANNOUNCEMENT_PREFIX_PATTERN = r'(?:南京地铁|【南京地铁运营】)'
 
 NEXT_ENTRY_PATTERN = (
     r'(?:(?:\d{2,4})[-/.年](?:\d{1,2})[-/.月](?:\d{1,2})[日号]?)?'
     r'(?:#?昨日客流#?.{0,80}?)?'
-    r'南京地铁(?:\d{2,4}年)?\d{1,2}月\d{1,2}日(?:线网)?客运量'
+    + ANNOUNCEMENT_PREFIX_PATTERN
+    + r'(?:\d{2,4}年)?(?:\d{1,2}月)?\d{1,2}日(?:线网)?客运量'
 )
 
 FLOW_ENTRY_PATTERN = re.compile(
     r'(?:(\d{2,4})[-/.年](\d{1,2})[-/.月](\d{1,2})[日号]?)?'
     r'(?:#?昨日客流#?.{0,80}?)?'
-    r'南京地铁(?:(\d{2,4})年)?(?:(\d{1,2})月)?(\d{1,2})日(?:线网)?客运量(?:为)?[：:]?(\d+\.?\d*)万?'
+    + ANNOUNCEMENT_PREFIX_PATTERN
+    + r'(?:(\d{2,4})年)?(?:(\d{1,2})月)?(\d{1,2})日(?:线网)?客运量(?:为)?[：:]?(\d+\.?\d*)万?'
     r'[，,；;。]?(.+?)(?:[（(]?以上单位[:：]?万?[）)]?|(?=' + NEXT_ENTRY_PATTERN + r')|$)',
     re.S
 )
@@ -276,36 +279,40 @@ def fetch_passenger_flow_entries(reference_date=None):
     return [], None, successful_sources, reached_sources
 
 
-def infer_entry_year(month, day, explicit_year=None, reference_date=None):
-    """根据微博日期推断年份，避免跨年后仍写死到旧年份。"""
-    if explicit_year:
-        year = int(explicit_year)
-        return 2000 + year if year < 100 else year
-
+def infer_entry_date(month, day, explicit_year=None, reference_date=None):
+    """根据公告中的部分日期推断完整日期，兼容跨月和跨年。"""
     ref = reference_date or date.today()
     candidates = []
-    # 当 month 为 None 时（如微博只写"27日客运量"），用 ref 的月份作为回退
     months_to_try = [month] if month is not None else [ref.month, ref.month - 1 if ref.month > 1 else 12]
-    days_to_try = [day]
+    if explicit_year:
+        normalized_year = int(explicit_year)
+        if normalized_year < 100:
+            normalized_year += 2000
+        years_to_try = [normalized_year]
+    else:
+        years_to_try = range(ref.year - 1, ref.year + 2)
 
     for m in months_to_try:
-        for d in days_to_try:
-            for year in range(ref.year - 1, ref.year + 2):
-                try:
-                    candidate = date(year, m, d)
-                except ValueError:
-                    continue
-                # 官网/微博可能在前一天晚间提前给出次日日期，允许一周内的近未来日期。
-                if candidate > ref + timedelta(days=7):
-                    continue
-                candidates.append((abs((candidate - ref).days), year, m, d))
+        for year in years_to_try:
+            try:
+                candidate = date(year, m, day)
+            except ValueError:
+                continue
+            # 官网/微博可能在前一天晚间提前给出次日日期，允许一周内的近未来日期。
+            if candidate > ref + timedelta(days=7):
+                continue
+            candidates.append((abs((candidate - ref).days), -candidate.toordinal(), candidate))
 
     if not candidates:
         raise ValueError(f"无法推断日期年份: {month}-{day}")
 
-    # 优先选离 ref 最近的；多条同距离时选月份最大的（更可能是同月）
-    candidates.sort(key=lambda x: (x[0], -x[2]))
-    return min(candidates)[1]
+    # 优先选离参考日最近的；同距离时取较新的日期。
+    return min(candidates)[2]
+
+
+def infer_entry_year(month, day, explicit_year=None, reference_date=None):
+    """兼容旧调用：返回推断完整日期中的年份。"""
+    return infer_entry_date(month, day, explicit_year, reference_date).year
 
 
 def normalize_flow_text(html):
@@ -339,10 +346,9 @@ def parse_passenger_flow(html, source_name=''):
         total = float(match.group(7))
         lines_str = match.group(8)
 
-        year = infer_entry_year(month, day, explicit_year=explicit_year)
-        # month 可能为 None（微博里只写"27日客运量"），用当前月份兜底
-        if month is None:
-            month = datetime.now().month
+        inferred_date = infer_entry_date(month, day, explicit_year=explicit_year)
+        year = inferred_date.year
+        month = inferred_date.month
         date_str = f"{year}-{month:02d}-{day:02d}"
         if date_str in seen_dates:
             continue
