@@ -97,7 +97,7 @@
         "type": "suburban"
       }
     ],
-    "fetched_at": "2026-10-08 23:14:52",
+    "fetched_at": "2026-10-08 23:27:39",
     "updated_at": "2026-03-23 10:12:44"
   },
   "daily_data": [
@@ -13510,6 +13510,30 @@
       }
     },
     {
+      "date": "2026-09-27",
+      "total": 279.79,
+      "is_weekend": true,
+      "note": "历史补录：用户提供公告",
+      "lines": {
+        "L1": 61.22,
+        "L2": 49.64,
+        "L3": 53.45,
+        "L4": 11.65,
+        "L5": 32.65,
+        "L7": 18.89,
+        "L10": 11.24,
+        "S1": 9.57,
+        "S2": 3.6,
+        "S3": 7.91,
+        "S6": 8.27,
+        "S7": 1.21,
+        "S8": 8.08,
+        "S9": 2.4
+      },
+      "source_type": "user-provided-announcement",
+      "source_document": "docs/backfill-announcements-2026-10-08.md"
+    },
+    {
       "date": "2026-09-28",
       "total": 332.42,
       "is_weekend": false,
@@ -13766,6 +13790,6 @@
       "date": "2026-07-12",
       "value": 68.82
     },
-    "avg_daily": 320.9139
+    "avg_daily": 320.8501
   }
 }
