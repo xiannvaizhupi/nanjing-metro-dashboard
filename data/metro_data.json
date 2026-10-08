@@ -97,7 +97,7 @@
         "type": "suburban"
       }
     ],
-    "fetched_at": "2026-10-08 22:32:02",
+    "fetched_at": "2026-10-08 23:14:52",
     "updated_at": "2026-03-23 10:12:44"
   },
   "daily_data": [
@@ -10842,6 +10842,30 @@
       }
     },
     {
+      "date": "2026-05-29",
+      "total": 394.66,
+      "is_weekend": false,
+      "note": "历史补录：用户提供公告",
+      "lines": {
+        "L1": 84.59,
+        "L2": 69.21,
+        "L3": 70.47,
+        "L4": 19.15,
+        "L5": 42.53,
+        "L7": 33.41,
+        "L10": 23.35,
+        "S1": 11.77,
+        "S2": 5.31,
+        "S3": 11.52,
+        "S6": 6.03,
+        "S7": 1.72,
+        "S8": 12.26,
+        "S9": 3.34
+      },
+      "source_type": "user-provided-announcement",
+      "source_document": "docs/backfill-announcements-2026-10-08.md"
+    },
+    {
       "date": "2026-05-30",
       "total": 363.75,
       "is_weekend": true,
@@ -10972,6 +10996,30 @@
         "S8": 9.95,
         "S9": 2.03
       }
+    },
+    {
+      "date": "2026-06-05",
+      "total": 373.35,
+      "is_weekend": false,
+      "note": "历史补录：用户提供公告",
+      "lines": {
+        "L1": 80.47,
+        "L2": 63.9,
+        "L3": 67.89,
+        "L4": 18.62,
+        "L5": 40.4,
+        "L7": 32.04,
+        "L10": 20.73,
+        "S1": 11.37,
+        "S2": 4.52,
+        "S3": 10.91,
+        "S6": 5.92,
+        "S7": 1.67,
+        "S8": 11.69,
+        "S9": 3.22
+      },
+      "source_type": "user-provided-announcement",
+      "source_document": "docs/backfill-announcements-2026-10-08.md"
     },
     {
       "date": "2026-06-06",
@@ -11126,6 +11174,30 @@
         "S8": 11.41,
         "S9": 3.12
       }
+    },
+    {
+      "date": "2026-06-13",
+      "total": 363.77,
+      "is_weekend": true,
+      "note": "历史补录：用户提供公告",
+      "lines": {
+        "L1": 79.5,
+        "L2": 67.09,
+        "L3": 65.01,
+        "L4": 18.87,
+        "L5": 42.47,
+        "L7": 26.72,
+        "L10": 17.68,
+        "S1": 10.16,
+        "S2": 6.18,
+        "S3": 8.96,
+        "S6": 5.17,
+        "S7": 1.42,
+        "S8": 11.37,
+        "S9": 3.17
+      },
+      "source_type": "user-provided-announcement",
+      "source_document": "docs/backfill-announcements-2026-10-08.md"
     },
     {
       "date": "2026-06-14",
@@ -13694,6 +13766,6 @@
       "date": "2026-07-12",
       "value": 68.82
     },
-    "avg_daily": 320.6501
+    "avg_daily": 320.9139
   }
 }
