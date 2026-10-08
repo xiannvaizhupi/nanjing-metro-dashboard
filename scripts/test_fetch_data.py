@@ -57,6 +57,14 @@ SEPTEMBER_12_OPERATION_TEXT = (
     "S6号线5.42，S7号线1.43，S8号线9.97，S9号线3.50（单位：万）"
 )
 
+OCTOBER_7_NEW_LINE_TEXT = (
+    "#昨日客流# 南京地铁10月7日客运量352.66，其中1号线69.63，2号线60.26，"
+    "3号线50.99，4号线15.91，5号线35.72，6号线24.48，7号线24.34，"
+    "10号线14.96，S1号线15.57，S2号线5.70，S3号线9.74，S6号线6.58，"
+    "S7号线1.94，S8号线11.33，S9号线5.51（以上单位：万）"
+)
+FIXTURE_DATE = date(2026, 10, 8)
+
 
 def assert_equal(actual, expected, label):
     if actual != expected:
@@ -71,7 +79,7 @@ def test_parse_with_explicit_short_year():
         "S2号线3.43，S3号线9.33，S6号线5.09，S7号线1.28，"
         "S8号线10.30，S9号线2.01（以上单位: 万）"
     )
-    entries = parse_weibo_flow(html)
+    entries = parse_weibo_flow(html, reference_date=FIXTURE_DATE)
 
     assert_equal(len(entries), 1, "entry count")
     assert_equal(entries[0]["date"], "2026-06-23", "date")
@@ -121,7 +129,7 @@ def test_parse_official_homepage_text_without_hashtag():
       S8号线：11.31，S9号线：2.39（以上单位：万）
     </div>
     """
-    entries = parse_passenger_flow(html, source_name="南京地铁官网首页")
+    entries = parse_passenger_flow(html, source_name="南京地铁官网首页", reference_date=FIXTURE_DATE)
 
     assert_equal(len(entries), 1, "official entry count")
     assert_equal(entries[0]["date"], "2026-06-27", "official date")
@@ -136,12 +144,12 @@ def test_incomplete_line_data_is_rejected():
         "1号线12.07，2号线12.80，3号线15.42，4号线4.44，"
         "5号线10.62，7号线8.59，10号线2.81，S3号线2.06（以上单位：万）"
     )
-    entries = parse_passenger_flow(html, source_name="南京地铁官网首页")
+    entries = parse_passenger_flow(html, source_name="南京地铁官网首页", reference_date=FIXTURE_DATE)
     assert_equal(entries, [], "incomplete line data should be rejected")
 
 
 def test_suspended_lines_complete_the_entry():
-    entries = parse_passenger_flow(JULY_12_SUSPENSION_TEXT, source_name="人工核验补录")
+    entries = parse_passenger_flow(JULY_12_SUSPENSION_TEXT, reference_date=FIXTURE_DATE)
     assert_equal(len(entries), 1, "suspension entry count")
     assert_equal(entries[0]["date"], "2026-07-12", "suspension date")
     assert_equal(len(entries[0]["lines"]), 14, "suspension line count")
@@ -160,12 +168,12 @@ def test_large_total_line_difference_is_rejected():
         "10号线10，S1号线10，S2号线10，S3号线10，S6号线10，"
         "S7号线10，S8号线10，S9号线10（以上单位：万）"
     )
-    entries = parse_passenger_flow(html, source_name="南京地铁官网首页")
+    entries = parse_passenger_flow(html, reference_date=FIXTURE_DATE)
     assert_equal(entries, [], "large total-line mismatch should be rejected")
 
 
 def test_parse_backfill_text_with_mixed_formats():
-    entries = parse_passenger_flow(JULY_BACKFILL_TEXT, source_name="人工核验补录")
+    entries = parse_passenger_flow(JULY_BACKFILL_TEXT, reference_date=FIXTURE_DATE)
     assert_equal(len(entries), 5, "backfill entry count")
     assert_equal([item["date"] for item in entries], [
         "2026-07-15", "2026-07-16", "2026-07-17", "2026-07-18", "2026-07-19"
@@ -174,7 +182,7 @@ def test_parse_backfill_text_with_mixed_formats():
 
 
 def test_parse_network_flow_wording():
-    entries = parse_passenger_flow(JULY_24_NETWORK_FLOW_TEXT, source_name="南京地铁官网首页")
+    entries = parse_passenger_flow(JULY_24_NETWORK_FLOW_TEXT, reference_date=FIXTURE_DATE)
     assert_equal(len(entries), 1, "network flow entry count")
     assert_equal(entries[0]["date"], "2026-07-24", "network flow date")
     assert_equal(entries[0]["total"], 371.37, "network flow total")
@@ -184,12 +192,58 @@ def test_parse_network_flow_wording():
 
 
 def test_parse_bracketed_operation_prefix_without_month():
-    entries = parse_passenger_flow(SEPTEMBER_12_OPERATION_TEXT, source_name="人工核验补录")
+    entries = parse_passenger_flow(SEPTEMBER_12_OPERATION_TEXT, reference_date=date(2026, 9, 13))
     assert_equal(len(entries), 1, "operation-prefix entry count")
     assert_equal(entries[0]["date"], "2026-09-12", "operation-prefix date")
     assert_equal(entries[0]["total"], 341.97, "operation-prefix total")
     assert_equal(len(entries[0]["lines"]), 14, "operation-prefix line count")
     assert_equal(entries[0]["lines"]["S9"], 3.5, "operation-prefix S9")
+
+
+def test_new_lines_are_parsed_without_a_whitelist():
+    entries = parse_passenger_flow(OCTOBER_7_NEW_LINE_TEXT, reference_date=FIXTURE_DATE)
+    assert_equal(len(entries[0]['lines']), 15, 'new line count')
+    assert_equal(entries[0]['lines']['L6'], 24.48, 'new main line 6')
+    assert_equal(entries[0]['lines']['S6'], 6.58, 'suburban line 6 is distinct')
+    future_text = OCTOBER_7_NEW_LINE_TEXT.replace('6号线24.48', '16号线24.48')
+    future_entry = parse_passenger_flow(future_text, reference_date=FIXTURE_DATE)[0]
+    assert_equal(future_entry['lines']['L16'], 24.48, 'future line parsed dynamically')
+    assert_equal('L6' in future_entry['lines'], False, 'do not partially match 16 or S6')
+
+
+def test_profile_anchors_month_to_publication_and_excludes_reposts():
+    html = (
+        '<a class="post-link" href="/news/detail/123.html"><article class="post">'
+        '<div class="uname">南京地铁</div><div class="time">2026-09-13 09:00<span>微博</span></div>'
+        f'<div class="post-text">{SEPTEMBER_12_OPERATION_TEXT}</div>'
+        f'<div class="post-repost">{OCTOBER_7_NEW_LINE_TEXT}</div></article></a>'
+        '<a class="post-link" href="/news/detail/124.html"><article class="post">'
+        '<div class="uname">其他账号</div><div class="time">2026-10-08 09:00</div>'
+        f'<div class="post-text">{OCTOBER_7_NEW_LINE_TEXT}</div></article></a>'
+    )
+    entries = fetch_data.parse_official_weibo_profile(html, reference_date=FIXTURE_DATE)
+    assert_equal(len(entries), 1, 'only official own post')
+    assert_equal(entries[0]['date'], '2026-09-12', 'old month inferred from publication')
+    assert_equal(entries[0]['source_url'], 'https://www.sina.cn/news/detail/123.html', 'source link')
+
+
+def test_new_line_metadata_and_idempotent_import():
+    original_path = fetch_data.METRO_DATA_PATH
+    try:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'metro.json'
+            path.write_text(json.dumps({'metadata': {'lines': []}, 'daily_data': []}), encoding='utf-8')
+            fetch_data.METRO_DATA_PATH = str(path)
+            entry = parse_passenger_flow(OCTOBER_7_NEW_LINE_TEXT, reference_date=FIXTURE_DATE)[0]
+            assert_equal(fetch_data.update_metro_data([entry, entry]), ['2026-10-07'], 'deduplicate import')
+            payload = json.loads(path.read_text(encoding='utf-8'))
+            assert_equal(payload['metadata']['lines_count'], 15, 'catalog grows with observed lines')
+            assert_equal(payload['metadata']['lines'][5]['id'], 'L6', 'line catalog order')
+            assert_equal(fetch_data.update_metro_data([entry]), [], 'idempotent second import')
+            corrected = {**entry, 'lines': {**entry['lines'], 'L6': 24.47, 'L1': 69.64}}
+            assert_equal(fetch_data.update_metro_data([corrected]), ['2026-10-07'], 'same-total line correction')
+    finally:
+        fetch_data.METRO_DATA_PATH = original_path
 
 
 def test_dated_detail_wins_over_stale_undated_total():
@@ -213,6 +267,29 @@ def test_widget_url_bypasses_cache():
     assert_equal(url.endswith("&_=12345"), True, "widget cache buster")
 
 
+def test_history_parser_failure_preserves_valid_widget_entries():
+    originals = {name: getattr(fetch_data, name) for name in (
+        'fetch_official_total', 'fetch_url', 'parse_official_weibo_profile', 'load_metro_data',
+    )}
+    try:
+        fetch_data.fetch_official_total = lambda: (None, False)
+        fetch_data.fetch_url = lambda *args, **kwargs: OCTOBER_7_NEW_LINE_TEXT
+        fetch_data.load_metro_data = lambda: {}
+
+        def invalid_profile(*args, **kwargs):
+            raise ValueError('malformed profile date')
+
+        fetch_data.parse_official_weibo_profile = invalid_profile
+        entries, _, successful, reached = fetch_data.fetch_passenger_flow_entries(FIXTURE_DATE)
+        assert_equal(len(entries), 1, 'profile failure must not discard valid widget data')
+        assert_equal(entries[0]['date'], '2026-10-07', 'valid widget date')
+        assert_equal(successful, ['南京地铁官方微博组件'], 'only successful source reported')
+        assert_equal('南京地铁官方微博（新浪公开页）' in reached, True, 'failed source remains reached')
+    finally:
+        for name, original in originals.items():
+            setattr(fetch_data, name, original)
+
+
 def test_unparseable_sources_are_not_reported_as_successful():
     original_fetch_url = fetch_data.fetch_url
     try:
@@ -225,7 +302,7 @@ def test_unparseable_sources_are_not_reported_as_successful():
         assert_equal(successful_sources, [], "unparseable sources should fail")
         assert_equal(
             reached_sources,
-            ["南京地铁官网客流接口", "南京地铁官方微博组件"],
+            ["南京地铁官网客流接口", "南京地铁官方微博组件", "南京地铁官方微博（新浪公开页）"],
             "unparseable sources should remain distinguishable from network failures",
         )
     finally:
@@ -350,8 +427,30 @@ def test_main_distinguishes_network_and_parse_failures():
         fetch_data.fetch_passenger_flow_entries = original_fetch_entries
 
 
+def test_history_source_recovers_widget_parser_failure():
+    originals = {name: getattr(fetch_data, name) for name in (
+        'fetch_passenger_flow_entries', 'update_metro_data', 'validate_metro_dataset',
+        'ml_predictions_need_refresh', 'validate_ml_predictions', 'required_data_date',
+    )}
+    try:
+        entry = parse_passenger_flow(OCTOBER_7_NEW_LINE_TEXT, reference_date=FIXTURE_DATE)[0]
+        fetch_data.fetch_passenger_flow_entries = lambda: (
+            [entry], '官方历史页', ['南京地铁官方微博（新浪公开页）'],
+            ['南京地铁官方微博组件', '南京地铁官方微博（新浪公开页）'],
+        )
+        fetch_data.update_metro_data = lambda *args, **kwargs: []
+        fetch_data.validate_metro_dataset = lambda: True
+        fetch_data.ml_predictions_need_refresh = lambda: False
+        fetch_data.validate_ml_predictions = lambda: True
+        fetch_data.required_data_date = lambda: None
+        assert_equal(fetch_data.main(), fetch_data.EXIT_SUCCESS, 'history source recovers widget failure')
+    finally:
+        for name, original in originals.items():
+            setattr(fetch_data, name, original)
+
+
 def test_dataset_validation_accepts_suspension_and_rejects_duplicates():
-    entry = parse_passenger_flow(JULY_12_SUSPENSION_TEXT, source_name="人工核验补录")[0]
+    entry = parse_passenger_flow(JULY_12_SUSPENSION_TEXT, reference_date=FIXTURE_DATE)[0]
     with tempfile.TemporaryDirectory() as temporary_directory:
         metro_path = Path(temporary_directory) / "metro_data.json"
         metro_path.write_text(
@@ -462,13 +561,18 @@ if __name__ == "__main__":
     test_parse_backfill_text_with_mixed_formats()
     test_parse_network_flow_wording()
     test_parse_bracketed_operation_prefix_without_month()
+    test_new_lines_are_parsed_without_a_whitelist()
+    test_profile_anchors_month_to_publication_and_excludes_reposts()
+    test_new_line_metadata_and_idempotent_import()
     test_dated_detail_wins_over_stale_undated_total()
     test_widget_url_bypasses_cache()
+    test_history_parser_failure_preserves_valid_widget_entries()
     test_unparseable_sources_are_not_reported_as_successful()
     test_required_data_date_from_environment()
     test_transient_push_error_detection()
     test_push_remote_retries_transient_failure()
     test_main_distinguishes_network_and_parse_failures()
+    test_history_source_recovers_widget_parser_failure()
     test_dataset_validation_accepts_suspension_and_rejects_duplicates()
     test_corrected_entry_triggers_follow_up_processing()
     test_hierarchical_prediction_validation()

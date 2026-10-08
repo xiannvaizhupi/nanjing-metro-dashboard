@@ -157,7 +157,31 @@ def test_prediction_with_recent_data_gaps():
         assert_true(result["forecasts"][0]["predicted_total"] > 0, "gapped forecast value")
 
 
+def test_new_line_cold_start_does_not_block_publication():
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        metro_path, weather_path, _ = build_fixture(root)
+        payload = json.loads(metro_path.read_text(encoding="utf-8"))
+        payload["metadata"]["lines"].append({"id": "L6", "name": "6号线"})
+        # The first operating day must publish real data even with no trainable lags.
+        payload["daily_data"][-1]["lines"]["L6"] = 21.57
+        metro_path.write_text(json.dumps(payload), encoding="utf-8")
+        result = generate_prediction_file(metro_path, weather_path, root / "predictions.json")
+        model = result["line_models"]["L6"]
+        assert_true(model["strategy"] == "cold-start-recent-mean", "explicit cold-start strategy")
+        assert_true(model["validation"]["mae"] is None, "do not invent validated accuracy")
+        assert_true(model["observed_days"] == 1, "report observed history")
+        assert_true(result["forecasts"][0]["line_forecasts"]["L6"]["predicted_flow"] > 0, "new line forecast")
+        assert_true(result["forecasts"][0]["line_forecast_sum"] == result["forecasts"][0]["predicted_total"], "reconciliation")
+        for row in payload["daily_data"][-9:]:
+            row["lines"]["L6"] = 24.48
+        metro_path.write_text(json.dumps(payload), encoding="utf-8")
+        result = generate_prediction_file(metro_path, weather_path, root / "predictions.json")
+        assert_true(result["line_models"]["L6"]["strategy"] != "cold-start-recent-mean", "automatically leave cold start")
+
+
 if __name__ == "__main__":
     test_prediction_file_generation()
     test_prediction_with_recent_data_gaps()
+    test_new_line_cold_start_does_not_block_publication()
     print("ml_predictor checks passed.")

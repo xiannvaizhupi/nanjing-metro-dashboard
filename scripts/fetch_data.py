@@ -36,6 +36,7 @@ OFFICIAL_HOMEPAGE_URL = "https://www.njmetro.com.cn/njdtweb/gx/dtmain.jsp"
 OFFICIAL_FLOW_API_URL = "https://www.njmetro.com.cn/njdtweb/portal/get-lineIntro.do"
 OFFICIAL_FLOW_ROW_ID = "8a80800766e1aa290166e7e5c60d0003"
 WEIBO_WIDGET_URL = "https://widget.weibo.com/weiboshow/index.php?language=&width=0&height=430&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=2638276292&verifier=138e3b0a&dpc=1"
+OFFICIAL_WEIBO_PROFILE_URL = "https://www.sina.cn/media/2638276292"
 
 HTTP_HEADERS = {
     "User-Agent": (
@@ -47,42 +48,12 @@ HTTP_HEADERS = {
     "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
 }
 
-LINE_PATTERNS = [
-    (r'(?<![A-Za-z])1号线[：:]?(\d+\.?\d*)', 'L1'),
-    (r'(?<![A-Za-z])2号线[：:]?(\d+\.?\d*)', 'L2'),
-    (r'(?<![A-Za-z])3号线[：:]?(\d+\.?\d*)', 'L3'),
-    (r'(?<![A-Za-z])4号线[：:]?(\d+\.?\d*)', 'L4'),
-    (r'(?<![A-Za-z])5号线[：:]?(\d+\.?\d*)', 'L5'),
-    (r'(?<![A-Za-z])7号线[：:]?(\d+\.?\d*)', 'L7'),
-    (r'(?<![A-Za-z])10号线[：:]?(\d+\.?\d*)', 'L10'),
-    (r'S1号线[：:]?(\d+\.?\d*)', 'S1'),
-    (r'S2号线[：:]?(\d+\.?\d*)', 'S2'),
-    (r'S3号线[：:]?(\d+\.?\d*)', 'S3'),
-    (r'S6号线[：:]?(\d+\.?\d*)', 'S6'),
-    (r'S7号线[：:]?(\d+\.?\d*)', 'S7'),
-    (r'S8号线[：:]?(\d+\.?\d*)', 'S8'),
-    (r'S9号线[：:]?(\d+\.?\d*)', 'S9'),
-]
+# 不维护线路白名单：新线开通后自动识别，且不能将 S6 或 16 误匹配为 6。
+LINE_FLOW_PATTERN = re.compile(
+    r'(?<![A-Za-z0-9])(S?\d+)号线[：:]?(\d+(?:\.\d+)?|(?:全天)?停运)'
+)
 
-# 停运线路仍属于完整公告，将其客流记为 0 并保留状态说明。
-SUSPENDED_LINE_PATTERNS = [
-    (r'(?<![A-Za-z])1号线[：:]?(?:全天)?停运', 'L1'),
-    (r'(?<![A-Za-z])2号线[：:]?(?:全天)?停运', 'L2'),
-    (r'(?<![A-Za-z])3号线[：:]?(?:全天)?停运', 'L3'),
-    (r'(?<![A-Za-z])4号线[：:]?(?:全天)?停运', 'L4'),
-    (r'(?<![A-Za-z])5号线[：:]?(?:全天)?停运', 'L5'),
-    (r'(?<![A-Za-z])7号线[：:]?(?:全天)?停运', 'L7'),
-    (r'(?<![A-Za-z])10号线[：:]?(?:全天)?停运', 'L10'),
-    (r'S1号线[：:]?(?:全天)?停运', 'S1'),
-    (r'S2号线[：:]?(?:全天)?停运', 'S2'),
-    (r'S3号线[：:]?(?:全天)?停运', 'S3'),
-    (r'S6号线[：:]?(?:全天)?停运', 'S6'),
-    (r'S7号线[：:]?(?:全天)?停运', 'S7'),
-    (r'S8号线[：:]?(?:全天)?停运', 'S8'),
-    (r'S9号线[：:]?(?:全天)?停运', 'S9'),
-]
-
-# 当前公告正常会覆盖 12 至 14 条线路状态；低于 10 条通常是页面内容截断。
+# 低于 10 条通常是页面内容截断，完整公告还需通过线路合计校验。
 MINIMUM_COMPLETE_LINE_COUNT = 10
 MAXIMUM_TOTAL_LINE_DIFFERENCE = 5.0
 ANNOUNCEMENT_PREFIX_PATTERN = r'(?:南京地铁|【南京地铁运营】)'
@@ -99,7 +70,7 @@ FLOW_ENTRY_PATTERN = re.compile(
     r'(?:#?昨日客流#?.{0,80}?)?'
     + ANNOUNCEMENT_PREFIX_PATTERN
     + r'(?:(\d{2,4})年)?(?:(\d{1,2})月)?(\d{1,2})日(?:线网)?客运量(?:为)?[：:]?(\d+\.?\d*)万?'
-    r'[，,；;。]?(.+?)(?:[（(]?以上单位[:：]?万?[）)]?|(?=' + NEXT_ENTRY_PATTERN + r')|$)',
+    r'[，,；;。]?(.+?)(?:[（(]?(?:以上)?单位[:：]?万?[）)]?|(?=' + NEXT_ENTRY_PATTERN + r')|$)',
     re.S
 )
 
@@ -239,11 +210,33 @@ def fetch_passenger_flow_entries(reference_date=None):
     if widget_html is not None:
         reached_sources.append('南京地铁官方微博组件')
         try:
-            detailed_entries = parse_passenger_flow(widget_html, source_name='南京地铁官方微博组件')
+            detailed_entries = parse_passenger_flow(
+                widget_html, source_name='南京地铁官方微博组件', reference_date=ref,
+            )
         except Exception as error:
             print(f"南京地铁官方微博组件解析异常: {error}")
         if detailed_entries:
             successful_sources.append('南京地铁官方微博组件')
+
+    # 组件仅有最近约 20 条微博，停更数日后必须查历史页，不能只补最新一天。
+    known_dates = set(load_metro_data()) | {item['date'] for item in detailed_entries}
+    recent_dates = {(expected_date - timedelta(days=offset)).isoformat() for offset in range(30)}
+    if not any(item['date'] == expected_date.isoformat() for item in detailed_entries) or recent_dates - known_dates:
+        source = '南京地铁官方微博（新浪公开页）'
+        profile_html = fetch_url(source, cache_busted_url(OFFICIAL_WEIBO_PROFILE_URL))
+        if profile_html is not None:
+            reached_sources.append(source)
+            historical_entries = []
+            try:
+                historical_entries = parse_official_weibo_profile(profile_html, reference_date=ref)
+            except Exception as error:
+                print(f"{source}解析异常: {error}")
+            if historical_entries:
+                successful_sources.append(source)
+                # 优先保留带发布时间和原文链接的公告，防止重复日期覆盖完整明细。
+                combined = {item['date']: item for item in detailed_entries}
+                combined.update({item['date']: item for item in historical_entries})
+                detailed_entries = list(combined.values())
 
     if official_total is not None:
         expected_key = expected_date.isoformat()
@@ -268,11 +261,7 @@ def fetch_passenger_flow_entries(reference_date=None):
 
     if detailed_entries:
         detailed_entries.sort(key=lambda item: item['date'])
-        source_name = (
-            '南京地铁官网首页（官方微博线路明细）'
-            if official_total is not None
-            else '南京地铁官方微博组件'
-        )
+        source_name = '；'.join(successful_sources)
         print(f"使用数据源: {source_name}")
         return detailed_entries, source_name, successful_sources, reached_sources
 
@@ -329,7 +318,7 @@ def normalize_flow_text(html):
     return normalized
 
 
-def parse_passenger_flow(html, source_name=''):
+def parse_passenger_flow(html, source_name='', reference_date=None):
     """解析官网首页或微博组件中的客流数据。"""
     if not html:
         return []
@@ -346,25 +335,32 @@ def parse_passenger_flow(html, source_name=''):
         total = float(match.group(7))
         lines_str = match.group(8)
 
-        inferred_date = infer_entry_date(month, day, explicit_year=explicit_year)
+        inferred_date = infer_entry_date(
+            month, day, explicit_year=explicit_year, reference_date=reference_date,
+        )
         year = inferred_date.year
         month = inferred_date.month
         date_str = f"{year}-{month:02d}-{day:02d}"
         if date_str in seen_dates:
             continue
 
-        # 解析各线路
         lines = {}
-        for line_pattern, line_id in LINE_PATTERNS:
-            line_match = re.search(line_pattern, lines_str)
-            if line_match:
-                lines[line_id] = float(line_match.group(1))
-
         suspended_lines = []
-        for line_pattern, line_id in SUSPENDED_LINE_PATTERNS:
-            if line_id not in lines and re.search(line_pattern, lines_str):
-                lines[line_id] = 0.0
+        conflicting_lines = False
+        for line_match in LINE_FLOW_PATTERN.finditer(lines_str):
+            number, value = line_match.groups()
+            line_id = number if number.startswith('S') else f'L{number}'
+            flow = 0.0 if '停运' in value else float(value)
+            if line_id in lines and lines[line_id] != flow:
+                conflicting_lines = True
+                break
+            lines[line_id] = flow
+            if '停运' in value and line_id not in suspended_lines:
                 suspended_lines.append(line_id)
+
+        if conflicting_lines:
+            print(f"跳过线路数值冲突数据: {date_str}")
+            continue
 
         if len(lines) < MINIMUM_COMPLETE_LINE_COUNT:
             print(f"跳过疑似不完整数据: {date_str}，仅解析到 {len(lines)} 条线路")
@@ -401,9 +397,39 @@ def parse_passenger_flow(html, source_name=''):
     return results
 
 
-def parse_weibo_flow(html):
+def parse_weibo_flow(html, reference_date=None):
     """兼容旧调用名：解析微博或官网客流文本。"""
-    return parse_passenger_flow(html, source_name='南京地铁官方微博组件')
+    return parse_passenger_flow(
+        html, source_name='南京地铁官方微博组件', reference_date=reference_date,
+    )
+
+
+def parse_official_weibo_profile(html, reference_date=None):
+    """仅解析官方账号自身的公告正文，排除转发正文、推荐内容和其他作者。"""
+    ref = reference_date or date.today()
+    results = {}
+    for post in re.finditer(
+        r'<a\s+class="post-link"\s+href="(/news/detail/\d+\.html)">\s*'
+        r'<article\s+class="post">(.*?)</article>', html, re.S,
+    ):
+        body = post.group(2)
+        author = re.search(r'<div\s+class="uname">(.*?)</div>', body, re.S)
+        text = re.search(r'<div\s+class="post-text">(.*?)</div>', body, re.S)
+        published = re.search(r'<div\s+class="time">(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})', body)
+        if not author or normalize_flow_text(author.group(1)) != '南京地铁' or not text or not published:
+            continue
+        published_date = date.fromisoformat(published.group(1))
+        if published_date > ref:
+            continue
+        for entry in parse_passenger_flow(
+            text.group(1), source_name='官方微博历史公告', reference_date=published_date,
+        ):
+            if entry['date'] > ref.isoformat():
+                continue
+            entry['source_url'] = 'https://www.sina.cn' + post.group(1)
+            entry['published_at'] = f'{published.group(1)} {published.group(2)}'
+            results.setdefault(entry['date'], entry)
+    return list(results.values())
 
 
 def write_json_atomic(path, payload):
@@ -445,23 +471,52 @@ def update_metro_data(new_entries, source_name=None):
                 if item['date'] == entry_date:
                     has_total_change = item['total'] != entry['total']
                     has_better_details = len(entry.get('lines', {})) > len(item.get('lines', {}))
-                    if has_total_change or has_better_details:
+                    has_detail_correction = (
+                        bool(entry.get('lines'))
+                        and len(entry['lines']) >= len(item.get('lines', {}))
+                        and entry['lines'] != item.get('lines', {})
+                    )
+                    if has_total_change or has_better_details or has_detail_correction:
                         data['daily_data'][i] = entry
                         if has_total_change:
                             print(f"数据有变，更新: {entry_date} ({item['total']} → {entry['total']})")
                         else:
-                            print(f"线路明细已补齐: {entry_date}")
+                            print(f"线路明细已更新: {entry_date}")
                         has_new = True
                         updated_dates.append(entry_date)
                     break
         else:
             data['daily_data'].append(entry)
+            existing_dates.add(entry_date)
             print(f"添加新数据: {entry_date} - {entry['total']}万")
             has_new = True
             updated_dates.append(entry_date)
 
     if has_new:
         data['daily_data'].sort(key=lambda x: x['date'])
+        maximum = max(data['daily_data'], key=lambda item: item['total'])
+        minimum = min(data['daily_data'], key=lambda item: item['total'])
+        data['statistics'] = {
+            'max_daily': {'date': maximum['date'], 'value': maximum['total']},
+            'min_daily': {'date': minimum['date'], 'value': minimum['total']},
+            'avg_daily': round(sum(item['total'] for item in data['daily_data']) / len(data['daily_data']), 4),
+        }
+        catalog = data['metadata'].setdefault('lines', [])
+        registered = {item['id'] for item in catalog}
+        for entry in new_entries:
+            for line_id in entry.get('lines', {}):
+                if line_id in registered:
+                    continue
+                suburban = line_id.startswith('S')
+                catalog.append({
+                    'id': line_id,
+                    'name': f"{line_id if suburban else line_id[1:]}号线",
+                    'color': '#4BBBB4' if line_id == 'L6' else '#607D8B',
+                    'type': 'suburban' if suburban else 'main',
+                })
+                registered.add(line_id)
+        catalog.sort(key=lambda item: (item['id'].startswith('S'), int(item['id'][1:])))
+        data['metadata']['lines_count'] = len(catalog)
         data['metadata']['last_updated'] = datetime.now().strftime('%Y-%m-%d')
         data['metadata']['fetched_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         if source_name:
@@ -859,6 +914,9 @@ def compare_and_log(newly_added_dates):
                 'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             }
         else:
+            if date.fromisoformat(date_str) < date.today() - timedelta(days=1):
+                print(f"[对比] {date_str}: 历史补录无留存预测，不补造评估记录")
+                continue
             predicted = baseline_predict(date_str, metro_map)
 
         if predicted is None:
@@ -993,7 +1051,9 @@ def main():
 
     entries, source_name, successful_sources, reached_sources = fetch_passenger_flow_entries()
     widget_source = '南京地铁官方微博组件'
-    if widget_source in reached_sources and widget_source not in successful_sources:
+    profile_source = '南京地铁官方微博（新浪公开页）'
+    if (widget_source in reached_sources and widget_source not in successful_sources
+            and profile_source not in successful_sources):
         print("官方微博组件已连接但未解析到任何完整客流记录，疑似页面格式变化。")
         return EXIT_DATA_INVALID
     if not successful_sources:

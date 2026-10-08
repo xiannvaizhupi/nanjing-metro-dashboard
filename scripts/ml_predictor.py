@@ -25,7 +25,7 @@ DEFAULT_WEATHER_DATA_PATH = REPO_DIR / "data" / "weather.json"
 DEFAULT_OUTPUT_PATH = REPO_DIR / "data" / "ml_predictions.json"
 
 MODEL_NAME = "adaptive-time-series-ensemble"
-MODEL_VERSION = "2.0.0"
+MODEL_VERSION = "2.1.0"
 RIDGE_ALPHAS = (0.1, 1.0, 10.0, 50.0, 100.0, 300.0, 500.0, 1000.0)
 ENSEMBLE_BASELINE_WEIGHTS = tuple(index / 10 for index in range(11))
 TRAINING_WINDOWS = (180, 365, None)
@@ -33,6 +33,7 @@ MEAN_WEEKDAY_BASELINE = "same-weekday-mean-4"
 WEIGHTED_WEEKDAY_BASELINE = "recency-weighted-same-weekday-4"
 BASELINE_NAMES = (MEAN_WEEKDAY_BASELINE, WEIGHTED_WEEKDAY_BASELINE)
 MIN_TRAINING_ROWS = 60
+COLD_START_STRATEGY = "cold-start-recent-mean"
 SERVICE_DISRUPTION_MARKERS = ("停运", "运营中断")
 
 
@@ -589,6 +590,21 @@ def predict_series_day(
     weather_map: dict[str, dict[str, Any]],
     target: date,
 ) -> dict[str, Any]:
+    if selection.strategy == COLD_START_STRATEGY:
+        recent = [value for key, value in sorted(values.items()) if key < format_date(target)][-7:]
+        if not recent:
+            raise ValueError("新线路缺少实际客流，不能生成冷启动预测")
+        weights = range(1, len(recent) + 1)
+        prediction = sum(value * weight for value, weight in zip(recent, weights)) / sum(weights)
+        # 样本不足时区间仅为保守启发式，不宣称通过时间验证。
+        radius = max(prediction * 0.35, max(recent) - min(recent), 1.0)
+        return {
+            "prediction": prediction,
+            "lower_bound": max(0.0, prediction - radius),
+            "upper_bound": prediction + radius,
+            "components": {"recent_weighted_mean": prediction},
+            "inputs": {"observed_days": len(recent), "cold_start": True},
+        }
     lags = lag_features(target, values)
     if lags is None:
         raise ValueError(f"{format_date(target)} 缺少构建预测所需的滞后客流数据")
@@ -682,6 +698,8 @@ def load_line_catalog(path: Path, daily_data: list[dict[str, Any]]) -> list[dict
 
 
 def algorithm_description(selection: ModelSelection) -> str:
+    if selection.strategy == COLD_START_STRATEGY:
+        return "新线路冷启动：最近实际客流加权均值（未完成时间验证）"
     if selection.strategy == "ridge-regression":
         return "带正则化的多特征岭回归"
     if selection.baseline_weight == 1:
@@ -712,8 +730,8 @@ def model_metadata(
         },
         "training_rows": len(training_rows),
         "excluded_service_disruption_rows": excluded_rows,
-        "training_start_date": training_rows[0].date,
-        "training_end_date": training_rows[-1].date,
+        "training_start_date": training_rows[0].date if training_rows else None,
+        "training_end_date": training_rows[-1].date if training_rows else None,
         "feature_names": feature_names(),
         "feature_means": [round(value, 8) for value in model.means] if model else [],
         "feature_scales": [round(value, 8) for value in model.scales] if model else [],
@@ -768,10 +786,22 @@ def generate_prediction_file(
     for line in line_catalog:
         line_id = line["id"]
         observed = [row for row in daily_data if line_id in row.get("lines", {})]
-        if len(observed) < 7:
-            raise ValueError(f"{line['name']} 只有 {len(observed)} 条数据，无法建立独立预测")
+        if not observed:
+            raise ValueError(f"{line['name']} 没有实际客流，无法建立预测")
         line_rows = build_training_rows(daily_data, weather_map, line_id=line_id)
-        line_model, line_selection, line_training_rows = train_series_model(line_rows)
+        if len(observed) >= 7 and line_rows:
+            line_model, line_selection, line_training_rows = train_series_model(line_rows)
+        else:
+            line_model, line_training_rows = None, []
+            line_selection = ModelSelection(
+                alpha=None,
+                baseline_weight=1.0,
+                baseline_name=COLD_START_STRATEGY,
+                training_window_days=None,
+                strategy=COLD_START_STRATEGY,
+                validation={"rows": 0, "mae": None, "rmse": None, "mape": None,
+                            "interval_radius": None, "status": "insufficient_history"},
+            )
         excluded_rows = sum(
             1
             for item in observed
@@ -784,7 +814,10 @@ def generate_prediction_file(
         line_models[line_id] = {
             "line_name": line["name"],
             **model_metadata(line_model, line_selection, line_training_rows, excluded_rows),
+            "observed_days": len(observed),
         }
+        if line_selection.strategy == COLD_START_STRATEGY:
+            line_models[line_id]["ensemble"]["baseline"] = "最近最多 7 天实际客流加权均值"
         line_bundles[line_id] = (line_model, line_selection)
         recursive_lines[line_id] = {
             item["date"]: as_number(item["lines"][line_id])
