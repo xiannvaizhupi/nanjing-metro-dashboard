@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-10-12 16:00:52+0800",
+  "generated_at": "2026-10-13 14:51:53+0800",
   "model": {
     "name": "adaptive-time-series-ensemble",
     "version": "2.1.0",
@@ -1997,11 +1997,11 @@
   "forecasts": [
     {
       "date": "2026-10-12",
-      "predicted_total": 355.34,
-      "lower_bound": 320.59,
-      "upper_bound": 390.09,
+      "predicted_total": 355.19,
+      "lower_bound": 320.44,
+      "upper_bound": 389.94,
       "model_components": {
-        "ridge_prediction": 355.34,
+        "ridge_prediction": 355.19,
         "selected_weekday_baseline": 349.44,
         "baseline_name": "same-weekday-mean-4"
       },
@@ -2010,7 +2010,7 @@
         "is_weekend": false,
         "is_holiday": false,
         "is_holiday_eve": false,
-        "temperature_mean": 20.3,
+        "temperature_mean": 20.6,
         "precipitation": 0.0,
         "is_rainy": false,
         "is_heavy_rain": false,
@@ -2022,92 +2022,92 @@
       "line_forecasts": {
         "L1": {
           "line_name": "1号线",
-          "predicted_flow": 68.36,
-          "raw_prediction": 70.47,
-          "lower_bound": 61.17,
-          "upper_bound": 75.58,
-          "reconciliation_factor": 0.970274,
+          "predicted_flow": 68.35,
+          "raw_prediction": 70.48,
+          "lower_bound": 61.14,
+          "upper_bound": 75.55,
+          "reconciliation_factor": 0.969704,
           "model_strategy": "ridge-regression"
         },
         "L2": {
           "line_name": "2号线",
-          "predicted_flow": 58.6,
-          "raw_prediction": 60.4,
-          "lower_bound": 52.18,
-          "upper_bound": 65.03,
-          "reconciliation_factor": 0.970274,
+          "predicted_flow": 58.58,
+          "raw_prediction": 60.41,
+          "lower_bound": 52.16,
+          "upper_bound": 65.0,
+          "reconciliation_factor": 0.969704,
           "model_strategy": "ridge-regression"
         },
         "L3": {
           "line_name": "3号线",
-          "predicted_flow": 54.3,
-          "raw_prediction": 55.96,
-          "lower_bound": 47.63,
-          "upper_bound": 60.96,
-          "reconciliation_factor": 0.970274,
+          "predicted_flow": 54.28,
+          "raw_prediction": 55.97,
+          "lower_bound": 47.62,
+          "upper_bound": 60.94,
+          "reconciliation_factor": 0.969704,
           "model_strategy": "ridge-recency-weighted-same-weekday-4-ensemble"
         },
         "L4": {
           "line_name": "4号线",
-          "predicted_flow": 17.72,
+          "predicted_flow": 17.71,
           "raw_prediction": 18.26,
           "lower_bound": 15.51,
-          "upper_bound": 19.92,
-          "reconciliation_factor": 0.970274,
+          "upper_bound": 19.91,
+          "reconciliation_factor": 0.969704,
           "model_strategy": "ridge-same-weekday-mean-4-ensemble"
         },
         "L5": {
           "line_name": "5号线",
-          "predicted_flow": 37.21,
+          "predicted_flow": 37.19,
           "raw_prediction": 38.35,
-          "lower_bound": 31.89,
-          "upper_bound": 42.53,
-          "reconciliation_factor": 0.970274,
+          "lower_bound": 31.88,
+          "upper_bound": 42.5,
+          "reconciliation_factor": 0.969704,
           "model_strategy": "ridge-regression"
         },
         "L6": {
           "line_name": "6号线",
-          "predicted_flow": 29.25,
+          "predicted_flow": 29.24,
           "raw_prediction": 30.15,
-          "lower_bound": 18.67,
-          "upper_bound": 39.84,
-          "reconciliation_factor": 0.970274,
+          "lower_bound": 18.66,
+          "upper_bound": 39.82,
+          "reconciliation_factor": 0.969704,
           "model_strategy": "recency-weighted-same-weekday-4"
         },
         "L7": {
           "line_name": "7号线",
-          "predicted_flow": 28.68,
-          "raw_prediction": 29.55,
-          "lower_bound": 26.14,
-          "upper_bound": 31.21,
-          "reconciliation_factor": 0.970274,
+          "predicted_flow": 28.66,
+          "raw_prediction": 29.56,
+          "lower_bound": 26.13,
+          "upper_bound": 31.19,
+          "reconciliation_factor": 0.969704,
           "model_strategy": "ridge-same-weekday-mean-4-ensemble"
         },
         "L10": {
           "line_name": "10号线",
-          "predicted_flow": 17.89,
+          "predicted_flow": 17.88,
           "raw_prediction": 18.44,
-          "lower_bound": 15.63,
-          "upper_bound": 20.15,
-          "reconciliation_factor": 0.970274,
+          "lower_bound": 15.62,
+          "upper_bound": 20.14,
+          "reconciliation_factor": 0.969704,
           "model_strategy": "ridge-same-weekday-mean-4-ensemble"
         },
         "S1": {
           "line_name": "S1号线",
-          "predicted_flow": 10.36,
-          "raw_prediction": 10.67,
+          "predicted_flow": 10.35,
+          "raw_prediction": 10.68,
           "lower_bound": 9.43,
-          "upper_bound": 11.28,
-          "reconciliation_factor": 0.970274,
+          "upper_bound": 11.27,
+          "reconciliation_factor": 0.969704,
           "model_strategy": "ridge-regression"
         },
         "S2": {
           "line_name": "S2号线",
-          "predicted_flow": 4.58,
-          "raw_prediction": 4.72,
-          "lower_bound": 3.44,
-          "upper_bound": 5.71,
-          "reconciliation_factor": 0.970274,
+          "predicted_flow": 4.57,
+          "raw_prediction": 4.71,
+          "lower_bound": 3.43,
+          "upper_bound": 5.7,
+          "reconciliation_factor": 0.969704,
           "model_strategy": "ridge-same-weekday-mean-4-ensemble"
         },
         "S3": {
@@ -2115,8 +2115,8 @@
           "predicted_flow": 8.87,
           "raw_prediction": 9.14,
           "lower_bound": 8.16,
-          "upper_bound": 9.58,
-          "reconciliation_factor": 0.970274,
+          "upper_bound": 9.57,
+          "reconciliation_factor": 0.969704,
           "model_strategy": "ridge-same-weekday-mean-4-ensemble"
         },
         "S6": {
@@ -2125,7 +2125,7 @@
           "raw_prediction": 5.87,
           "lower_bound": 4.01,
           "upper_bound": 7.37,
-          "reconciliation_factor": 0.970274,
+          "reconciliation_factor": 0.969704,
           "model_strategy": "ridge-same-weekday-mean-4-ensemble"
         },
         "S7": {
@@ -2134,16 +2134,16 @@
           "raw_prediction": 1.53,
           "lower_bound": 1.34,
           "upper_bound": 1.63,
-          "reconciliation_factor": 0.970274,
+          "reconciliation_factor": 0.969704,
           "model_strategy": "ridge-same-weekday-mean-4-ensemble"
         },
         "S8": {
           "line_name": "S8号线",
-          "predicted_flow": 9.91,
+          "predicted_flow": 9.9,
           "raw_prediction": 10.21,
           "lower_bound": 8.94,
-          "upper_bound": 10.88,
-          "reconciliation_factor": 0.970274,
+          "upper_bound": 10.87,
+          "reconciliation_factor": 0.969704,
           "model_strategy": "ridge-same-weekday-mean-4-ensemble"
         },
         "S9": {
@@ -2151,20 +2151,20 @@
           "predicted_flow": 2.44,
           "raw_prediction": 2.51,
           "lower_bound": 1.75,
-          "upper_bound": 3.13,
-          "reconciliation_factor": 0.970274,
+          "upper_bound": 3.12,
+          "reconciliation_factor": 0.969704,
           "model_strategy": "ridge-regression"
         }
       },
-      "line_forecast_sum": 355.34
+      "line_forecast_sum": 355.19
     },
     {
       "date": "2026-10-13",
-      "predicted_total": 347.27,
-      "lower_bound": 312.52,
-      "upper_bound": 382.02,
+      "predicted_total": 347.25,
+      "lower_bound": 312.5,
+      "upper_bound": 382.0,
       "model_components": {
-        "ridge_prediction": 347.27,
+        "ridge_prediction": 347.25,
         "selected_weekday_baseline": 346.32,
         "baseline_name": "same-weekday-mean-4"
       },
@@ -2173,104 +2173,104 @@
         "is_weekend": false,
         "is_holiday": false,
         "is_holiday_eve": false,
-        "temperature_mean": 21.4,
-        "precipitation": 0.5,
+        "temperature_mean": 21.8,
+        "precipitation": 0.3,
         "is_rainy": true,
         "is_heavy_rain": false,
-        "lag_1": 355.34,
+        "lag_1": 355.19,
         "lag_7": 389.68,
-        "rolling_7": 354.42,
+        "rolling_7": 354.4,
         "weather_source": "weather_file"
       },
       "line_forecasts": {
         "L1": {
           "line_name": "1号线",
           "predicted_flow": 67.18,
-          "raw_prediction": 69.09,
+          "raw_prediction": 69.12,
           "lower_bound": 59.95,
           "upper_bound": 74.39,
-          "reconciliation_factor": 0.972146,
+          "reconciliation_factor": 0.971823,
           "model_strategy": "ridge-regression"
         },
         "L2": {
           "line_name": "2号线",
           "predicted_flow": 59.78,
-          "raw_prediction": 61.49,
-          "lower_bound": 53.34,
-          "upper_bound": 66.21,
-          "reconciliation_factor": 0.972146,
+          "raw_prediction": 61.52,
+          "lower_bound": 53.35,
+          "upper_bound": 66.22,
+          "reconciliation_factor": 0.971823,
           "model_strategy": "ridge-regression"
         },
         "L3": {
           "line_name": "3号线",
           "predicted_flow": 54.01,
-          "raw_prediction": 55.56,
-          "lower_bound": 47.33,
+          "raw_prediction": 55.58,
+          "lower_bound": 47.34,
           "upper_bound": 60.69,
-          "reconciliation_factor": 0.972146,
+          "reconciliation_factor": 0.971823,
           "model_strategy": "ridge-recency-weighted-same-weekday-4-ensemble"
         },
         "L4": {
           "line_name": "4号线",
-          "predicted_flow": 17.31,
-          "raw_prediction": 17.8,
+          "predicted_flow": 17.3,
+          "raw_prediction": 17.81,
           "lower_bound": 15.1,
           "upper_bound": 19.51,
-          "reconciliation_factor": 0.972146,
+          "reconciliation_factor": 0.971823,
           "model_strategy": "ridge-same-weekday-mean-4-ensemble"
         },
         "L5": {
           "line_name": "5号线",
           "predicted_flow": 37.16,
           "raw_prediction": 38.23,
-          "lower_bound": 31.84,
-          "upper_bound": 42.49,
-          "reconciliation_factor": 0.972146,
+          "lower_bound": 31.83,
+          "upper_bound": 42.48,
+          "reconciliation_factor": 0.971823,
           "model_strategy": "ridge-regression"
         },
         "L6": {
           "line_name": "6号线",
-          "predicted_flow": 24.12,
+          "predicted_flow": 24.11,
           "raw_prediction": 24.81,
           "lower_bound": 13.51,
-          "upper_bound": 34.73,
-          "reconciliation_factor": 0.972146,
+          "upper_bound": 34.71,
+          "reconciliation_factor": 0.971823,
           "model_strategy": "recency-weighted-same-weekday-4"
         },
         "L7": {
           "line_name": "7号线",
-          "predicted_flow": 28.32,
+          "predicted_flow": 28.31,
           "raw_prediction": 29.13,
           "lower_bound": 25.78,
-          "upper_bound": 30.86,
-          "reconciliation_factor": 0.972146,
+          "upper_bound": 30.85,
+          "reconciliation_factor": 0.971823,
           "model_strategy": "ridge-same-weekday-mean-4-ensemble"
         },
         "L10": {
           "line_name": "10号线",
-          "predicted_flow": 17.73,
-          "raw_prediction": 18.24,
+          "predicted_flow": 17.74,
+          "raw_prediction": 18.25,
           "lower_bound": 15.47,
           "upper_bound": 20.0,
-          "reconciliation_factor": 0.972146,
+          "reconciliation_factor": 0.971823,
           "model_strategy": "ridge-same-weekday-mean-4-ensemble"
         },
         "S1": {
           "line_name": "S1号线",
           "predicted_flow": 9.87,
-          "raw_prediction": 10.15,
+          "raw_prediction": 10.16,
           "lower_bound": 8.95,
           "upper_bound": 10.79,
-          "reconciliation_factor": 0.972146,
+          "reconciliation_factor": 0.971823,
           "model_strategy": "ridge-regression"
         },
         "S2": {
           "line_name": "S2号线",
-          "predicted_flow": 4.14,
-          "raw_prediction": 4.26,
+          "predicted_flow": 4.13,
+          "raw_prediction": 4.25,
           "lower_bound": 3.0,
-          "upper_bound": 5.28,
-          "reconciliation_factor": 0.972146,
+          "upper_bound": 5.27,
+          "reconciliation_factor": 0.971823,
           "model_strategy": "ridge-same-weekday-mean-4-ensemble"
         },
         "S3": {
@@ -2279,16 +2279,16 @@
           "raw_prediction": 9.06,
           "lower_bound": 8.1,
           "upper_bound": 9.52,
-          "reconciliation_factor": 0.972146,
+          "reconciliation_factor": 0.971823,
           "model_strategy": "ridge-same-weekday-mean-4-ensemble"
         },
         "S6": {
           "line_name": "S6号线",
-          "predicted_flow": 5.58,
-          "raw_prediction": 5.74,
+          "predicted_flow": 5.59,
+          "raw_prediction": 5.75,
           "lower_bound": 3.9,
           "upper_bound": 7.27,
-          "reconciliation_factor": 0.972146,
+          "reconciliation_factor": 0.971823,
           "model_strategy": "ridge-same-weekday-mean-4-ensemble"
         },
         "S7": {
@@ -2297,7 +2297,7 @@
           "raw_prediction": 1.43,
           "lower_bound": 1.25,
           "upper_bound": 1.54,
-          "reconciliation_factor": 0.972146,
+          "reconciliation_factor": 0.971823,
           "model_strategy": "ridge-same-weekday-mean-4-ensemble"
         },
         "S8": {
@@ -2305,8 +2305,8 @@
           "predicted_flow": 9.57,
           "raw_prediction": 9.85,
           "lower_bound": 8.6,
-          "upper_bound": 10.55,
-          "reconciliation_factor": 0.972146,
+          "upper_bound": 10.54,
+          "reconciliation_factor": 0.971823,
           "model_strategy": "ridge-same-weekday-mean-4-ensemble"
         },
         "S9": {
@@ -2315,11 +2315,11 @@
           "raw_prediction": 2.36,
           "lower_bound": 1.61,
           "upper_bound": 2.99,
-          "reconciliation_factor": 0.972146,
+          "reconciliation_factor": 0.971823,
           "model_strategy": "ridge-regression"
         }
       },
-      "line_forecast_sum": 347.27
+      "line_forecast_sum": 347.25
     }
   ]
 }
